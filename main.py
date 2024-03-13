@@ -209,7 +209,7 @@ async def google_signin(data: GoogleSignInData):
         # For this example, I'm assuming you have already implemented this logic
 
         # Create a JWT token
-        # token = jwt.encode({"userId": user["id"]}, "secret-key", algorithm="HS256")
+        token = jwt.encode({"userId": user["id"]}, "secret-key", algorithm="HS256")
 
         return JSONResponse(content={"message": "Login successful", "token": token})
 
