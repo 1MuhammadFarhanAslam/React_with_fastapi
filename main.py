@@ -122,30 +122,23 @@
 
 
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from google.oauth2 import id_token
-from google.auth.transport import requests
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from google.oauth2 import id_token
-from google.auth.transport import requests
-from getpass import getpass  # Use getpass to hide the password input
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from google.oauth2 import id_token
+from google.auth.transport import requests
 from routers import admin, user, login
-
 
 app = FastAPI()
 
-    # Allow CORS for all domains in this example
+# Allow CORS for all domains in this example
 app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class Token(BaseModel):
     id_token: str
@@ -167,16 +160,12 @@ async def google_signin(token: Token):
         return {
             "message": "Login successful",
             "userData": user_data
-            # "token": token,  # Your JWT token
         }
     except Exception as e:
         print(e)
-        # Send error response
         raise HTTPException(status_code=500, detail="Server Error")
 
-
-
-    # Include routers
+# Include routers
 app.include_router(login.router, prefix="", tags=["Authentication"])
 app.include_router(admin.router, prefix="", tags=["Admin"])
 app.include_router(user.router, prefix="", tags=["User"])
