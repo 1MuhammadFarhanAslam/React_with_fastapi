@@ -125,8 +125,17 @@ from fastapi.security import OAuth2PasswordBearer
 from typing import Any
 from datetime import datetime, timedelta
 import jwt
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # Define a generic model for user data
 class UserData(BaseModel):
