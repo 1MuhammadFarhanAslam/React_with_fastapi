@@ -122,31 +122,31 @@
 
 
 
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from google.oauth2 import id_token
-from google.auth.transport import requests
+# from fastapi import FastAPI, HTTPException
+# from fastapi.middleware.cors import CORSMiddleware
+# from google.oauth2 import id_token
+# from google.auth.transport import requests
 
-app = FastAPI()
+# app = FastAPI()
 
-# Configure CORS to allow requests from the frontend origin
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Update with your frontend origin
-    allow_credentials=True,
-    allow_methods=["POST"],
-    allow_headers=["Content-Type"],
-)
+# # Configure CORS to allow requests from the frontend origin
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["http://localhost:3000"],  # Update with your frontend origin
+#     allow_credentials=True,
+#     allow_methods=["POST"],
+#     allow_headers=["Content-Type"],
+# )
 
-@app.post("/login/google")
-async def login_with_google(access_token: str):
-    try:
-        # Verify the access token with Google OAuth2
-        idinfo = id_token.verify_oauth2_token(access_token, requests.Request(), 'YOUR_GOOGLE_CLIENT_ID')
+# @app.post("/login/google")
+# async def login_with_google(access_token: str):
+#     try:
+#         # Verify the access token with Google OAuth2
+#         idinfo = id_token.verify_oauth2_token(access_token, requests.Request(), 'YOUR_GOOGLE_CLIENT_ID')
 
-        # Token verification successful, return user information
-        return {"email": idinfo['email'], "name": idinfo.get('name'), "picture": idinfo.get('picture')}
-    except Exception as e:
-        # Token verification failed
-        raise HTTPException(status_code=401, detail="Invalid access token")
+#         # Token verification successful, return user information
+#         return {"email": idinfo['email'], "name": idinfo.get('name'), "picture": idinfo.get('picture')}
+#     except Exception as e:
+#         # Token verification failed
+#         raise HTTPException(status_code=401, detail="Invalid access token")
 
