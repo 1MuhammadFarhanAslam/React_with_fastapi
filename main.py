@@ -123,30 +123,28 @@
 
 
 # from fastapi import FastAPI, HTTPException
-# from fastapi.middleware.cors import CORSMiddleware
-# from google.oauth2 import id_token
-# from google.auth.transport import requests
+from fastapi import FastAPI, HTTPException
 
-# app = FastAPI()
+app = FastAPI()
 
-# # Configure CORS to allow requests from the frontend origin
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["http://localhost:3000"],  # Update with your frontend origin
-#     allow_credentials=True,
-#     allow_methods=["POST"],
-#     allow_headers=["Content-Type"],
-# )
+@app.post("/google-signin")
+async def google_signin(id_token: str):
+    try:
+        # Here you would verify the token and extract user data
+        # For demonstration, let's assume the token verification is successful
+        # and extract user data from the token payload
+        # Replace this part with your actual token verification logic
+        payload = {
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "state": ""
+        }
 
-# @app.post("/login/google")
-# async def login_with_google(access_token: str):
-#     try:
-#         # Verify the access token with Google OAuth2
-#         idinfo = id_token.verify_oauth2_token(access_token, requests.Request(), 'YOUR_GOOGLE_CLIENT_ID')
+        # You can perform additional operations here, such as saving the user data to the database
 
-#         # Token verification successful, return user information
-#         return {"email": idinfo['email'], "name": idinfo.get('name'), "picture": idinfo.get('picture')}
-#     except Exception as e:
-#         # Token verification failed
-#         raise HTTPException(status_code=401, detail="Invalid access token")
+        # Respond with a success message
+        return {"message": "Login successful", "userData": payload}
+    except Exception as e:
+        # If any error occurs, return a server error response
+        raise HTTPException(status_code=500, detail="Server Error")
 
