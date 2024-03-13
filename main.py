@@ -127,7 +127,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from routers import admin, user, login
 
 app = FastAPI()
 
@@ -165,7 +164,7 @@ async def google_signin(token: Token):
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
 
-# Include routers
-app.include_router(login.router, prefix="", tags=["Authentication"])
-app.include_router(admin.router, prefix="", tags=["Admin"])
-app.include_router(user.router, prefix="", tags=["User"])
+# # Include routers
+# app.include_router(login.router, prefix="", tags=["Authentication"])
+# app.include_router(admin.router, prefix="", tags=["Admin"])
+# app.include_router(user.router, prefix="", tags=["User"])
