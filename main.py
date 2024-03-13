@@ -180,7 +180,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
-from jose import jwt
 import requests
 
 router = APIRouter()
@@ -210,7 +209,7 @@ async def google_signin(data: GoogleSignInData):
         # For this example, I'm assuming you have already implemented this logic
 
         # Create a JWT token
-        token = jwt.encode({"userId": user["id"]}, "secret-key", algorithm="HS256")
+        # token = jwt.encode({"userId": user["id"]}, "secret-key", algorithm="HS256")
 
         return JSONResponse(content={"message": "Login successful", "token": token})
 
