@@ -177,45 +177,45 @@
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from fastapi.responses import JSONResponse
-import requests
-import jwt
+# from fastapi import APIRouter, HTTPException
+# from pydantic import BaseModel
+# from fastapi.responses import JSONResponse
+# import requests
+# import jwt
 
-router = APIRouter()
+# router = APIRouter()
 
-# Assuming you have already configured googleClient and redis
-# Replace process.env.googleClientId with your actual Google Client ID
+# # Assuming you have already configured googleClient and redis
+# # Replace process.env.googleClientId with your actual Google Client ID
 
-class GoogleSignInData(BaseModel):
-    id_token: str
+# class GoogleSignInData(BaseModel):
+#     id_token: str
 
-@router.post("/google-signin", response_model=dict)
-async def google_signin(data: GoogleSignInData):
-    try:
-        # Validate Google ID token
-        response = requests.post('https://oauth2.googleapis.com/tokeninfo', data={'id_token': data.id_token})
-        if response.status_code != 200:
-            raise HTTPException(status_code=400, detail="Invalid Google ID token")
+# @router.post("/google-signin", response_model=dict)
+# async def google_signin(data: GoogleSignInData):
+#     try:
+#         # Validate Google ID token
+#         response = requests.post('https://oauth2.googleapis.com/tokeninfo', data={'id_token': data.id_token})
+#         if response.status_code != 200:
+#             raise HTTPException(status_code=400, detail="Invalid Google ID token")
 
-        payload = response.json()
+#         payload = response.json()
 
-        # Check if the user exists in the database
-        # You'll need to replace this with your database query logic
-        # For demonstration purposes, I'm just using a placeholder user object
-        user = {"name": payload.get("name"), "email": payload.get("email"), "state": ""}
+#         # Check if the user exists in the database
+#         # You'll need to replace this with your database query logic
+#         # For demonstration purposes, I'm just using a placeholder user object
+#         user = {"name": payload.get("name"), "email": payload.get("email"), "state": ""}
 
-        # Here you can perform actions like database queries to check if the user exists, and create/update the user if necessary
-        # For this example, I'm assuming you have already implemented this logic
+#         # Here you can perform actions like database queries to check if the user exists, and create/update the user if necessary
+#         # For this example, I'm assuming you have already implemented this logic
 
-        # Create a JWT token
-        token = jwt.encode({"userId": user["id"]}, "secret-key", algorithm="HS256")
+#         # Create a JWT token
+#         token = jwt.encode({"userId": user["id"]}, "secret-key", algorithm="HS256")
 
-        return JSONResponse(content={"message": "Login successful", "token": token})
+#         return JSONResponse(content={"message": "Login successful", "token": token})
 
-    except Exception as e:
-        # Log the error
-        print("Error:", e)
-        # Return error response
-        return JSONResponse(status_code=500, content={"message": "Server Error"})
+#     except Exception as e:
+#         # Log the error
+#         print("Error:", e)
+#         # Return error response
+#         return JSONResponse(status_code=500, content={"message": "Server Error"})
