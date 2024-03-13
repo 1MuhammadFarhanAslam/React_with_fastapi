@@ -122,29 +122,38 @@
 
 
 
-# from fastapi import FastAPI, HTTPException
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import Optional
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 app = FastAPI()
 
+class Token(BaseModel):
+    id_token: str
+
 @app.post("/google-signin")
-async def google_signin(id_token: str):
+async def google_signin(token: Token):
     try:
-        # Here you would verify the token and extract user data
-        # For demonstration, let's assume the token verification is successful
-        # and extract user data from the token payload
-        # Replace this part with your actual token verification logic
-        payload = {
-            "name": "John Doe",
-            "email": "john.doe@example.com",
+        # Verify the Google ID token
+        ticket = id_token.verify_oauth2_token(token.id_token, requests.Request(), "274409146209-qp9qp2au3k9bgghu8tb7urf2j7qal8e3.apps.googleusercontent.com")
+        
+        # Extract user information from the token's payload
+        payload = ticket.get("payload")
+        user_data = {
+            "name": payload.get("name"),
+            "email": payload.get("email"),
             "state": ""
         }
 
-        # You can perform additional operations here, such as saving the user data to the database
-
-        # Respond with a success message
-        return {"message": "Login successful", "userData": payload}
+        return {
+            "message": "Login successful",
+            "userData": user_data
+            # "token": token,  # Your JWT token
+        }
     except Exception as e:
-        # If any error occurs, return a server error response
+        print(e)
+        # Send error response
         raise HTTPException(status_code=500, detail="Server Error")
 
