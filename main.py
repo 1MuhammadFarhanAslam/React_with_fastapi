@@ -119,103 +119,34 @@
 
 
 
-# from fastapi import FastAPI, HTTPException
-# from pydantic import BaseModel
-# from fastapi.security import OAuth2PasswordBearer
-# from typing import Any
-# from datetime import datetime, timedelta
-# import jwt
-# from fastapi.middleware.cors import CORSMiddleware
-
-# app = FastAPI()
-
-# app.add_middleware(
-#         CORSMiddleware,
-#         allow_origins=["*"],
-#         allow_credentials=True,
-#         allow_methods=["*"],
-#         allow_headers=["*"],
-#     )
-
-# # Define a generic model for user data
-# class UserData(BaseModel):
-#     data: Any
-
-# # Route for Google sign-in
-# @app.post("/google-signin")
-# async def google_signin(user_data: UserData):
-#     try:
-#         # Extract user information from the payload
-#         data = user_data.data
-        
-#         # Here you can process the user data as needed, once you know its format
-#         # For now, let's just print it
-#         print(f"Received user data: {data}")
-
-#         # # For demonstration, let's create a dummy user
-#         # user_id = 1
-
-#         # # Create a JWT token
-#         # token_expiry = datetime.utcnow() + timedelta(hours=24)
-#         # token = jwt.encode({"userId": user_id, "exp": token_expiry}, "secret-key", algorithm="HS256")
-
-#         # # Your Redis storage logic here
-#         # # For demonstration, let's just print the token
-#         # print(f"Token: {token}")
-
-#         # return {
-#         #     "message": "Login successful",
-#         #     "token": token.decode('utf-8')
-#         # }
-#     except Exception as e:
-#         print(f"Error: {e}")
-#         raise HTTPException(status_code=500, detail="Server Error")
-
-# # Main function to run the FastAPI app
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
-# from fastapi import APIRouter, HTTPException
-# from pydantic import BaseModel
-# from fastapi.responses import JSONResponse
-# import requests
-# import jwt
 
-# router = APIRouter()
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
-# # Assuming you have already configured googleClient and redis
-# # Replace process.env.googleClientId with your actual Google Client ID
+app = FastAPI()
 
-# class GoogleSignInData(BaseModel):
-#     id_token: str
+# Configure CORS to allow requests from the frontend origin
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Update with your frontend origin
+    allow_credentials=True,
+    allow_methods=["POST"],
+    allow_headers=["Content-Type"],
+)
 
-# @router.post("/google-signin", response_model=dict)
-# async def google_signin(data: GoogleSignInData):
-#     try:
-#         # Validate Google ID token
-#         response = requests.post('https://oauth2.googleapis.com/tokeninfo', data={'id_token': data.id_token})
-#         if response.status_code != 200:
-#             raise HTTPException(status_code=400, detail="Invalid Google ID token")
+@app.post("/login/google")
+async def login_with_google(access_token: str):
+    try:
+        # Verify the access token with Google OAuth2
+        idinfo = id_token.verify_oauth2_token(access_token, requests.Request(), 'YOUR_GOOGLE_CLIENT_ID')
 
-#         payload = response.json()
+        # Token verification successful, return user information
+        return {"email": idinfo['email'], "name": idinfo.get('name'), "picture": idinfo.get('picture')}
+    except Exception as e:
+        # Token verification failed
+        raise HTTPException(status_code=401, detail="Invalid access token")
 
-#         # Check if the user exists in the database
-#         # You'll need to replace this with your database query logic
-#         # For demonstration purposes, I'm just using a placeholder user object
-#         user = {"name": payload.get("name"), "email": payload.get("email"), "state": ""}
-
-#         # Here you can perform actions like database queries to check if the user exists, and create/update the user if necessary
-#         # For this example, I'm assuming you have already implemented this logic
-
-#         # Create a JWT token
-#         token = jwt.encode({"userId": user["id"]}, "secret-key", algorithm="HS256")
-
-#         return JSONResponse(content={"message": "Login successful", "token": token})
-
-#     except Exception as e:
-#         # Log the error
-#         print("Error:", e)
-#         # Return error response
-#         return JSONResponse(status_code=500, content={"message": "Server Error"})
