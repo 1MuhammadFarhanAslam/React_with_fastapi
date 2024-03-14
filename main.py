@@ -242,8 +242,26 @@ import os
 from models import React_User, React_user_Token
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
+from fastapi.middleware.cors import CORSMiddleware
+from routers import admin, user, login
 
 app = FastAPI()
+
+
+# Allow CORS for all domains in this example
+app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# Include routers
+app.include_router(login.router, prefix="", tags=["Authentication"])
+app.include_router(admin.router, prefix="", tags=["Admin"])
+app.include_router(user.router, prefix="", tags=["User"])
+
 # Get the database URL from the environment variable
 DATABASE_URL = os.environ.get("DATABASE_URL")
 GOOGLE_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_LOGIN_SECRET_KEY")
@@ -304,6 +322,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_db)):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
+
 
 
 
