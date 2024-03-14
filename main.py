@@ -231,74 +231,41 @@
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
-from fastapi import FastAPI, HTTPException, Depends, Security
-from datetime import datetime, timedelta
-from uuid import uuid4
-from pydantic import BaseModel
-from google.oauth2 import id_token
-from google.auth.transport import requests
-import jwt
-import os
+import asyncio
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
-GOOGLE_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_LOGIN_SECRET_KEY")
-ALGORITHM = "HS256"
+# Define a function to create the FastAPI application
+def create_app():
+    # Import routers inside the function
+    from routers import admin, user, login, google_signin
 
-class Token(BaseModel):
-    id_token: str
+    # Create FastAPI application object
+    app = FastAPI()
 
-class User(BaseModel):
-    id: str = str(uuid4()) # Generate a random integer ID
-    created_at: datetime = datetime.now()
-    username: str
-    email: str
-    picture: str
-    email_verified: bool
-    role: str = "user"
+    # Allow CORS for all domains in this example
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-def create_access_token(data: dict, expires_delta: timedelta):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, GOOGLE_LOGIN_SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    # Include routers
+    app.include_router(login.router, prefix="", tags=["Authentication"])
+    app.include_router(google_signin.router, prefix="", tags=["Google Signin"])
+    app.include_router(admin.router, prefix="", tags=["Admin"])
+    app.include_router(user.router, prefix="", tags=["User"])
 
-@app.post("/google-signin")
-async def google_signin(token: Token):
-    try:
-        # Verify the Google ID token
-        ticket = id_token.verify_oauth2_token(token.id_token, requests.Request(), "274409146209-qp9qp2au3k9bgghu8tb7urf2j7qal8e3.apps.googleusercontent.com")
-        print(ticket)
-        
-        # Extract user information from the token's payload
-        user_data = {
-            "username": ticket.get("name"),
-            "email": ticket.get("email"),
-            "picture": ticket.get("picture"),
-            "email_verified": ticket.get("email_verified"),
+    return app
 
-        }
+# Call create_app() to obtain the FastAPI application instance
+app = create_app()
 
-        # Create a User instance with additional fields
-        user = User(**user_data)
-
-        access_token_expires = timedelta(minutes=30)
-        access_token = create_access_token(
-            data={"sub": user.email}, expires_delta=access_token_expires
-        )
-
-        return {
-            "message": "Login successful",
-            "userData": user.dict(),
-            "access_token": access_token,
-            "token_type": "bearer"
-        }
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Server Error")
-
-# # Main function to run the FastAPI app
+# Main function to run the FastAPI app
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 

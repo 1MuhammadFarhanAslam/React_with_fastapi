@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from sqlalchemy.sql import func
 import os
 from sqlalchemy import create_engine
+from uuid import uuid4
+from sqlalchemy.dialects.postgresql import UUID
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -44,10 +46,6 @@ class SecretKey(Base):
         session.close()
 
 
-
-
-
-
 class Role(Base):
     __tablename__ = 'roles'
 
@@ -73,6 +71,21 @@ class User(Base):
 
 # Add back reference to Role
 Role.user = relationship("User", back_populates="roles")
+
+
+class React_User(Base):
+    __tablename__ = "react_users"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid4)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    username = Column(String)
+    email = Column(String, unique=True, index=True)
+    picture = Column(String)
+    email_verified = Column(Boolean)
+    role = Column(String, default="user")  # Default role is "user"
+
+class React_user_Token(BaseModel):
+    id_token: str
 
 class Token(BaseModel):
     access_token: str
