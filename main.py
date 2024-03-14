@@ -358,7 +358,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
         raise HTTPException(status_code=500, detail="Server Error")
     
 
-@app.get("/read/{user_id}", response_model=None, tags=["login_with_google"])
+@app.get("/read/{user_id}")
 async def read_admin_info(
     user_id: str,
     db: Session = Depends(get_database)
