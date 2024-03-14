@@ -240,8 +240,7 @@ from google.auth.transport import requests
 import jwt
 import os
 from models import React_User, React_user_Token
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 
 app = FastAPI()
