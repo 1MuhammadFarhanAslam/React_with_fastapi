@@ -358,6 +358,8 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
         raise HTTPException(status_code=500, detail="Server Error")
     
 
+
+# Use the dependency to protect the endpoint
 @app.get("/read/{user_id}", response_model=None, tags=["google_signin"])
 async def read_admin_info(
     user_id: str,
@@ -368,6 +370,7 @@ async def read_admin_info(
         
         # Query the user based on the UUID
         user = db.query(React_User).filter(React_User.id == user_id).first()
+        logger.info(f"User found: {user}")
         
         if user:
             logger.info(f"User found: {user}")
