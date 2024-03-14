@@ -231,7 +231,7 @@
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Security
 from datetime import datetime, timedelta
 from uuid import uuid4
 from pydantic import BaseModel
@@ -240,21 +240,27 @@ from google.auth.transport import requests
 import jwt
 
 app = FastAPI()
-
-# Secret key to sign JWT tokens
-SECRET_KEY = "$2b$12$G4NGmbDvlO7LUQxYEbPfUuYcjcXh2d4kw/CwFtSyFx5UtFKByRBZO"
+SECRET_KEY = "your-secret-key-here"
+ALGORITHM = "HS256"
 
 class Token(BaseModel):
     id_token: str
 
 class User(BaseModel):
-    id: str = str(uuid4())
+    id: str = str(uuid4()) # Generate a random integer ID
     created_at: datetime = datetime.now()
     username: str
     email: str
     picture: str
     email_verified: bool
     role: str = "user"
+
+def create_access_token(data: dict, expires_delta: timedelta):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + expires_delta
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 @app.post("/google-signin")
 async def google_signin(token: Token):
@@ -269,24 +275,29 @@ async def google_signin(token: Token):
             "email": ticket.get("email"),
             "picture": ticket.get("picture"),
             "email_verified": ticket.get("email_verified"),
+
         }
 
         # Create a User instance with additional fields
         user = User(**user_data)
 
-        # Generate JWT token
-        jwt_token = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm="HS256")
+        access_token_expires = timedelta(minutes=30)
+        access_token = create_access_token(
+            data={"sub": user.email}, expires_delta=access_token_expires
+        )
 
         return {
             "message": "Login successful",
             "userData": user.dict(),
-            "token": jwt_token
+            "access_token": access_token,
+            "token_type": "bearer"
         }
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
 
-# Main function to run the FastAPI app
+# # Main function to run the FastAPI app
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
