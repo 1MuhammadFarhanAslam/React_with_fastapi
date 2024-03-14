@@ -315,10 +315,18 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_db)):
 
         return {
             "message": "Login successful",
-            "userData": user.dict(),
+            "userData": {
+                "id": str(user.id),
+                "username": user.username,
+                "email": user.email,
+                "picture": user.picture,
+                "email_verified": user.email_verified,
+                "role": user.role
+            },
             "access_token": access_token,
             "token_type": "bearer"
         }
+    
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
