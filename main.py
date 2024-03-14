@@ -152,8 +152,10 @@ async def google_signin(token: Token):
         
         # Extract user information from the token's payload
         user_data = {
-            "name": ticket.get("name"),
+            "username": ticket.get("name"),
             "email": ticket.get("email"),
+            "picture": ticket.get("picture"),
+            "email_verified": ticket.get("email_verified"),
             "state": ""
         }
 
