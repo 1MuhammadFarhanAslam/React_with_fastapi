@@ -311,6 +311,6 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_db)):
 # Main function to run the FastAPI app
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(host="0.0.0.0", port=8000)
 
 
