@@ -190,7 +190,7 @@ class Token(BaseModel):
     id_token: str
 
 class User(BaseModel):
-    id: str = str(uuid4())
+    id: str = str(uuid4()) # Generate a random integer ID
     created_at: datetime = datetime.now()
     username: str
     email: str
@@ -212,7 +212,7 @@ async def google_signin(token: Token):
             "email": ticket.get("email"),
             "picture": ticket.get("picture"),
             "email_verified": ticket.get("email_verified"),
-            "state": ""
+
         }
 
         # Create a User instance with additional fields
