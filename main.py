@@ -225,3 +225,8 @@ async def google_signin(token: Token):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
+
+# # Main function to run the FastAPI app
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
