@@ -295,7 +295,7 @@ def get_database() -> Generator[Session, None, None]:
         db.close()
 
         
-@app.post("/google-signin")
+@app.post("/google-signin", tags=["google_signin"])
 async def google_signin(token: React_user_Token, db: Session = Depends(get_database)):
     try:
         # Verify the Google ID token
@@ -358,7 +358,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
         raise HTTPException(status_code=500, detail="Server Error")
     
 
-@app.get("/read/{user_id}")
+@app.get("/read/{user_id}", response_model=None, tags=["google_signin"])
 async def read_admin_info(
     user_id: str,
     db: Session = Depends(get_database)
