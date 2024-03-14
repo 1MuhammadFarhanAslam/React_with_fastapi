@@ -122,26 +122,82 @@
 
 
 
+# from fastapi import FastAPI, HTTPException, Depends
+# from fastapi.middleware.cors import CORSMiddleware
+# from pydantic import BaseModel
+# from google.oauth2 import id_token
+# from google.auth.transport import requests
+# from routers import admin, user, login
+
+# app = FastAPI()
+
+# # Allow CORS for all domains in this example
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# class Token(BaseModel):
+#     id_token: str
+
+# @app.post("/google-signin")
+# async def google_signin(token: Token):
+#     try:
+#         # Verify the Google ID token
+#         ticket = id_token.verify_oauth2_token(token.id_token, requests.Request(), "274409146209-qp9qp2au3k9bgghu8tb7urf2j7qal8e3.apps.googleusercontent.com")
+#         print(ticket)
+        
+#         # Extract user information from the token's payload
+#         user_data = {
+#             "username": ticket.get("name"),
+#             "email": ticket.get("email"),
+#             "picture": ticket.get("picture"),
+#             "email_verified": ticket.get("email_verified"),
+#             "state": ""
+#         }
+
+#         return {
+#             "message": "Login successful",
+#             "userData": user_data
+#         }
+#     except Exception as e:
+#         print(e)
+#         raise HTTPException(status_code=500, detail="Server Error")
+
+# # Include routers
+# app.include_router(login.router, prefix="", tags=["Authentication"])
+# app.include_router(admin.router, prefix="", tags=["Admin"])
+# app.include_router(user.router, prefix="", tags=["User"])
+
+# # Main function to run the FastAPI app
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 from fastapi import FastAPI, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
+from uuid import uuid4
 from pydantic import BaseModel
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from routers import admin, user, login
 
 app = FastAPI()
 
-# Allow CORS for all domains in this example
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 class Token(BaseModel):
     id_token: str
+
+class User(BaseModel):
+    id: str = str(uuid4())
+    created_at: datetime = datetime.now()
+    username: str
+    email: str
+    picture: str
+    email_verified: bool
+    state: str = ""
+    role: str = "user"
 
 @app.post("/google-signin")
 async def google_signin(token: Token):
@@ -159,20 +215,13 @@ async def google_signin(token: Token):
             "state": ""
         }
 
+        # Create a User instance with additional fields
+        user = User(**user_data)
+
         return {
             "message": "Login successful",
-            "userData": user_data
+            "userData": user.dict()
         }
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
-
-# Include routers
-app.include_router(login.router, prefix="", tags=["Authentication"])
-app.include_router(admin.router, prefix="", tags=["Admin"])
-app.include_router(user.router, prefix="", tags=["User"])
-
-# Main function to run the FastAPI app
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
