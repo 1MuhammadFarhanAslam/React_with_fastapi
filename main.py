@@ -231,20 +231,15 @@
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
-import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from routers import admin, user, login, google_signin
 
-# Define a function to create the FastAPI application
-def create_app():
-    # Import routers inside the function
-    from routers import admin, user, login, google_signin
+# Create FastAPI application object
+app = FastAPI()
 
-    # Create FastAPI application object
-    app = FastAPI()
-
-    # Allow CORS for all domains in this example
-    app.add_middleware(
+# Allow CORS for all domains in this example
+app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
         allow_credentials=True,
@@ -252,16 +247,13 @@ def create_app():
         allow_headers=["*"],
     )
 
-    # Include routers
-    app.include_router(login.router, prefix="", tags=["Authentication"])
-    app.include_router(google_signin.router, prefix="", tags=["Google Signin"])
-    app.include_router(admin.router, prefix="", tags=["Admin"])
-    app.include_router(user.router, prefix="", tags=["User"])
+# Include routers
+app.include_router(login.router, prefix="", tags=["Authentication"])
+app.include_router(google_signin.router, prefix="", tags=["Google Signin"])
+app.include_router(admin.router, prefix="", tags=["Admin"])
+app.include_router(user.router, prefix="", tags=["User"])
 
-    return app
 
-# Call create_app() to obtain the FastAPI application instance
-app = create_app()
 
 # Main function to run the FastAPI app
 if __name__ == "__main__":
