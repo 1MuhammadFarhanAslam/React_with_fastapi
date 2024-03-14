@@ -287,6 +287,7 @@ def get_db():
     finally:
         db.close()
 
+        
 @app.post("/google-signin")
 async def google_signin(token: React_user_Token, db: Session = Depends(get_db)):
     try:
@@ -301,31 +302,49 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_db)):
             "email_verified": ticket.get("email_verified"),
         }
 
-        # Create a User instance with additional fields
-        user = React_User(**user_data)
+        # Check if the user already exists in the database
+        existing_user = db.query(React_User).filter(React_User.email == user_data["email"]).first()
 
-        # Add the user to the database
-        db.add(user)
-        db.commit()
+        if existing_user:
+            # User already exists, return their details
+            access_token_expires = timedelta(minutes=30)
+            access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
 
-        access_token_expires = timedelta(minutes=30)
-        access_token = React_JWT_Token(
-            data={"sub": user.email}, expires_delta=access_token_expires
-        )
+            return {
+                "message": "User already exists",
+                "userData": {
+                    "id": str(existing_user.id),
+                    "username": existing_user.username,
+                    "email": existing_user.email,
+                    "picture": existing_user.picture,
+                    "email_verified": existing_user.email_verified,
+                    "role": existing_user.role
+                },
+                "access_token": access_token,
+                "token_type": "bearer"
+            }
+        else:
+            # User does not exist, create a new user and save it to the database
+            user = React_User(**user_data)
+            db.add(user)
+            db.commit()
 
-        return {
-            "message": "Login successful",
-            "userData": {
-                "id": str(user.id),
-                "username": user.username,
-                "email": user.email,
-                "picture": user.picture,
-                "email_verified": user.email_verified,
-                "role": user.role
-            },
-            "access_token": access_token,
-            "token_type": "bearer"
-        }
+            access_token_expires = timedelta(minutes=30)
+            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
+
+            return {
+                "message": "Login successful",
+                "userData": {
+                    "id": str(user.id),
+                    "username": user.username,
+                    "email": user.email,
+                    "picture": user.picture,
+                    "email_verified": user.email_verified,
+                    "role": user.role
+                },
+                "access_token": access_token,
+                "token_type": "bearer"
+            }
     
     except Exception as e:
         print(e)
