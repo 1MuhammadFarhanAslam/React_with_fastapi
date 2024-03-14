@@ -196,7 +196,6 @@ class User(BaseModel):
     email: str
     picture: str
     email_verified: bool
-    state: str = ""
     role: str = "user"
 
 @app.post("/google-signin")
