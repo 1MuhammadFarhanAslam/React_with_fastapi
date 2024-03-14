@@ -177,20 +177,78 @@
 #     import uvicorn
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
 
+# from fastapi import FastAPI, HTTPException, Depends
+# from datetime import datetime
+# from uuid import uuid4
+# from pydantic import BaseModel
+# from google.oauth2 import id_token
+# from google.auth.transport import requests
+
+# app = FastAPI()
+
+# class Token(BaseModel):
+#     id_token: str
+
+# class User(BaseModel):
+#     id: str = str(uuid4()) # Generate a random integer ID
+#     created_at: datetime = datetime.now()
+#     username: str
+#     email: str
+#     picture: str
+#     email_verified: bool
+#     role: str = "user"
+
+# @app.post("/google-signin")
+# async def google_signin(token: Token):
+#     try:
+#         # Verify the Google ID token
+#         ticket = id_token.verify_oauth2_token(token.id_token, requests.Request(), "274409146209-qp9qp2au3k9bgghu8tb7urf2j7qal8e3.apps.googleusercontent.com")
+#         print(ticket)
+        
+#         # Extract user information from the token's payload
+#         user_data = {
+#             "username": ticket.get("name"),
+#             "email": ticket.get("email"),
+#             "picture": ticket.get("picture"),
+#             "email_verified": ticket.get("email_verified"),
+
+#         }
+
+#         # Create a User instance with additional fields
+#         user = User(**user_data)
+
+#         return {
+#             "message": "Login successful",
+#             "userData": user.dict()
+#         }
+#     except Exception as e:
+#         print(e)
+#         raise HTTPException(status_code=500, detail="Server Error")
+
+# # # Main function to run the FastAPI app
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
 from fastapi import FastAPI, HTTPException, Depends
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import uuid4
 from pydantic import BaseModel
 from google.oauth2 import id_token
 from google.auth.transport import requests
+import jwt
 
 app = FastAPI()
+
+# Secret key to sign JWT tokens
+SECRET_KEY = "$2b$12$G4NGmbDvlO7LUQxYEbPfUuYcjcXh2d4kw/CwFtSyFx5UtFKByRBZO"
 
 class Token(BaseModel):
     id_token: str
 
 class User(BaseModel):
-    id: str = str(uuid4()) # Generate a random integer ID
+    id: str = str(uuid4())
     created_at: datetime = datetime.now()
     username: str
     email: str
@@ -211,21 +269,24 @@ async def google_signin(token: Token):
             "email": ticket.get("email"),
             "picture": ticket.get("picture"),
             "email_verified": ticket.get("email_verified"),
-
         }
 
         # Create a User instance with additional fields
         user = User(**user_data)
 
+        # Generate JWT token
+        jwt_token = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm="HS256")
+
         return {
             "message": "Login successful",
-            "userData": user.dict()
+            "userData": user.dict(),
+            "token": jwt_token
         }
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
 
-# # Main function to run the FastAPI app
+# Main function to run the FastAPI app
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
