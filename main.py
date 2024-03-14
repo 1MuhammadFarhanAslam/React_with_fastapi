@@ -286,7 +286,7 @@ def React_JWT_Token(data: dict, expires_delta: timedelta):
     return encoded_jwt
 
 # Dependency to get the database session
-def get_database() -> Generator[Session, None, None]:
+def get_database():
     # Provide a database session to use within the request
     db = SessionLocal()
     try:
@@ -295,7 +295,7 @@ def get_database() -> Generator[Session, None, None]:
         db.close()
 
         
-@app.post("/google-signin", tags=["google_signin"])
+@app.post("/google-signin", )
 async def google_signin(token: React_user_Token, db: Session = Depends(get_database)):
     try:
         # Verify the Google ID token
