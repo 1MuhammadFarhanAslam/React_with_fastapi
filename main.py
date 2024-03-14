@@ -270,7 +270,7 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/google-signin")
+@app.post("/google-signin")
 async def google_signin(token: React_user_Token, db: Session = Depends(get_db)):
     try:
         # Verify the Google ID token
