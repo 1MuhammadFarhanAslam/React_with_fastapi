@@ -244,7 +244,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import create_engine
 
-router = APIRouter()
+app = FastAPI()
 # Get the database URL from the environment variable
 DATABASE_URL = os.environ.get("DATABASE_URL")
 GOOGLE_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_LOGIN_SECRET_KEY")
@@ -311,6 +311,6 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_db)):
 # Main function to run the FastAPI app
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
