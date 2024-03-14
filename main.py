@@ -244,6 +244,11 @@ from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from fastapi.middleware.cors import CORSMiddleware
 from routers import admin, user, login
+from typing import Generator
+from fastapi.logger import logger
+from uuid import uuid4
+from sqlalchemy.dialects.postgresql import UUID
+
 
 app = FastAPI()
 
@@ -280,7 +285,9 @@ def React_JWT_Token(data: dict, expires_delta: timedelta):
     encoded_jwt = jwt.encode(to_encode, GOOGLE_LOGIN_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def get_db():
+# Dependency to get the database session
+def get_database() -> Generator[Session, None, None]:
+    # Provide a database session to use within the request
     db = SessionLocal()
     try:
         yield db
@@ -289,7 +296,7 @@ def get_db():
 
         
 @app.post("/google-signin")
-async def google_signin(token: React_user_Token, db: Session = Depends(get_db)):
+async def google_signin(token: React_user_Token, db: Session = Depends(get_database)):
     try:
         # Verify the Google ID token
         ticket = id_token.verify_oauth2_token(token.id_token, requests.Request(), "274409146209-qp9qp2au3k9bgghu8tb7urf2j7qal8e3.apps.googleusercontent.com")
@@ -349,6 +356,44 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_db)):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
+    
+
+@app.get("/read/{user_id}", response_model=None, tags=["login_with_google"])
+async def read_admin_info(
+    user_id: str,
+    db: Session = Depends(get_database)
+):
+    try:
+        logger.info(f"Attempting to retrieve user with ID: {user_id}")
+        
+        # Query the user based on the UUID
+        user = db.query(React_User).filter(React_User.id == user_id).first()
+        
+        if user:
+            logger.info(f"User found: {user}")
+            
+            # Customizing the response body
+            user_data = {
+                "id": str(user.id),
+                "username": user.username,
+                "email": user.email,
+                "picture": user.picture,
+                "email_verified": user.email_verified,
+                "role": user.role,
+                "created_at": user.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f")
+            }
+            
+            return user_data
+        else:
+            logger.warning(f"User not found with ID: {user_id}")
+            raise HTTPException(status_code=404, detail="User not found")
+    except ValueError:
+        logger.warning(f"Invalid UUID format for user ID: {user_id}")
+        raise HTTPException(status_code=400, detail="Invalid UUID format")
+    except Exception as e:
+        logger.error(f"Error during user retrieval: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
 
 
