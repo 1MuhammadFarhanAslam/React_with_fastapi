@@ -363,7 +363,6 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 @app.get("/read/{user_id}", response_model=None, tags=["google_signin"])
 async def read_admin_info(
     user_id: str,
-    current_active_react_user: React_User,
     db: Session = Depends(get_database)
 ):
     try:

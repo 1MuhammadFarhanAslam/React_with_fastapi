@@ -112,7 +112,7 @@ async def read_all_admins_info(
 @router.get("/read/{username}", response_model=None, tags=["Admin"])
 async def read_admin_info(
     username: str, 
-    current_active_admin: Admin = Depends(get_current_active_admin),
+    # current_active_admin: Admin = Depends(get_current_active_admin),
     db: Session = Depends(get_database)
 ):
     try:
