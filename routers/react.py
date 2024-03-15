@@ -51,7 +51,7 @@ def React_JWT_Token(data: dict, expires_delta: timedelta):
 
 
 
-@router.post("react//google-signin", tags=["React"])
+@router.post("/react/google-signin", tags=["React"])
 async def google_signin(token: React_user_Token, db: Session = Depends(get_database)):
     try:
         # Verify the Google ID token
