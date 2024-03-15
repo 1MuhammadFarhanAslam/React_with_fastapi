@@ -147,7 +147,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
     
 
 @router.get("/read", response_model=None, tags=["React"])
-async def read_react_user(
+async def jwt_token_react_user(
     access_token: str = Header(...),  # Assuming the access token is sent in the header
     db: Session = Depends(get_database)
 ):
