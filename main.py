@@ -376,9 +376,7 @@ async def read_react_user(
         print("_____________________User_____________________" , users)
         
         if users:
-            user_data = []
-            for user in users:
-                user_data.append({
+            user_data = {
                     "id": str(user.id),
                     "created_at": user.created_at,
                     "username": user.username,
@@ -386,7 +384,7 @@ async def read_react_user(
                     "picture": user.picture,
                     "email_verified": user.email_verified,
                     "role": user.role,
-                })
+                }
 
             return user_data
         else:
