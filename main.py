@@ -359,6 +359,42 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
         raise HTTPException(status_code=500, detail="Server Error")
    
 
+@app.get("/read/{username}", response_model=None, tags=["React"])
+async def read_react_user(
+    username: str,
+    db: Session = Depends(get_database)
+):
+    try:
+        logger.info(f"Attempting to retrieve user with ID: {username}")
+        
+        # Query the user based on the UUID
+        user = db.query(React_User).filter(React_User.username == username).first()
+        print("_____________________User_____________________" , user)
+        
+        if user:
+            logger.info(f"User found: {user}")
+            
+            # Customizing the response body
+            user_data = {
+                "id": str(user.id),
+                "username": user.username,
+                "email": user.email,
+                "picture": user.picture,
+                "email_verified": user.email_verified,
+                "role": user.role,
+                "created_at": user.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f")
+            }
+            
+            return user_data
+        else:
+            logger.warning(f"User not found with ID: {username}")
+            raise HTTPException(status_code=404, detail="User not found")
+    except ValueError:
+        logger.warning(f"Invalid UUID format for user ID: {username}")
+        raise HTTPException(status_code=400, detail="Invalid UUID format")
+    except Exception as e:
+        logger.error(f"Error during user retrieval: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # Main function to run the FastAPI app
 if __name__ == "__main__":
