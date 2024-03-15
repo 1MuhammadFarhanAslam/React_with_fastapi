@@ -109,43 +109,6 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
-
-    
-
-@router.get("/read", response_model=None, tags=["React"])
-async def jwt_token_react_user(
-    authorization: Optional[str] = Header(None),
-    db: Session = Depends(get_database)
-):
-    try:
-        if authorization is None:
-            raise HTTPException(status_code=401, detail="Authorization header is missing")
-
-        # Decode the JWT token to get user information
-        decoded_token = jwt.decode(authorization, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = decoded_token.get("sub")  # Assuming the subject of the token contains the user ID
-        
-        # Query the user based on the user ID obtained from the decoded token
-        user = db.query(React_User).filter(React_User.id == user_id).first()
-        
-        if user:
-            user_data = {
-                "id": str(user.id),
-                "created_at": user.created_at,
-                "username": user.username,
-                "email": user.email,
-                "picture": user.picture,
-                "email_verified": user.email_verified,
-                "role": user.role,
-            }
-
-            return user_data
-        else:
-            raise HTTPException(status_code=404, detail="No user found")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
 @router.get("/read/{id}", response_model=None, tags=["React"])
@@ -180,4 +143,19 @@ async def read_react_user(
         raise HTTPException(status_code=400, detail="Invalid role")
     except Exception as e:
         logger.error(f"Error during user retrieval: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+
+
+@router.get("/decode-token", response_model=React_user_Token, tags=["React"])
+async def decode_access_token(access_token: str):
+    try:
+        # Decode the access token to get user information
+        decoded_token = jwt.decode(access_token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = decoded_token.get("sub")  # Assuming 'sub' contains the user ID
+
+        return {"sub": user_id}
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
