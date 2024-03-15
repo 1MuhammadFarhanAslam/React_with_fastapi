@@ -204,13 +204,16 @@ def expire_token(token: str):
 async def logout_user(authorization: str = Header(...)):
     try:
         # Extract the token from the Authorization header
-        token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+        token = authorization  # Assuming the header format is "Bearer <token>"
         
         # Decode and verify the JWT token
         decoded_token = jwt.decode(token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
         print("________________decoded_token________________", decoded_token)
 
-        return {"message": "Logout successful"}
+        # Invalidate the token by setting its expiration to a past date
+        expired_token = expire_token(token)
+
+        return {"message": "Logout successful", "token": expired_token}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
