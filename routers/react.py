@@ -193,15 +193,15 @@ async def read_react_user(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.post("/react/signout", tags=["React"])
+@router.post("/react/logout", tags=["React"])
 async def logout_user(
-    authorization: str = Header(...),  # Get the access token from the Authorization header
+    authorization: str = Header(None),  # Get the full Authorization header value
     db: Session = Depends(get_database)
 ):
     try:
-        # Extract the token from the Authorization header
-        token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
-
+        if authorization is None:
+            raise HTTPException(status_code=401, detail="Authorization header missing")
+        
         # Invalidate the token by setting its expiration to a past date
         expired_token = React_JWT_Token(expiration=datetime.utcnow() - timedelta(days=1))
 
