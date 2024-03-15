@@ -196,9 +196,6 @@ async def read_react_user(
 @router.post("/react/logout", tags=["React"])
 async def logout_user(authorization: str = Header(...)):
     try:
-        if authorization is None:
-            raise HTTPException(status_code=401, detail="Authorization header missing")
-        
         # Invalidate the token by setting its expiration to a past date
         expired_token = React_JWT_Token(expiration=datetime.utcnow() - timedelta(days=1))
 
