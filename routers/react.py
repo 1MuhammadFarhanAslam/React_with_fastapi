@@ -155,7 +155,7 @@ async def decode_access_token(access_token: str, db: Session = Depends(get_datab
         
         # Query the database based on the email to get user data
         user = db.query(React_User).filter(React_User.email == email).first()
-        print(user)
+        print("_______________user details in jwt token___________" ,user)
         
         if user:
             return {
