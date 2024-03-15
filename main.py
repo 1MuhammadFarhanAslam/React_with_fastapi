@@ -370,7 +370,7 @@ async def read_admin_info(
         
         # Query the user based on the UUID
         user = db.query(React_User).filter(React_User.username == username).first()
-        logger.info(f"User found: {user}")
+        print(user)
         
         if user:
             logger.info(f"User found: {user}")
