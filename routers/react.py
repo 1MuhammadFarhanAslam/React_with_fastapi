@@ -35,7 +35,7 @@ def get_database():
     finally:
         db.close()
 
-@router.get("/read/{username}", response_model=None, tags=["google_signin"])
+@router.get("/read/{username}", response_model=None)
 async def read_react_user(
     username: str,
     db: Session = Depends(get_database)
