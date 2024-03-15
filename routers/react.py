@@ -147,7 +147,7 @@ async def read_react_user(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.get("/read", response_model=React_User, tags=["React"])
+@router.get("/read", response_model=None, tags=["React"])
 async def jwt_token_react_user(
     authorization: Optional[str] = Header(None),
     db: Session = Depends(get_database)
@@ -164,7 +164,17 @@ async def jwt_token_react_user(
         user = db.query(React_User).filter(React_User.id == user_id).first()
         
         if user:
-            return user
+            user_data = {
+                "id": str(user.id),
+                "created_at": user.created_at,
+                "username": user.username,
+                "email": user.email,
+                "picture": user.picture,
+                "email_verified": user.email_verified,
+                "role": user.role,
+            }
+
+            return user_data
         else:
             raise HTTPException(status_code=404, detail="No user found")
     except JWTError:
