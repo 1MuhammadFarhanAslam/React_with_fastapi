@@ -222,7 +222,7 @@ async def user_auth(
 # Set to store blacklisted tokens
 blacklisted_tokens = set()
 
-@router.get("/react/signout", tags=["React"])
+@router.post("/react/signout", tags=["React"])
 async def logout_user(authorization: str = Header(...)):
     try:
         # Extract the token from the Authorization header
