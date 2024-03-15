@@ -85,7 +85,12 @@ class React_User(Base):
     role = Column(String, default="user")  # Default role is "user"
 
 class React_user_Token(BaseModel):
-    id_token: str
+    sub: str  # Assuming 'sub' contains the user ID
+    username: str
+    email: str
+    picture: str
+    email_verified: bool
+    exp: int
 
 class Token(BaseModel):
     access_token: str
