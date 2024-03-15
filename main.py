@@ -369,36 +369,36 @@ async def read_react_user(
     db: Session = Depends(get_database)
 ):
     try:
-        logger.info(f"Attempting to retrieve user with ID: {users}")
-        
-        # Query the user based on the UUID
+        # Query the user based on the role
         users = db.query(React_User).filter(React_User.role == role).all()
+        
+        logger.info(f"Attempting to retrieve users with role: {role}")
         print("_____________________User_____________________" , users)
         
-        if user:
-            
-            # Customizing the response body
-            user_data = {
-                "id": str(user.id),
-                "created_at": user.created_at,
-                "username": user.username,
-                "email": user.email,
-                "picture": user.picture,
-                "email_verified": user.email_verified,
-                "role": user.role,
-                
-            }
-            
+        if users:
+            user_data = []
+            for user in users:
+                user_data.append({
+                    "id": str(user.id),
+                    "created_at": user.created_at,
+                    "username": user.username,
+                    "email": user.email,
+                    "picture": user.picture,
+                    "email_verified": user.email_verified,
+                    "role": user.role,
+                })
+
             return user_data
         else:
-            logger.warning(f"User not found with ID: {users}")
-            raise HTTPException(status_code=404, detail="User not found")
+            logger.warning(f"No users found with role: {role}")
+            raise HTTPException(status_code=404, detail="No users found")
     except ValueError:
-        logger.warning(f"Invalid UUID format for user ID: {users}")
-        raise HTTPException(status_code=400, detail="Invalid UUID format")
+        logger.warning(f"Invalid role: {role}")
+        raise HTTPException(status_code=400, detail="Invalid role")
     except Exception as e:
         logger.error(f"Error during user retrieval: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
 # Main function to run the FastAPI app
 if __name__ == "__main__":
