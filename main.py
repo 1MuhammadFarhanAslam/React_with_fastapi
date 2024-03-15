@@ -361,7 +361,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 
 # Use the dependency to protect the endpoint
 @app.get("/read/{username}", response_model=None, tags=["google_signin"])
-async def read_admin_info(
+async def read_react_user(
     username: str,
     db: Session = Depends(get_database)
 ):
