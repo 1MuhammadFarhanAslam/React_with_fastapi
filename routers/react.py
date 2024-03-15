@@ -147,8 +147,8 @@ async def read_react_user(
     
 
 
-@router.get("/decode-token", response_model=React_user_Token, tags=["React"])
-async def decode_access_token(access_token: str):
+@router.get("/decode-token", response_model=React_User, tags=["React"])
+async def decode_access_token(access_token: str, db: Session = Depends(get_database)):
     try:
         # Decode the access token to get user information
         decoded_token = jwt.decode(access_token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
@@ -157,16 +157,23 @@ async def decode_access_token(access_token: str):
         email = decoded_token.get("email")
         picture = decoded_token.get("picture")
         email_verified = decoded_token.get("email_verified")
-        exp = decoded_token.get("exp")
 
-        return {
-            "sub": user_id,
-            "username": username,
-            "email": email,
-            "picture": picture,
-            "email_verified": email_verified,
-            "exp": exp
-        }
+        # Log the decoded token information
+        print("Decoded Token:", decoded_token)
+
+        # Query the user based on the decoded token
+        user = db.query(React_User).filter(React_User.id == user_id).first()
+
+        if user:
+            # Update user information based on the decoded token
+            user.username = username
+            user.email = email
+            user.picture = picture
+            user.email_verified = email_verified
+
+            return user
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
