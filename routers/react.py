@@ -200,7 +200,7 @@ def expire_token(token: str):
     expired_token["exp"] = datetime.utcnow() - timedelta(days=1)
     return expired_token
 
-@router.post("/react/signout", tags=["React"])
+@router.get("/react/signout", tags=["React"])
 async def logout_user(authorization: str = Header(...)):
     try:
         # Extract the token from the Authorization header
@@ -209,7 +209,7 @@ async def logout_user(authorization: str = Header(...)):
         # Decode and verify the JWT token
         decoded_token = jwt.decode(token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
         print("________________decoded_token________________", decoded_token)
-        
+
         return {"message": "Logout successful"}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
