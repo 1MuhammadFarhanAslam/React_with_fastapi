@@ -142,7 +142,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 #         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.get("/react/decode-token", response_model=None, tags=["React"])
+@router.get("/react/auth/user", response_model=None, tags=["React"])
 async def decode_access_token(
     authorization: str = Header(...),  # Get the access token from the Authorization header
     db: Session = Depends(get_database)
@@ -162,9 +162,12 @@ async def decode_access_token(
         if user:
             return {
                 "id": user.id,
+                "created_at": user.created_at,
                 "username": user.username,
                 "email": user.email,
-                # Add other user data fields as needed
+                "picture": user.picture,
+                "email_verified": user.email_verified,
+                "role": user.role
             }
         else:
             raise HTTPException(status_code=404, detail="User not found")
