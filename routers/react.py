@@ -142,7 +142,7 @@ async def decode_access_token(access_token: str, db: Session = Depends(get_datab
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.get("/read/{id}", response_model=None, tags=["React"])
+@router.get("/react/read/{id}", response_model=None, tags=["React"])
 async def read_react_user(
     id: str,
     db: Session = Depends(get_database)

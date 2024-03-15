@@ -109,7 +109,7 @@ async def read_all_admins_info(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
     
-@router.get("/read/{username}", response_model=None, tags=["Admin"])
+@router.get("/admin/read/{username}", response_model=None, tags=["Admin"])
 async def read_admin_info(
     username: str, 
     current_active_admin: Admin = Depends(get_current_active_admin),
