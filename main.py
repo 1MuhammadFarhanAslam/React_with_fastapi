@@ -368,21 +368,21 @@ async def read_react_user(
         logger.info(f"Attempting to retrieve user with ID: {email}")
         
         # Query the user based on the UUID
-        user = db.query(React_User).filter(React_User.email == email).first()
+        user = db.query(React_User).all()
         print("_____________________User_____________________" , user)
         
         if user:
-            logger.info(f"User found: {user}")
             
             # Customizing the response body
             user_data = {
                 "id": str(user.id),
+                "created_at": user.created_at,
                 "username": user.username,
                 "email": user.email,
                 "picture": user.picture,
                 "email_verified": user.email_verified,
                 "role": user.role,
-                "created_at": user.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f")
+                
             }
             
             return user_data
