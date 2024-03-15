@@ -146,7 +146,7 @@ async def read_react_user(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.get("/read", response_model=None, tags=["React"])
+@router.get("/read/{access_token}", response_model=None, tags=["React"])
 async def jwt_token_react_user(
     access_token: str = Header(...),  # Assuming the access token is sent in the header
     db: Session = Depends(get_database)
