@@ -116,32 +116,6 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
         raise HTTPException(status_code=500, detail="Server Error")
     
 
-
-# @router.get("/react/decode-token", response_model=None, tags=["React"])
-# async def decode_access_token(access_token: str, db: Session = Depends(get_database)):
-#     try:
-#         decoded_token = jwt.decode(access_token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
-#         email = decoded_token.get("sub")  # Assuming "sub" contains the email address
-        
-#         # Query the database based on the email to get user data
-#         user = db.query(React_User).filter(React_User.email == email).first()
-#         print("_______________user details in jwt token___________" ,user)
-        
-#         if user:
-#             return {
-#                 "id": user.id,
-#                 "username": user.username,
-#                 "email": user.email,
-#                 # Add other user data fields as needed
-#             }
-#         else:
-#             raise HTTPException(status_code=404, detail="User not found")
-#     except jwt.JWTError:
-#         raise HTTPException(status_code=401, detail="Invalid token")
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail="Internal Server Error")
-    
-
 @router.get("/react/auth/user", response_model=None, tags=["React"])
 async def user_auth(
     authorization: str = Header(...),  # Get the access token from the Authorization header
@@ -176,40 +150,6 @@ async def user_auth(
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
-
-# @router.get("/react/read/{id}", response_model=None, tags=["React"])
-# async def read_react_user(
-#     id: str,
-#     db: Session = Depends(get_database)
-# ):
-#     try:
-#         # Query the user based on the role
-#         user = db.query(React_User).filter(React_User.id == id).first()
-        
-#         logger.info(f"Attempting to retrieve user with id: {id}")
-#         print("_____________________User_____________________" , user)
-        
-#         if user:
-#             user_data = {
-#                 "id": str(user.id),
-#                 "created_at": user.created_at,
-#                 "username": user.username,
-#                 "email": user.email,
-#                 "picture": user.picture,
-#                 "email_verified": user.email_verified,
-#                 "role": user.role,
-#             }
-
-#             return user_data
-#         else:
-#             logger.warning(f"No user found with id: {id}")
-#             raise HTTPException(status_code=404, detail="No user found")
-#     except ValueError:
-#         logger.warning(f"Invalid id: {id}")
-#         raise HTTPException(status_code=400, detail="Invalid role")
-#     except Exception as e:
-#         logger.error(f"Error during user retrieval: {e}")
-#         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
 @router.get("/react/read/{id}", response_model=None, tags=["React"])
@@ -247,4 +187,32 @@ async def read_react_user(
         raise HTTPException(status_code=400, detail="Invalid role")
     except Exception as e:
         logger.error(f"Error during user retrieval: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+
+@router.post("/react/logout", tags=["React"])
+async def logout(
+    authorization: str = Header(...),  # Get the access token from the Authorization header
+    db: Session = Depends(get_database)
+):
+    try:
+        # Extract the token from the Authorization header
+        token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+        
+        # Decode and verify the JWT token
+        decoded_token = jwt.decode(token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+        email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+        
+        # Query the database based on the email to get user data
+        user = db.query(React_User).filter(React_User.email == email).first()
+        
+        if user:
+            # Perform logout actions here, such as invalidating the token or removing session data
+            
+            return {"message": "Logout successful"}
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
