@@ -42,6 +42,9 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 GOOGLE_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_LOGIN_SECRET_KEY")
 ALGORITHM = "HS256"
 
+# Blacklist to store invalidated tokens
+BLACKLISTED_TOKENS = set()
+
 def React_JWT_Token(data: dict, expires_delta: timedelta):
     to_encode = data.copy()
     expire = datetime.utcnow() + expires_delta
@@ -190,7 +193,7 @@ async def read_react_user(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.post("/react/logout", tags=["React"])
+@router.post("/react/signout", tags=["React"])
 async def logout(
     authorization: str = Header(...),  # Get the access token from the Authorization header
     db: Session = Depends(get_database)
@@ -203,11 +206,16 @@ async def logout(
         decoded_token = jwt.decode(token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
         email = decoded_token.get("sub")  # Assuming "sub" contains the email address
         
+        # Check if the token is in the blacklist
+        if token in BLACKLISTED_TOKENS:
+            raise HTTPException(status_code=401, detail="Token has been invalidated")
+
         # Query the database based on the email to get user data
         user = db.query(React_User).filter(React_User.email == email).first()
         
         if user:
-            # Perform logout actions here, such as invalidating the token or removing session data
+            # Invalidate the token by adding it to the blacklist
+            BLACKLISTED_TOKENS.add(token)
             
             return {"message": "Logout successful"}
         else:
