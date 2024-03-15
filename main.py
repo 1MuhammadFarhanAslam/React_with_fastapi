@@ -370,26 +370,26 @@ async def read_react_user(
 ):
     try:
         # Query the user based on the role
-        users = db.query(React_User).filter(React_User.id == id).all()
+        user = db.query(React_User).filter(React_User.id == id).first()
         
-        logger.info(f"Attempting to retrieve users with id: {id}")
-        print("_____________________User_____________________" , users)
+        logger.info(f"Attempting to retrieve user with id: {id}")
+        print("_____________________User_____________________" , user)
         
-        if users:
+        if user:
             user_data = {
-                    "id": str(user.id),
-                    "created_at": user.created_at,
-                    "username": user.username,
-                    "email": user.email,
-                    "picture": user.picture,
-                    "email_verified": user.email_verified,
-                    "role": user.role,
-                }
+                "id": str(user.id),
+                "created_at": user.created_at,
+                "username": user.username,
+                "email": user.email,
+                "picture": user.picture,
+                "email_verified": user.email_verified,
+                "role": user.role,
+            }
 
             return user_data
         else:
-            logger.warning(f"No users found with id: {id}")
-            raise HTTPException(status_code=404, detail="No users found")
+            logger.warning(f"No user found with id: {id}")
+            raise HTTPException(status_code=404, detail="No user found")
     except ValueError:
         logger.warning(f"Invalid id: {id}")
         raise HTTPException(status_code=400, detail="Invalid role")
