@@ -287,7 +287,6 @@ def React_JWT_Token(data: dict, expires_delta: timedelta):
     return encoded_jwt
 
 def initialize_database():
-    from models import Base
     Base.metadata.create_all(bind=engine)
     print("Database initialized successfully.")
 
