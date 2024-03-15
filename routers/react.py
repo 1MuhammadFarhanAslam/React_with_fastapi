@@ -150,11 +150,11 @@ async def read_react_user(
 @router.get("/decode-token", response_model=None, tags=["React"])
 async def decode_access_token(access_token: str, db: Session = Depends(get_database)):
     try:
-        decoded_token = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+        decoded_token = jwt.decode(access_token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
         email = decoded_token.get("sub")  # Assuming "sub" contains the email address
         
         # Query the database based on the email to get user data
-        user = db.query(models.User).filter(models.User.email == email).first()
+        user = db.query(React_User).filter(React_User.email == email).first()
         
         if user:
             return {
