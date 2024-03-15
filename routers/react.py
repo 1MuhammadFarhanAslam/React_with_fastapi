@@ -150,31 +150,22 @@ async def read_react_user(
 @router.get("/decode-token", response_model=None, tags=["React"])
 async def decode_access_token(access_token: str, db: Session = Depends(get_database)):
     try:
-        # Decode the access token to get user information
-        decoded_token = jwt.decode(access_token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = decoded_token.get("sub")  # Assuming 'sub' contains the user ID
-        username = decoded_token.get("username")
-        email = decoded_token.get("email")
-        picture = decoded_token.get("picture")
-        email_verified = decoded_token.get("email_verified")
-
-        # Log the decoded token information
-        print("Decoded Token:", decoded_token)
-
-        # Query the user based on the decoded token
-        user = db.query(React_User).filter(React_User.id == user_id).first()
-
+        decoded_token = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+        
+        # Query the database based on the email to get user data
+        user = db.query(models.User).filter(models.User.email == email).first()
+        
         if user:
-            # Update user information based on the decoded token
-            user.username = username
-            user.email = email
-            user.picture = picture
-            user.email_verified = email_verified
-
-            return user
+            return {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                # Add other user data fields as needed
+            }
         else:
             raise HTTPException(status_code=404, detail="User not found")
-    except JWTError:
+    except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
