@@ -195,7 +195,7 @@ async def read_react_user(
 
 BLACKLISTED_TOKENS = set()
 
-@router.post("/react/logout", tags=["React"])
+@router.post("/react/signout", response_model=None, tags=["React"])
 async def logout(
     authorization: str = Header(...),  # Get the access token from the Authorization header
 ):
