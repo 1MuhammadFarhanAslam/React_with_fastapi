@@ -193,24 +193,19 @@ async def read_react_user(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-BLACKLISTED_TOKENS = set()
-
-@router.post("/react/signout", response_model=None, tags=["React"])
-async def logout(
+@router.post("/react/signout", tags=["React"])
+async def logout_user(
     authorization: str = Header(...),  # Get the access token from the Authorization header
+    db: Session = Depends(get_database)
 ):
     try:
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
-        print("_____________token_______________", token)
-        
-        # Check if the token is in the blacklist
-        if token in BLACKLISTED_TOKENS:
-            raise HTTPException(status_code=401, detail="Token has been invalidated")
 
-        # Invalidate the token by adding it to the blacklist
-        BLACKLISTED_TOKENS.add(token)
-        
-        return {"message": "Logout successful"}
+        # Invalidate the token by setting its expiration to a past date
+        expired_token = React_JWT_Token(expiration=datetime.utcnow() - timedelta(days=1))
+
+        return {"message": "Logout successful", "expired_token": expired_token}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
