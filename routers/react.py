@@ -225,9 +225,10 @@ blacklisted_tokens = set()
 @router.get("/react/signout", tags=["React"])
 async def logout_user(authorization: str = Header(...)):
     try:
+        print("Received Authorization header:", authorization)  # Debugging
         # Extract the token from the Authorization header
         token = authorization
-        print("Received token:", token)
+        print("Received token:", token)  # Debugging
 
         # Blacklist the token
         blacklisted_tokens.add(token)
@@ -237,4 +238,5 @@ async def logout_user(authorization: str = Header(...)):
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
 
