@@ -202,6 +202,7 @@ async def logout(
     try:
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+        print("_____________token_______________", token)
         
         # Check if the token is in the blacklist
         if token in BLACKLISTED_TOKENS:
