@@ -243,7 +243,7 @@ from models import React_User, React_user_Token
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from fastapi.middleware.cors import CORSMiddleware
-from routers import admin, user, login, react
+from routers import admin, user, logineact
 from typing import Generator
 from fastapi.logger import logger
 from uuid import uuid4
@@ -264,7 +264,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(login.router, prefix="", tags=["Authentication"])
-app.include_router(react.router, prefix="", tags=["React"])
+# app.include_router(react.router, prefix="", tags=["React"])
 app.include_router(admin.router, prefix="", tags=["Admin"])
 app.include_router(user.router, prefix="", tags=["User"])
 
