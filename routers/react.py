@@ -5,7 +5,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 import jwt
 import os
-from models import React_User, React_user_Token
+from models import React_User, React_user_Token, Token
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
@@ -193,11 +193,20 @@ async def read_react_user(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
+def expire_token(token: str):
+    # Invalidation logic: Set expiration to a past date
+    expired_token = token
+    expired_token["exp"] = datetime.utcnow() - timedelta(days=1)
+    return expired_token
+
 @router.post("/react/logout", tags=["React"])
-async def logout_user(authorization: str = Header(...)):
+async def logout_user(token_data: Token):
     try:
+        token = token_data.token
+        print("Received token:", token)
+
         # Invalidate the token by setting its expiration to a past date
-        expired_token = React_JWT_Token(expiration=datetime.utcnow() - timedelta(days=1))
+        expired_token = expire_token(token)
 
         return {"message": "Logout successful", "expired_token": expired_token}
     except Exception as e:
