@@ -109,34 +109,34 @@ async def read_all_admins_info(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
     
-@router.get("/read/{username}", response_model=None, tags=["Admin"])
-async def read_admin_info(
-    username: str, 
-    current_active_admin: Admin = Depends(get_current_active_admin),
-    db: Session = Depends(get_database)
-):
-    try:
-        logger.info(f"Attempting to retrieve admin with username: {username}")
-        admin = db.query(Admin).filter(Admin.username == username).first()
-        if admin:
-            logger.info(f"Admin found: {admin}")
+# @router.get("/read/{username}", response_model=None, tags=["Admin"])
+# async def read_admin_info(
+#     username: str, 
+#     current_active_admin: Admin = Depends(get_current_active_admin),
+#     db: Session = Depends(get_database)
+# ):
+#     try:
+#         logger.info(f"Attempting to retrieve admin with username: {username}")
+#         admin = db.query(Admin).filter(Admin.username == username).first()
+#         if admin:
+#             logger.info(f"Admin found: {admin}")
             
-            # Customizing the response body
-            admin_data = {
-                "id": admin.id,
-                "admin_flag": admin.admin_flag,
-                "username": admin.username,
-                "password": admin.hashed_password,
-                "created_at": admin.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f")
-            }
+#             # Customizing the response body
+#             admin_data = {
+#                 "id": admin.id,
+#                 "admin_flag": admin.admin_flag,
+#                 "username": admin.username,
+#                 "password": admin.hashed_password,
+#                 "created_at": admin.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f")
+#             }
             
-            return admin_data
-        else:
-            logger.warning(f"Admin not found with username: {username}")
-            raise HTTPException(status_code=404, detail="Admin not found")
-    except Exception as e:
-        logger.error(f"Error during admin retrieval: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+#             return admin_data
+#         else:
+#             logger.warning(f"Admin not found with username: {username}")
+#             raise HTTPException(status_code=404, detail="Admin not found")
+#     except Exception as e:
+#         logger.error(f"Error during admin retrieval: {e}")
+#         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @router.put("/{username}", response_model=dict)
