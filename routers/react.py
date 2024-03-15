@@ -194,10 +194,7 @@ async def read_react_user(
     
 
 @router.post("/react/logout", tags=["React"])
-async def logout_user(
-    authorization: str = Header(None),  # Get the full Authorization header value
-    db: Session = Depends(get_database)
-):
+async def logout_user(authorization: str = Header(...)):
     try:
         if authorization is None:
             raise HTTPException(status_code=401, detail="Authorization header missing")
