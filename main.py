@@ -372,7 +372,7 @@ async def read_react_user(
         logger.info(f"Attempting to retrieve user with ID: {role}")
         
         # Query the user based on the UUID
-        user = db.query(React_User).all()
+        users = db.query(React_User).filter(React_User.role == role).all()
         print("_____________________User_____________________" , role)
         
         if user:
