@@ -193,34 +193,23 @@ async def read_react_user(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.post("/react/signout", tags=["React"])
+BLACKLISTED_TOKENS = set()
+
+@router.post("/react/logout", tags=["React"])
 async def logout(
     authorization: str = Header(...),  # Get the access token from the Authorization header
-    db: Session = Depends(get_database)
 ):
     try:
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
         
-        # Decode and verify the JWT token
-        decoded_token = jwt.decode(token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
-        email = decoded_token.get("sub")  # Assuming "sub" contains the email address
-        
         # Check if the token is in the blacklist
         if token in BLACKLISTED_TOKENS:
             raise HTTPException(status_code=401, detail="Token has been invalidated")
 
-        # Query the database based on the email to get user data
-        user = db.query(React_User).filter(React_User.email == email).first()
+        # Invalidate the token by adding it to the blacklist
+        BLACKLISTED_TOKENS.add(token)
         
-        if user:
-            # Invalidate the token by adding it to the blacklist
-            BLACKLISTED_TOKENS.add(token)
-            
-            return {"message": "Logout successful"}
-        else:
-            raise HTTPException(status_code=404, detail="User not found")
-    except jwt.JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        return {"message": "Logout successful"}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
