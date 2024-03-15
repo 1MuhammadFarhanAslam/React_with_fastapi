@@ -116,7 +116,6 @@ async def read_admin_info(
     db: Session = Depends(get_database)
 ):
     try:
-        logger.info(f"Attempting to retrieve admin with username: {username}")
         admin = db.query(Admin).filter(Admin.username == username).first()
         if admin:
             logger.info(f"Admin found: {admin}")
