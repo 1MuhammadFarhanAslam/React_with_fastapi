@@ -78,7 +78,7 @@ Role.user = relationship("User", back_populates="roles")
 class React_User(Base):
     __tablename__ = "react_users"
 
-    id = Column(String, primary_key=True, index=True, default=lambda: ''.join(random.choices(string.ascii_letters + string.digits, k=8)))
+    id = Column(String, primary_key=True, index=True, default=lambda: ''.join(random.choices(string.ascii_letters + string.digits, k=64)))
     created_at = Column(DateTime, default=datetime.utcnow)
     username = Column(String)
     email = Column(String, unique=True, index=True)
