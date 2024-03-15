@@ -226,7 +226,7 @@ blacklisted_tokens = set()
 async def logout_user(authorization: str = Header(...)):
     try:
         # Extract the token from the Authorization header
-        token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+        token = authorization
         print("Received token:", token)
 
         # Blacklist the token
