@@ -194,27 +194,47 @@ async def user_auth(
 #         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-def expire_token(token: str):
-    # Invalidation logic: Set expiration to a past date
-    expired_token = token
-    expired_token["exp"] = datetime.utcnow() - timedelta(days=1)
-    return expired_token
+# def expire_token(token: str):
+#     # Invalidation logic: Set expiration to a past date
+#     expired_token = token
+#     expired_token["exp"] = datetime.utcnow() - timedelta(days=1)
+#     return expired_token
+
+# @router.get("/react/signout", tags=["React"])
+# async def logout_user(authorization: str = Header(...)):
+#     try:
+#         # Extract the token from the Authorization header
+#         token = authorization  # Assuming the header format is "Bearer <token>"
+#         print("__________token__________:", token)
+        
+#         # Decode and verify the JWT token
+#         decoded_token = jwt.decode(token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+#         print("________________decoded_token________________", decoded_token)
+
+#         # Invalidate the token by setting its expiration to a past date
+#         expired_token = expire_token(token)
+
+#         return {"message": "Logout successful", "token": expired_token}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+
+# Set to store blacklisted tokens
+blacklisted_tokens = set()
 
 @router.get("/react/signout", tags=["React"])
 async def logout_user(authorization: str = Header(...)):
     try:
         # Extract the token from the Authorization header
-        token = authorization  # Assuming the header format is "Bearer <token>"
-        print("__________token__________:", token)
-        
-        # Decode and verify the JWT token
-        decoded_token = jwt.decode(token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
-        print("________________decoded_token________________", decoded_token)
+        token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+        print("Received token:", token)
 
-        # Invalidate the token by setting its expiration to a past date
-        expired_token = expire_token(token)
+        # Blacklist the token
+        blacklisted_tokens.add(token)
 
-        return {"message": "Logout successful", "token": expired_token}
+        return {"message": "Logout successful"}
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
