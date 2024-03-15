@@ -363,16 +363,16 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
         raise HTTPException(status_code=500, detail="Server Error")
    
 
-@app.get("/read/{role}", response_model=None, tags=["React"])
+@app.get("/read/{id}", response_model=None, tags=["React"])
 async def read_react_user(
-    role: str,
+    id: str,
     db: Session = Depends(get_database)
 ):
     try:
         # Query the user based on the role
-        users = db.query(React_User).filter(React_User.role == role).all()
+        users = db.query(React_User).filter(React_User.id == id).all()
         
-        logger.info(f"Attempting to retrieve users with role: {role}")
+        logger.info(f"Attempting to retrieve users with id: {id}")
         print("_____________________User_____________________" , users)
         
         if users:
@@ -390,10 +390,10 @@ async def read_react_user(
 
             return user_data
         else:
-            logger.warning(f"No users found with role: {role}")
+            logger.warning(f"No users found with id: {id}")
             raise HTTPException(status_code=404, detail="No users found")
     except ValueError:
-        logger.warning(f"Invalid role: {role}")
+        logger.warning(f"Invalid id: {id}")
         raise HTTPException(status_code=400, detail="Invalid role")
     except Exception as e:
         logger.error(f"Error during user retrieval: {e}")
