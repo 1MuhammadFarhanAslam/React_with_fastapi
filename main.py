@@ -279,12 +279,12 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # SQLAlchemy models
 Base = declarative_base()
 
-def React_JWT_Token(data: dict, expires_delta: timedelta):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, GOOGLE_LOGIN_SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+# def React_JWT_Token(data: dict, expires_delta: timedelta):
+#     to_encode = data.copy()
+#     expire = datetime.utcnow() + expires_delta
+#     to_encode.update({"exp": expire})
+#     encoded_jwt = jwt.encode(to_encode, GOOGLE_LOGIN_SECRET_KEY, algorithm=ALGORITHM)
+#     return encoded_jwt
 
 # Dependency to get the database session
 def get_database():
