@@ -130,6 +130,7 @@ async def user_auth(
         
         # Decode and verify the JWT token
         decoded_token = jwt.decode(token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+        print("________________decoded_token________________", decoded_token)
         email = decoded_token.get("sub")  # Assuming "sub" contains the email address
         
         # Query the database based on the email to get user data
@@ -155,42 +156,42 @@ async def user_auth(
     
     
 
-@router.get("/react/read/{id}", response_model=None, tags=["React"])
-async def read_react_user(
-    id: str,
-    authorization: str = Header(...),
-    db: Session = Depends(get_database)
-):
-    try:
-        # Verify the authorization token here if needed
+# @router.get("/react/read/{id}", response_model=None, tags=["React"])
+# async def read_react_user(
+#     id: str,
+#     authorization: str = Header(...),
+#     db: Session = Depends(get_database)
+# ):
+#     try:
+#         # Verify the authorization token here if needed
 
-        # Query the user based on the ID
-        user = db.query(React_User).filter(React_User.id == id).first()
+#         # Query the user based on the ID
+#         user = db.query(React_User).filter(React_User.id == id).first()
         
-        logger.info(f"Attempting to retrieve user with id: {id}")
-        print("_____________________User_____________________" , user)
+#         logger.info(f"Attempting to retrieve user with id: {id}")
+#         print("_____________________User_____________________" , user)
         
-        if user:
-            user_data = {
-                "id": str(user.id),
-                "created_at": user.created_at,
-                "username": user.username,
-                "email": user.email,
-                "picture": user.picture,
-                "email_verified": user.email_verified,
-                "role": user.role,
-            }
+#         if user:
+#             user_data = {
+#                 "id": str(user.id),
+#                 "created_at": user.created_at,
+#                 "username": user.username,
+#                 "email": user.email,
+#                 "picture": user.picture,
+#                 "email_verified": user.email_verified,
+#                 "role": user.role,
+#             }
 
-            return user_data
-        else:
-            logger.warning(f"No user found with id: {id}")
-            raise HTTPException(status_code=404, detail="No user found")
-    except ValueError:
-        logger.warning(f"Invalid id: {id}")
-        raise HTTPException(status_code=400, detail="Invalid role")
-    except Exception as e:
-        logger.error(f"Error during user retrieval: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+#             return user_data
+#         else:
+#             logger.warning(f"No user found with id: {id}")
+#             raise HTTPException(status_code=404, detail="No user found")
+#     except ValueError:
+#         logger.warning(f"Invalid id: {id}")
+#         raise HTTPException(status_code=400, detail="Invalid role")
+#     except Exception as e:
+#         logger.error(f"Error during user retrieval: {e}")
+#         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
 def expire_token(token: str):
@@ -200,15 +201,16 @@ def expire_token(token: str):
     return expired_token
 
 @router.post("/react/signout", tags=["React"])
-async def logout_user(token_data: Token):
+async def logout_user(authorization: str = Header(...)):
     try:
-        token = token_data
-        logger.error("Received token:", token)
-
-        # Invalidate the token by setting its expiration to a past date
-        expired_token = expire_token(token)
-
-        return {"message": "Logout successful", "expired_token": expired_token}
+        # Extract the token from the Authorization header
+        token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+        
+        # Decode and verify the JWT token
+        decoded_token = jwt.decode(token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+        print("________________decoded_token________________", decoded_token)
+        
+        return {"message": "Logout successful"}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
