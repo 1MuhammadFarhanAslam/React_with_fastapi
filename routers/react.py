@@ -153,8 +153,20 @@ async def decode_access_token(access_token: str):
         # Decode the access token to get user information
         decoded_token = jwt.decode(access_token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
         user_id = decoded_token.get("sub")  # Assuming 'sub' contains the user ID
+        username = decoded_token.get("username")
+        email = decoded_token.get("email")
+        picture = decoded_token.get("picture")
+        email_verified = decoded_token.get("email_verified")
+        exp = decoded_token.get("exp")
 
-        return {"sub": user_id, "id_token": access_token}  # Include the id_token in the response
+        return {
+            "sub": user_id,
+            "username": username,
+            "email": email,
+            "picture": picture,
+            "email_verified": email_verified,
+            "exp": exp
+        }
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
