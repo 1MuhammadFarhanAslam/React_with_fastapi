@@ -143,7 +143,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
     
 
 @router.get("/react/auth/user", response_model=None, tags=["React"])
-async def decode_access_token(
+async def user_auth(
     authorization: str = Header(...),  # Get the access token from the Authorization header
     db: Session = Depends(get_database)
 ):
