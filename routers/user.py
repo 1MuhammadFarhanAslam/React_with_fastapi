@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 
-@router.post("/change_password", response_model=dict)
+@router.post("/user/change_password", response_model=dict)
 async def change_user_password(
     username: str = Form(...),
     current_password: str = Form(...),
@@ -68,7 +68,7 @@ async def change_user_password(
 ##########################################################################################################################
 
 # Endpoint for tts_service
-@router.post("/tts_service")
+@router.post("/user/tts_service")
 async def tts_service(user: User = Depends(get_current_active_user)):
     user_dict = jsonable_encoder(user)  # Convert User object to a dictionary
     print("User details:", user_dict)   # Print the dictionary
@@ -86,7 +86,7 @@ async def tts_service(user: User = Depends(get_current_active_user)):
 
 
 # Endpoint for ttm_service
-@router.post("/ttm_service")
+@router.post("/user/ttm_service")
 async def ttm_service(user: User = Depends(get_current_active_user)):
     user_dict = jsonable_encoder(user)
     print("User details:", user_dict)
@@ -105,7 +105,7 @@ async def ttm_service(user: User = Depends(get_current_active_user)):
 from fastapi import UploadFile, File
 
 
-@router.post("/vc_service")
+@router.post("/user/vc_service")
 async def vc_service(
     user: User = Depends(get_current_active_user),
     audio_file: UploadFile = File(...)

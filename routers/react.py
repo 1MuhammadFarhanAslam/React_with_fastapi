@@ -51,7 +51,7 @@ def React_JWT_Token(data: dict, expires_delta: timedelta):
 
 
 
-@router.post("/google-signin", tags=["React"])
+@router.post("react//google-signin", tags=["React"])
 async def google_signin(token: React_user_Token, db: Session = Depends(get_database)):
     try:
         # Verify the Google ID token
@@ -117,7 +117,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
     
 
 
-@router.get("/decode-token", response_model=None, tags=["React"])
+@router.get("/react/decode-token", response_model=None, tags=["React"])
 async def decode_access_token(access_token: str, db: Session = Depends(get_database)):
     try:
         decoded_token = jwt.decode(access_token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
