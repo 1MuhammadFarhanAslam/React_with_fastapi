@@ -11,6 +11,7 @@ from sqlalchemy import create_engine
 from typing import Generator
 from fastapi.logger import logger
 from jose import jwt, JWTError
+from typing import Optional
 
 router = APIRouter()
 
@@ -146,37 +147,27 @@ async def read_react_user(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.get("/read/{access_token}", response_model=None, tags=["React"])
+@router.get("/read", response_model=React_User, tags=["React"])
 async def jwt_token_react_user(
-    access_token: str = Header(...),  # Assuming the access token is sent in the header
+    authorization: Optional[str] = Header(None),
     db: Session = Depends(get_database)
 ):
     try:
+        if authorization is None:
+            raise HTTPException(status_code=401, detail="Authorization header is missing")
+
         # Decode the JWT token to get user information
-        decoded_token = jwt.decode(access_token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+        decoded_token = jwt.decode(authorization, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
         user_id = decoded_token.get("sub")  # Assuming the subject of the token contains the user ID
         
         # Query the user based on the user ID obtained from the decoded token
         user = db.query(React_User).filter(React_User.id == user_id).first()
         
         if user:
-            user_data = {
-                "id": str(user.id),
-                "created_at": user.created_at,
-                "username": user.username,
-                "email": user.email,
-                "picture": user.picture,
-                "email_verified": user.email_verified,
-                "role": user.role,
-            }
-
-            return user_data
+            return user
         else:
-            logger.warning(f"No user found with ID: {user_id}")
             raise HTTPException(status_code=404, detail="No user found")
     except JWTError:
-        logger.warning("Invalid token")
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
-        logger.error(f"Error during user retrieval: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
