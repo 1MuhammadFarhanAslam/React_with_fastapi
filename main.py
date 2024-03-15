@@ -369,11 +369,11 @@ async def read_react_user(
     db: Session = Depends(get_database)
 ):
     try:
-        logger.info(f"Attempting to retrieve user with ID: {role}")
+        logger.info(f"Attempting to retrieve user with ID: {users}")
         
         # Query the user based on the UUID
         users = db.query(React_User).filter(React_User.role == role).all()
-        print("_____________________User_____________________" , role)
+        print("_____________________User_____________________" , users)
         
         if user:
             
@@ -391,10 +391,10 @@ async def read_react_user(
             
             return user_data
         else:
-            logger.warning(f"User not found with ID: {role}")
+            logger.warning(f"User not found with ID: {users}")
             raise HTTPException(status_code=404, detail="User not found")
     except ValueError:
-        logger.warning(f"Invalid UUID format for user ID: {role}")
+        logger.warning(f"Invalid UUID format for user ID: {users}")
         raise HTTPException(status_code=400, detail="Invalid UUID format")
     except Exception as e:
         logger.error(f"Error during user retrieval: {e}")
