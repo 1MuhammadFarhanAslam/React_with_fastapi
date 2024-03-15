@@ -8,6 +8,8 @@ import os
 from sqlalchemy import create_engine
 from uuid import uuid4
 from sqlalchemy.dialects.postgresql import UUID
+import random
+import string
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -76,7 +78,7 @@ Role.user = relationship("User", back_populates="roles")
 class React_User(Base):
     __tablename__ = "react_users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid4)
+    id = Column(String, primary_key=True, index=True, default=lambda: ''.join(random.choices(string.ascii_letters + string.digits, k=8)))
     created_at = Column(DateTime, default=datetime.utcnow)
     username = Column(String)
     email = Column(String, unique=True, index=True)
@@ -85,12 +87,7 @@ class React_User(Base):
     role = Column(String, default="user")  # Default role is "user"
 
 class React_user_Token(BaseModel):
-    sub: str  # Assuming 'sub' contains the user ID
-    username: str
-    email: str
-    picture: str
-    email_verified: bool
-    exp: int
+    id_token: str
 
 class Token(BaseModel):
     access_token: str
