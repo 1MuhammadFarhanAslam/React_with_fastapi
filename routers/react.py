@@ -199,7 +199,7 @@ def expire_token(token: str):
     expired_token["exp"] = datetime.utcnow() - timedelta(days=1)
     return expired_token
 
-@router.post("/react/logout", tags=["React"])
+@router.post("/react/signout", tags=["React"])
 async def logout_user(token_data: Token):
     try:
         token = token_data.token
