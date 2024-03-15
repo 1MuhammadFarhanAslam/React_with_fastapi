@@ -360,16 +360,16 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 
 
 # Use the dependency to protect the endpoint
-@app.get("/read/{user_id}", response_model=None, tags=["google_signin"])
+@app.get("/read/{username}", response_model=None, tags=["google_signin"])
 async def read_admin_info(
-    user_id: str,
+    username: str,
     db: Session = Depends(get_database)
 ):
     try:
-        logger.info(f"Attempting to retrieve user with ID: {user_id}")
+        logger.info(f"Attempting to retrieve user with ID: {username}")
         
         # Query the user based on the UUID
-        user = db.query(React_User).filter(React_User.id == user_id).first()
+        user = db.query(React_User).filter(React_User.username == username).first()
         logger.info(f"User found: {user}")
         
         if user:
@@ -388,10 +388,10 @@ async def read_admin_info(
             
             return user_data
         else:
-            logger.warning(f"User not found with ID: {user_id}")
+            logger.warning(f"User not found with ID: {username}")
             raise HTTPException(status_code=404, detail="User not found")
     except ValueError:
-        logger.warning(f"Invalid UUID format for user ID: {user_id}")
+        logger.warning(f"Invalid UUID format for user ID: {username}")
         raise HTTPException(status_code=400, detail="Invalid UUID format")
     except Exception as e:
         logger.error(f"Error during user retrieval: {e}")
