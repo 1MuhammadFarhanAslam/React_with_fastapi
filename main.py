@@ -296,7 +296,7 @@ def get_database():
         db.close()
 
         
-@app.post("/google-signin", )
+@app.post("/google-signin" )
 async def google_signin(token: React_user_Token, db: Session = Depends(get_database)):
     try:
         # Verify the Google ID token
