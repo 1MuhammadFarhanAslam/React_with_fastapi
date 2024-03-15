@@ -1,7 +1,6 @@
-from fastapi import FastAPI, HTTPException, Depends, APIRouter
+from fastapi import HTTPException, Depends, APIRouter, Header
 from datetime import datetime, timedelta
 from uuid import uuid4
-from pydantic import BaseModel
 from google.oauth2 import id_token
 from google.auth.transport import requests
 import jwt
@@ -9,12 +8,9 @@ import os
 from models import React_User, React_user_Token
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
-from fastapi.middleware.cors import CORSMiddleware
-from routers import admin, user, login
 from typing import Generator
 from fastapi.logger import logger
-from uuid import uuid4
-from sqlalchemy.dialects.postgresql import UUID
+from jose import jwt, JWTError
 
 router = APIRouter()
 
@@ -113,17 +109,53 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 
 
 
-@router.get("/read/{id}", response_model=None, tags=["React"])
+# @router.get("/read/{id}", response_model=None, tags=["React"])
+# async def read_react_user(
+#     id: str,
+#     db: Session = Depends(get_database)
+# ):
+#     try:
+#         # Query the user based on the role
+#         user = db.query(React_User).filter(React_User.id == id).first()
+        
+#         logger.info(f"Attempting to retrieve user with id: {id}")
+#         print("_____________________User_____________________" , user)
+        
+#         if user:
+#             user_data = {
+#                 "id": str(user.id),
+#                 "created_at": user.created_at,
+#                 "username": user.username,
+#                 "email": user.email,
+#                 "picture": user.picture,
+#                 "email_verified": user.email_verified,
+#                 "role": user.role,
+#             }
+
+#             return user_data
+#         else:
+#             logger.warning(f"No user found with id: {id}")
+#             raise HTTPException(status_code=404, detail="No user found")
+#     except ValueError:
+#         logger.warning(f"Invalid id: {id}")
+#         raise HTTPException(status_code=400, detail="Invalid role")
+#     except Exception as e:
+#         logger.error(f"Error during user retrieval: {e}")
+#         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+
+@router.get("/read", response_model=None, tags=["React"])
 async def read_react_user(
-    id: str,
+    access_token: str = Header(...),  # Assuming the access token is sent in the header
     db: Session = Depends(get_database)
 ):
     try:
-        # Query the user based on the role
-        user = db.query(React_User).filter(React_User.id == id).first()
+        # Decode the JWT token to get user information
+        decoded_token = jwt.decode(access_token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = decoded_token.get("sub")  # Assuming the subject of the token contains the user ID
         
-        logger.info(f"Attempting to retrieve user with id: {id}")
-        print("_____________________User_____________________" , user)
+        # Query the user based on the user ID obtained from the decoded token
+        user = db.query(React_User).filter(React_User.id == user_id).first()
         
         if user:
             user_data = {
@@ -138,11 +170,11 @@ async def read_react_user(
 
             return user_data
         else:
-            logger.warning(f"No user found with id: {id}")
+            logger.warning(f"No user found with ID: {user_id}")
             raise HTTPException(status_code=404, detail="No user found")
-    except ValueError:
-        logger.warning(f"Invalid id: {id}")
-        raise HTTPException(status_code=400, detail="Invalid role")
+    except JWTError:
+        logger.warning("Invalid token")
+        raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
         logger.error(f"Error during user retrieval: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
