@@ -23,6 +23,11 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # SQLAlchemy models
 Base = declarative_base()
 
+def initialize_database():
+    from models import Base
+    React_User.metadata.create_all(bind=engine)
+    print("Database initialized successfully.")
+
 # Dependency to get the database session
 def get_database() -> Generator[Session, None, None]:
     # Provide a database session to use within the request
