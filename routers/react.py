@@ -205,6 +205,7 @@ async def logout_user(authorization: str = Header(...)):
     try:
         # Extract the token from the Authorization header
         token = authorization  # Assuming the header format is "Bearer <token>"
+        print("__________token__________:", token)
         
         # Decode and verify the JWT token
         decoded_token = jwt.decode(token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
