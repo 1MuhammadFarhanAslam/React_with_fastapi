@@ -359,16 +359,16 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
         raise HTTPException(status_code=500, detail="Server Error")
    
 
-@app.get("/read/{username}", response_model=None, tags=["React"])
+@app.get("/read/{email}", response_model=None, tags=["React"])
 async def read_react_user(
-    username: str,
+    email: str,
     db: Session = Depends(get_database)
 ):
     try:
-        logger.info(f"Attempting to retrieve user with ID: {username}")
+        logger.info(f"Attempting to retrieve user with ID: {email}")
         
         # Query the user based on the UUID
-        user = db.query(React_User).filter(React_User.username == username).first()
+        user = db.query(React_User).filter(React_User.email == email).first()
         print("_____________________User_____________________" , user)
         
         if user:
@@ -387,10 +387,10 @@ async def read_react_user(
             
             return user_data
         else:
-            logger.warning(f"User not found with ID: {username}")
+            logger.warning(f"User not found with ID: {email}")
             raise HTTPException(status_code=404, detail="User not found")
     except ValueError:
-        logger.warning(f"Invalid UUID format for user ID: {username}")
+        logger.warning(f"Invalid UUID format for user ID: {email}")
         raise HTTPException(status_code=400, detail="Invalid UUID format")
     except Exception as e:
         logger.error(f"Error during user retrieval: {e}")
