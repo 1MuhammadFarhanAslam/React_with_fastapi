@@ -147,7 +147,7 @@ async def read_react_user(
     
 
 
-@router.get("/decode-token", response_model=React_User, tags=["React"])
+@router.get("/decode-token", response_model=None, tags=["React"])
 async def decode_access_token(access_token: str, db: Session = Depends(get_database)):
     try:
         # Decode the access token to get user information
