@@ -66,6 +66,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             # User already exists, return their details
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
+            print(access_token)
 
             return {
                 "message": "User already exists",
@@ -88,6 +89,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
+            print(access_token)
 
             return {
                 "message": "Login successful",
