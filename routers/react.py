@@ -202,8 +202,8 @@ def expire_token(token: str):
 @router.post("/react/signout", tags=["React"])
 async def logout_user(token_data: Token):
     try:
-        token = token_data.token
-        print("Received token:", token)
+        token = token_data
+        logger.error("Received token:", token)
 
         # Invalidate the token by setting its expiration to a past date
         expired_token = expire_token(token)
