@@ -139,13 +139,16 @@ async def user_auth(
         
         if user:
             return {
-                "id": user.id,
-                "created_at": user.created_at,
-                "username": user.username,
-                "email": user.email,
-                "picture": user.picture,
-                "email_verified": user.email_verified,
-                "role": user.role
+                "message": "User details retrieved successfully",
+                "userData": {
+                    "id": str(user.id),
+                    "created_at": user.created_at,
+                    "username": user.username,
+                    "email": user.email,
+                    "picture": user.picture,
+                    "email_verified": user.email_verified,
+                    "role": user.role
+                }
             }
         else:
             raise HTTPException(status_code=404, detail="User not found")

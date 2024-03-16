@@ -66,11 +66,14 @@ async def create_admin_account(
         
         # Return the created admin instance
         return {
-            "id": new_admin.id,
-            "username": new_admin.username,
-            "password": new_admin.hashed_password,
-            "admin_flag": new_admin.admin_flag,
-            "created_at": new_admin.created_at
+            "message": "Admin created successfully",
+            "admin_info": {
+                "id": new_admin.id,
+                "username": new_admin.username,
+                "password": new_admin.hashed_password,
+                "admin_flag": new_admin.admin_flag,
+                "created_at": new_admin.created_at
+            }
         }
     except HTTPException as e:
         raise e  # Re-raise HTTPException to return specific error response
@@ -95,11 +98,14 @@ async def read_all_admins_info(
         admins_data = []
         for admin in admins:
             admin_data = {
-                "id": admin.id,
-                "admin_flag": admin.admin_flag,
-                "username": admin.username,
-                "hashed_password": admin.hashed_password,
-                "created_at": admin.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f")
+                "message": "Admin retrieved successfully",
+                "admin_info": {
+                    "id": admin.id,
+                    "admin_flag": admin.admin_flag,
+                    "username": admin.username,
+                    "hashed_password": admin.hashed_password,
+                    "created_at": admin.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f")
+                }
             }
             admins_data.append(admin_data)
 
@@ -122,11 +128,14 @@ async def read_admin_info(
             
             # Customizing the response body
             admin_data = {
-                "id": admin.id,
-                "admin_flag": admin.admin_flag,
-                "username": admin.username,
-                "password": admin.hashed_password,
-                "created_at": admin.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f")
+                "message": "Admin retrieved successfully",
+                "admin_info": {
+                    "id": admin.id,
+                    "admin_flag": admin.admin_flag,
+                    "username": admin.username,
+                    "hashed_password": admin.hashed_password,
+                    "created_at": admin.created_at.strftime("%Y-%m-%dT%H:%M:%S.%f")
+                }
             }
             
             return admin_data
