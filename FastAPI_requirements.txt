@@ -37,7 +37,6 @@ networkx==3.2.1
 orjson==3.9.10
 passlib==1.7.4
 pip==24.0  # Please note that the version of pip is not typically included in requirements.txt
-psycopg2==2.9.9
 psycopg2-binary==2.9.9
 pyasn1==0.5.1
 pycparser==2.21
@@ -71,7 +70,6 @@ uvicorn==0.26.0
 watchfiles==0.21.0
 websockets==12.0
 google-auth==2.28.2
-psycopg2-binary==2.9.9
 passlib==1.7.4
 python==jose-3.3.0
 typing==3.7.4.3
