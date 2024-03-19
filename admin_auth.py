@@ -36,12 +36,15 @@ async def get_current_admin(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
+        print('______________username______________', username)
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
+        print('______________token_data______________', token_data)
     except JWTError:
         raise credentials_exception
     admin = get_admin(username=token_data.username)
+    print('______________admin______________', admin)
     if admin is None:
         raise credentials_exception
     return admin
