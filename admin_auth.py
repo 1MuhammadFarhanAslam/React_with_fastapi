@@ -35,6 +35,7 @@ async def get_current_admin(token: Annotated[str, Depends(oauth2_scheme)]):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print('______________payload______________', payload)
         username: str = payload.get("sub")
         print('______________username______________', username)
         if username is None:
