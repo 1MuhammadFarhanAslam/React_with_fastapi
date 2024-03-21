@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Depends, APIRouter, Header
+from fastapi import HTTPException, Depends, APIRouter, Header, Form
 from datetime import datetime, timedelta
 from uuid import uuid4
 from google.oauth2 import id_token
@@ -9,9 +9,7 @@ from models import React_User, React_user_Token, Token
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
-from fastapi.logger import logger
-from jose import jwt, JWTError
-from typing import Optional
+from hashing import hash_password, verify_hash
 
 router = APIRouter()
 
@@ -222,24 +220,55 @@ async def user_auth(
 #         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-# Set to store blacklisted tokens
-blacklisted_tokens = set()
+@router.post("/react/login-or-register", tags=["React"])
+async def login_or_register(email: str = Form(...), password: str = Form(...), db: Session = Depends(get_database)):
+    # Check if the user exists in the database
+    user = db.query(React_User).filter(React_User.email == email).first()
+    if user:
+        # User exists, verify password
+        if verify_hash(password, user.password):
+            # Generate access token
+            access_token_expires = timedelta(minutes=30)
+            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
 
-@router.get("/react/signout", tags=["React"])
-async def logout_user(authorization: str = Header(...)):
-    try:
-        print("Received Authorization header:", authorization)  # Debugging
-        # Extract the token from the Authorization header
-        token = authorization
-        print("Received token:", token)  # Debugging
+            return {
+                "message": "Login successful",
+                "userData": {
+                    "id": str(user.id),
+                    "username": user.username,
+                    "email": user.email,
+                    "picture": user.picture,
+                    "email_verified": user.email_verified,
+                    "role": user.role
+                },
+                "access_token": access_token,
+                "token_type": "bearer"
+            }
+        else:
+            raise HTTPException(status_code=401, detail="Incorrect email or password")
+    else:
+        # User does not exist, register
+        hashed_password = verify_hash(password)
+        new_user = React_User(email=email, password=hashed_password)
+        db.add(new_user)
+        db.commit()
 
-        # Blacklist the token
-        blacklisted_tokens.add(token)
+        # Generate access token for new user
+        access_token_expires = timedelta(minutes=30)
+        access_token = React_JWT_Token(data={"sub": new_user.email}, expires_delta=access_token_expires)
 
-        return {"message": "Logout successful"}
-    except jwt.JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        return {
+            "message": "User registered successfully",
+            "userData": {
+                "id": str(new_user.id),
+                "username": new_user.username,
+                "email": new_user.email,
+                "picture": new_user.picture,
+                "email_verified": new_user.email_verified,
+                "role": new_user.role
+            },
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
 
 
