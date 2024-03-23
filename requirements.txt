@@ -59,7 +59,7 @@ sympy==1.10  # Updated version
 torch  # Updated version
 typing-extensions==4.0.1  # Updated version
 ujson
-urllib3==1.26.7  # Updated version
+urllib3==1.26.18  # Updated version
 uvicorn==0.15.0  # Updated version
 watchfiles # Updated version
 websockets  # Updated version
