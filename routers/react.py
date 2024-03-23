@@ -301,7 +301,7 @@ async def email_signin(email: str = Form(...), password: str = Form(...), db: Se
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if existing_user:
-            if await verify_hash(password, existing_user.password):
+            if verify_hash(password, existing_user.password):
                 access_token_expires = timedelta(minutes=30)
                 access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
 
