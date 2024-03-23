@@ -41,8 +41,6 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 GOOGLE_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_LOGIN_SECRET_KEY")
 ALGORITHM = "HS256"
 
-# Blacklist to store invalidated tokens
-BLACKLISTED_TOKENS = set()
 
 def React_JWT_Token(data: dict, expires_delta: timedelta):
     to_encode = data.copy()
