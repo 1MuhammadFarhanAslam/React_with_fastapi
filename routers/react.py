@@ -298,16 +298,10 @@ async def user_auth(
 @router.post("/react/email-signin", tags=["React"])
 async def email_signin(email: str = Form(...), password: str = Form(...), db: Session = Depends(get_database)):
     try:
-        
-        # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
-        print("_______________existing_user_______________", existing_user)
 
         if existing_user:
-            # User exists, check password for login
-            if verify_hash(existing_user.password, password):
-                print("_______________existing_user_______________", existing_user)
-                # Generate an access token for the user
+            if await verify_hash(password, existing_user.password):
                 access_token_expires = timedelta(minutes=30)
                 access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
 
@@ -317,26 +311,20 @@ async def email_signin(email: str = Form(...), password: str = Form(...), db: Se
                         "id": str(existing_user.id),
                         "created_at": existing_user.created_at,
                         "email": existing_user.email,
-                        "password": existing_user.password,
                         "status": existing_user.status,
                         "role": existing_user.role
                     },
-                    "access_token": str(access_token),  # Convert access token to string
+                    "access_token": str(access_token),
                     "token_type": "bearer"
                 }
             else:
                 raise HTTPException(status_code=401, detail="Incorrect password.")
-
         else:
-            # User does not exist, hash the password and save the user to the database for signup
             hashed_password = hash_password(password)
-            print("_______________hashed_password_______________", hashed_password)
             user = Email_User(email=email, password=hashed_password)
-            print("_______________user_______________", user)
             db.add(user)
             db.commit()
 
-            # Generate an access token for the new user
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
 
@@ -346,11 +334,10 @@ async def email_signin(email: str = Form(...), password: str = Form(...), db: Se
                     "id": str(user.id),
                     "created_at": user.created_at,
                     "email": user.email,
-                    "password": user.password,
                     "status": user.status,
                     "role": user.role
                 },
-                "access_token": str(access_token),  # Convert access token to string
+                "access_token": str(access_token),
                 "token_type": "bearer"
             }
 
