@@ -1,25 +1,43 @@
-from fastapi import FastAPI, HTTPException, Depends, APIRouter
-from datetime import datetime, timedelta
-from uuid import uuid4
-from pydantic import BaseModel
-from google.oauth2 import id_token
-from google.auth.transport import requests
-import jwt
+from fastapi import FastAPI
 import os
-from models import React_User, React_user_Token
-from sqlalchemy.orm import sessionmaker, Session, declarative_base
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import create_engine
 from fastapi.middleware.cors import CORSMiddleware
 from routers import admin, user, login, react
 from typing import Generator
-from fastapi.logger import logger
-from uuid import uuid4
-from sqlalchemy.dialects.postgresql import UUID
-from admin_database import get_database
-from routers.react import React_JWT_Token
-
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session
+from typing import Generator
 
 app = FastAPI()
+
+
+# Get the database URL from the environment variable
+DATABASE_URL = os.environ.get("DATABASE_URL")
+# Check if DATABASE_URL is defined
+if DATABASE_URL is None:
+    raise EnvironmentError("DATABASE_URL environment variable is not defined.")
+
+# Create the SQLAlchemy engine
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Initialize the database
+def initialize_database():
+    print("Database initializing...")
+    from models import Base
+    Base.metadata.create_all(bind=engine)
+    print("Database initialized successfully.")
+
+# Dependency to get the database session
+def get_database() -> Generator[Session, None, None]:
+    # Provide a database session to use within the request
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 # Allow CORS for all domains in this example
