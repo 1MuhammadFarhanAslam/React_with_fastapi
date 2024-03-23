@@ -299,6 +299,7 @@ async def user_auth(
 @router.post("/react/email-signin", tags=["React"])
 async def email_signin(email: str = Form(...), password: str = Form(...), db: Session = Depends(get_database)):
     try:
+        
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
@@ -314,12 +315,12 @@ async def email_signin(email: str = Form(...), password: str = Form(...), db: Se
                     "user_info": {
                         "id": str(existing_user.id),
                         "created_at": existing_user.created_at,
-                        "username": existing_user.username,
                         "email": existing_user.email,
+                        "password": existing_user.password,
                         "status": existing_user.status,
                         "role": existing_user.role
                     },
-                    "access_token": access_token,
+                    "access_token": str(access_token),  # Convert access token to string
                     "token_type": "bearer"
                 }
             else:
@@ -341,12 +342,12 @@ async def email_signin(email: str = Form(...), password: str = Form(...), db: Se
                 "user_info": {
                     "id": str(user.id),
                     "created_at": user.created_at,
-                    "username": user.username,
                     "email": user.email,
+                    "password": user.password,
                     "status": user.status,
                     "role": user.role
                 },
-                "access_token": access_token,
+                "access_token": str(access_token),  # Convert access token to string
                 "token_type": "bearer"
             }
 
