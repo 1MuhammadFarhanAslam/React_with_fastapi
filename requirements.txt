@@ -54,7 +54,7 @@ setuptools==58.0.4  # Updated version
 six==1.16.0
 sniffio==1.2.0  # Updated version
 sqlalchemy==1.4.31  # Updated version
-starlette==0.14.0  # Updated version
+starlette==0.36.2  # Updated version
 sympy==1.10  # Updated version
 torch  # Updated version
 typing-extensions==4.0.1  # Updated version
