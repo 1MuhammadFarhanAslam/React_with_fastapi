@@ -272,7 +272,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
 
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
-            print(access_token)
+            print("_______________access_token_______________", access_token)
 
 
             return {
