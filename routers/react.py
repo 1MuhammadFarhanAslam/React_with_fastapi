@@ -298,10 +298,21 @@ async def user_auth(
 @router.post("/react/email-signin", tags=["React"])
 async def email_signin(email: str = Form(...), password: str = Form(...), db: Session = Depends(get_database)):
     try:
+        # Validate that both email and password are provided
+        if not email or not password:
+            raise HTTPException(status_code=400, detail="Both email and password are required.")
+
+        # Validate password complexity
+        if not re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$", password):
+            raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character.")
+
+        # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if existing_user:
+            # User exists, check password for login
             if verify_hash(password, existing_user.password):
+                # Generate an access token for the user
                 access_token_expires = timedelta(minutes=30)
                 access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
 
@@ -320,11 +331,13 @@ async def email_signin(email: str = Form(...), password: str = Form(...), db: Se
             else:
                 raise HTTPException(status_code=401, detail="Incorrect password.")
         else:
+            # User does not exist, hash the password and save the user to the database for signup
             hashed_password = hash_password(password)
             user = Email_User(email=email, password=hashed_password)
             db.add(user)
             db.commit()
 
+            # Generate an access token for the new user
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
 
