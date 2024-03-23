@@ -61,7 +61,7 @@ typing-extensions==4.0.1  # Updated version
 ujson
 urllib3==1.26.7  # Updated version
 uvicorn==0.15.0  # Updated version
-watchfiles==0.6.0  # Updated version
-websockets==10.0  # Updated version
-typing==3.7.4.3
-requests==2.26.0
+watchfiles # Updated version
+websockets  # Updated version
+typing
+requests
