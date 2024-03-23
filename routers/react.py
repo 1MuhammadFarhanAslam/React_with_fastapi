@@ -299,7 +299,7 @@ async def user_auth(
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
 
-        form_data = request.form()
+        form_data = await request.form()
         print("______________form_data______________", form_data)
         email = form_data.get('email')
         password = form_data.get('password')
