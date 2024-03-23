@@ -301,10 +301,12 @@ async def email_signin(email: str = Form(...), password: str = Form(...), db: Se
         
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
+        print("_______________existing_user_______________", existing_user)
 
         if existing_user:
             # User exists, check password for login
             if verify_hash(existing_user.password, password):
+                print("_______________existing_user_______________", existing_user)
                 # Generate an access token for the user
                 access_token_expires = timedelta(minutes=30)
                 access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
@@ -328,7 +330,9 @@ async def email_signin(email: str = Form(...), password: str = Form(...), db: Se
         else:
             # User does not exist, hash the password and save the user to the database for signup
             hashed_password = hash_password(password)
+            print("_______________hashed_password_______________", hashed_password)
             user = Email_User(email=email, password=hashed_password)
+            print("_______________user_______________", user)
             db.add(user)
             db.commit()
 
