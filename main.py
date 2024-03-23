@@ -30,15 +30,8 @@ def initialize_database():
     Base.metadata.create_all(bind=engine)
     print("Database initialized successfully.")
 
-# Dependency to get the database session
-def get_database() -> Generator[Session, None, None]:
-    # Provide a database session to use within the request
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
+# Call the database initialization function
+initialize_database()
 
 # Allow CORS for all domains in this example
 app.add_middleware(
