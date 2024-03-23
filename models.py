@@ -84,16 +84,10 @@ class Email_User(Base):
 
     id = Column(String, primary_key=True, index=True, default=lambda: ''.join(random.choices(string.ascii_letters + string.digits, k=64)))
     created_at = Column(DateTime, default=datetime.utcnow)
-    username = Column(String, nullable=True)
     email = Column(String, unique=True, index=True)
     password = Column(String)
     status = Column(String, default="Active")
-    role = Column(String, default="user")
-
-    # Optional: Unique constraint on username and email together
-    __table_args__ = (UniqueConstraint('username', 'email', name='_username_email_uc'),)
-
-
+    role = Column(String, default="user")  # Default role is "user"
 
 class React_User(Base):
     __tablename__ = "react_users"
