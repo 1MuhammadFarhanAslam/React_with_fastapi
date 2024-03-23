@@ -46,7 +46,6 @@ PyJWT==2.8.0
 pyngrok==7.1.2
 PySocks==1.7.1
 python-multipart==0.0.5  # Updated version
-PyYAML==5.4.1  # Updated version
 requests==2.26.0  # Updated version
 requests-toolbelt==0.9.1  # Updated version
 rich==13.7.0
