@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Depends, APIRouter, Header, Form
+from fastapi import HTTPException, Depends, APIRouter, Header, Form, Request
 from datetime import datetime, timedelta
 from uuid import uuid4
 from google.oauth2 import id_token
@@ -296,8 +296,13 @@ async def user_auth(
 
 
 @router.post("/react/email-signin", tags=["React"])
-async def email_signin(email: str = Form(...), password: str = Form(...), db: Session = Depends(get_database)):
+async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
+
+        form_data = request.form()
+        print("______________form_data______________", form_data)
+        email = form_data.get('email')
+        password = form_data.get('password')
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
