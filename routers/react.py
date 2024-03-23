@@ -231,14 +231,16 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
         print("_______________existing_user_______________", existing_user)
+
         if existing_user:
-            raise HTTPException(status_code=400, detail="email already exists.")
+            raise HTTPException(status_code=400, detail="Email already exists. Try with another email.")
 
         if not re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$", password):
             raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character.")
 
         # User already exists
-        if existing_user:
+        if existing_user.email == email and verify_hash(existing_user.password, password):
+            
             # Generate an access token for the new user and return his/her details
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
