@@ -8,7 +8,7 @@ cffi==1.14.6  # Updated version
 charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6
-cryptography==36.0.0  # Updated version
+cryptography==42.0.4  # Updated version
 databases==0.9.0
 defusedxml==0.7.1
 dnspython==2.1.0  # Updated version
