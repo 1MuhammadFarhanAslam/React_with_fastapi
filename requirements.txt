@@ -1,67 +1,66 @@
-aiosqlite==0.19.0
-alembic==1.13.1
-annotated-types==0.6.0
-anyio==3.7.1
-bcrypt==3.2.0
-certifi==2023.11.17
-cffi==1.14.6  # Updated version
-charset-normalizer==3.3.2
-click==8.1.7
-colorama==0.4.6
-cryptography==36.0.0  # Updated version
-databases==0.9.0
-defusedxml==0.7.1
-dnspython==2.1.0  # Updated version
-ecdsa==0.18.0
-email-validator==2.1.0.post1
-fastapi==0.110.0
-filelock==3.13.1
-fsspec==2023.12.2
-greenlet==1.1.1  # Updated version
-h11==0.14.0
-httpcore==0.14.1  # Updated version
-httpie==3.2.2
-httptools==0.2.0  # Updated version
-httpx==0.19.0  # Updated version
-idna==3.3  # Updated version
-itsdangerous==2.1.2
-Jinja2==3.1.2
-Mako==1.1.5  # Updated version
-markdown-it-py==3.0.0
-MarkupSafe==2.1.3
-mdurl==0.1.2
-mpmath==1.3.0
-multidict==4.7.6  # Updated version
-networkx==2.6.3  # Updated version
-orjson==3.6.1  # Updated version
-passlib==1.7.4  # Updated version
-pip==24.0  # Please note that the version of pip is not typically included in requirements.txt
-psycopg2-binary==2.9.1  # Updated version
-pyasn1==0.4.8  # Updated version
-pycparser==2.21
-pydantic==1.9.0  # Updated version
-pydantic-core==2.14.6 # Updated version # Updated version # Updated version
-Pygments==2.17.2
-PyJWT==2.8.0
-pyngrok==7.1.2
-PySocks==1.7.1
-python-multipart==0.0.5  # Updated version
-requests==2.26.0  # Updated version
-requests-toolbelt==0.9.1  # Updated version
-rich==13.7.0
-rsa==4.9
-setuptools==58.0.4  # Updated version
-six==1.16.0
-sniffio==1.2.0  # Updated version
-sqlalchemy==1.4.31  # Updated version
-starlette==0.14.0  # Updated version
-sympy==1.10  # Updated version
-torch  # Updated version
-typing-extensions==4.0.1  # Updated version
-ujson
-urllib3==1.26.7  # Updated version
-uvicorn==0.15.0  # Updated version
-watchfiles # Updated version
-websockets  # Updated version
-typing
+aiosqlite
+alembic
+annotated-types
+anyio
+bcrypt
+certifi
+cffi
+charset-normalizer
+click
+colorama
+cryptography
+databases
+defusedxml
+dnspython
+ecdsa
+email-validator
+fastapi
+filelock
+fsspec
+greenlet
+h11
+httpcore
+httpie
+httptools
+httpx
+idna
+itsdangerous
+Jinja2
+Mako
+markdown-it-py
+MarkupSafe
+mdurl
+mpmath
+multidict
+networkx
+orjson
+passlib
+pip
+psycopg2-binary
+pyasn1
+pycparser
+pydantic
+pydantic-core
+Pygments
+PyJWT
+pyngrok
+PySocks
+python-multipart
 requests
+requests-toolbelt
+rich
+rsa
+setuptools
+six
+sniffio
+sqlalchemy
+starlette
+sympy
+torch
+typing-extensions
+ujson
+urllib3
+uvicorn
+watchfiles
+websockets
+typing
