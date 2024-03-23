@@ -5,11 +5,12 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 import jwt
 import os
-from models import React_User, React_user_Token, Token
+from models import React_User, React_user_Token, Token, Email_User
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from hashing import hash_password, verify_hash
+import re
 
 router = APIRouter()
 
@@ -70,13 +71,13 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
         existing_user = db.query(React_User).filter(React_User.email == user_data["email"]).first()
 
         if existing_user:
-            # User already exists, return their details
+            # User already exists, return his/her details
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
             print(access_token)
 
             return {
-                "message": "User already exists",
+                "message": "Log-in successfully! User already exists.",
                 "userData": {
                     "id": str(existing_user.id),
                     "username": existing_user.username,
@@ -99,7 +100,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             print(access_token)
 
             return {
-                "message": "Login successful",
+                "message": "Sign-up successfully. User created successfully.",
                 "userData": {
                     "id": str(user.id),
                     "username": user.username,
@@ -220,55 +221,77 @@ async def user_auth(
 #         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.post("/react/login-or-register", tags=["React"])
-async def login_or_register(email: str = Form(...), password: str = Form(...), db: Session = Depends(get_database)):
-    # Check if the user exists in the database
-    user = db.query(React_User).filter(React_User.email == email).first()
-    if user:
-        # User exists, verify password
-        if verify_hash(password, user.password):
-            # Generate access token
+
+@router.post("/react/email-signin", tags=["React"])
+async def email_signin(email: str = Form(...), password: str = Form(..., min_length=8, max_length=16, regex="^[a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?/~\\-=|\\\\]+$") , db: Session = Depends(get_database)):
+    try:
+
+        # Validate that both username and password are provided
+        if not email or not password:
+            raise HTTPException(status_code=400, detail="Both username and password are required.")
+
+        # Check if the user already exists in the database
+        existing_user = db.query(Email_User).filter(Email_User.email == email).first()
+        print("_______________existing_user_______________", existing_user)
+        if existing_user:
+            raise HTTPException(status_code=400, detail="email already exists.")
+
+        if not re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$", password):
+            raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character.")
+
+        # User already exists
+        if existing_user:
+            # Generate an access token for the new user and return his/her details
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
+            print("_______________access_token_______________", access_token)
 
             return {
-                "message": "Login successful",
-                "userData": {
+                "message": "Log-in successfully! User already exists.",
+                "user_info" : {
+                    "id": str(existing_user.id),
+                    "created_at": existing_user.created_at,
+                    "username": existing_user.username,
+                    "email": existing_user.email,
+                    "password": existing_user.password,
+                    "status": existing_user.status,
+                    "role": existing_user.role
+                },
+                "access_token": access_token,
+                "token_type": "bearer"
+            }
+
+        else:
+            # User does not exist, hash the password and save the user to the database
+            hashed_password = hash_password(password)
+
+            # Create a new user and save it to the database
+            user = Email_User(email=email, hashed_password=hashed_password)
+            db.add(user)
+            db.commit()
+
+            access_token_expires = timedelta(minutes=30)
+            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
+            print(access_token)
+
+
+            return {
+                "message": "Sign-up successfully! User created successfully.",
+                "user_info" : {
                     "id": str(user.id),
+                    "created_at": user.created_at,
                     "username": user.username,
                     "email": user.email,
-                    "picture": user.picture,
-                    "email_verified": user.email_verified,
+                    "password": user.password,
+                    "status": user.status,
                     "role": user.role
                 },
                 "access_token": access_token,
                 "token_type": "bearer"
             }
-        else:
-            raise HTTPException(status_code=401, detail="Incorrect email or password")
-    else:
-        # User does not exist, register
-        hashed_password = verify_hash(password)
-        new_user = React_User(email=email, password=hashed_password)
-        db.add(new_user)
-        db.commit()
 
-        # Generate access token for new user
-        access_token_expires = timedelta(minutes=30)
-        access_token = React_JWT_Token(data={"sub": new_user.email}, expires_delta=access_token_expires)
-
-        return {
-            "message": "User registered successfully",
-            "userData": {
-                "id": str(new_user.id),
-                "username": new_user.username,
-                "email": new_user.email,
-                "picture": new_user.picture,
-                "email_verified": new_user.email_verified,
-                "role": new_user.role
-            },
-            "access_token": access_token,
-            "token_type": "bearer"
-        }
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Server Error")
 
 

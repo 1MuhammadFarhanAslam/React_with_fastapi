@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Table, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Table, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -10,6 +10,10 @@ from uuid import uuid4
 from sqlalchemy.dialects.postgresql import UUID
 import random
 import string
+
+from sqlalchemy.orm import validates
+from pydantic import BaseModel, constr, EmailStr
+from pydantic import validator
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -80,11 +84,29 @@ class Email_User(Base):
 
     id = Column(String, primary_key=True, index=True, default=lambda: ''.join(random.choices(string.ascii_letters + string.digits, k=64)))
     created_at = Column(DateTime, default=datetime.utcnow)
-    username = Column(String)
+    username = Column(String, nullable=True)  # Username is now optional
     email = Column(String, unique=True, index=True)
-    picture = Column(String)
-    email_verified = Column(Boolean)
+    password = Column(String)
+    status = Column(String, default="Active")  # Default status is "Active"
     role = Column(String, default="user")  # Default role is "user"
+
+    # Custom validator for password to ensure it meets the criteria
+    @validates('password')
+    def validate_password(self, key, value):
+        if len(value) < 8 or len(value) > 16:
+            raise ValueError("Password must be between 8 and 16 characters")
+        if not any(char.isupper() for char in value):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not any(char.islower() for char in value):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not any(char.isdigit() for char in value):
+            raise ValueError("Password must contain at least one digit")
+        if not any(char in string.punctuation for char in value):
+            raise ValueError("Password must contain at least one special character")
+        return value
+
+    # Optional: Unique constraint on username and email together
+    __table_args__ = (UniqueConstraint('username', 'email', name='_username_email_uc'),)
 
 
 class React_User(Base):
