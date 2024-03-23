@@ -308,28 +308,24 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
 
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
+        print("_______________existing_user_______________", existing_user)
 
         if existing_user:
-            # User exists, check password for login
-            if verify_hash(password, existing_user.password):
-                # Generate an access token for the user
-                access_token_expires = timedelta(minutes=30)
-                access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
+            access_token_expires = timedelta(minutes=30)
+            access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
 
-                return {
-                    "message": "Login successful!",
-                    "user_info": {
-                        "id": str(existing_user.id),
-                        "created_at": existing_user.created_at,
-                        "email": existing_user.email,
-                        "status": existing_user.status,
-                        "role": existing_user.role
-                    },
-                    "access_token": str(access_token),
-                    "token_type": "bearer"
-                }
-            else:
-                raise HTTPException(status_code=401, detail="Incorrect password.")
+            return {
+                "message": "Login successful!",
+                "user_info": {
+                    "id": str(existing_user.id),
+                    "created_at": existing_user.created_at,
+                    "email": existing_user.email,
+                    "status": existing_user.status,
+                    "role": existing_user.role
+                },
+                "access_token": str(access_token),
+                "token_type": "bearer"
+            }
         else:
             # User does not exist, hash the password and save the user to the database for signup
             hashed_password = hash_password(password)
@@ -353,3 +349,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
                 "access_token": str(access_token),
                 "token_type": "bearer"
             }
+        
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Internal Server Error")
