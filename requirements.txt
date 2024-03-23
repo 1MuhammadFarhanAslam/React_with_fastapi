@@ -56,7 +56,7 @@ sniffio==1.2.0  # Updated version
 sqlalchemy==1.4.31  # Updated version
 starlette==0.14.0  # Updated version
 sympy==1.10  # Updated version
-torch==1.10.0  # Updated version
+torch  # Updated version
 typing-extensions==4.0.1  # Updated version
 ujson==5.0.3  # Updated version
 urllib3==1.26.7  # Updated version
