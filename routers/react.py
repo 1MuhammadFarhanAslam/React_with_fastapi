@@ -353,7 +353,3 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
                 "access_token": str(access_token),
                 "token_type": "bearer"
             }
-
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Server Error")
