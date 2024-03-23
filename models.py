@@ -82,13 +82,17 @@ Role.user = relationship("User", back_populates="roles")
 class Email_User(Base):
     __tablename__ = "email_users"
 
-    id = Column(String, primary_key=True, index=True, default=lambda: ''.join(random.choices(string.ascii_letters + string.digits, k=64)))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    username = Column(String, nullable=True)  # Username is now optional
+    id = Column(String, primary_key=True, index=True)
+    created_at = Column(DateTime)
+    username = Column(String, nullable=True)
     email = Column(String, unique=True, index=True)
-    password = Column(String)  # Change from hashed_password to password
-    status = Column(String, default="Active")  # Default status is "Active"
-    role = Column(String, default="user")  # Default role is "user"
+    password = Column(String)
+    status = Column(String, default="Active")
+    role = Column(String, default="user")
+
+    # Optional: Unique constraint on username and email together
+    __table_args__ = (UniqueConstraint('username', 'email', name='_username_email_uc'),)
+
 
 
 class React_User(Base):
