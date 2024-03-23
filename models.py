@@ -3,16 +3,18 @@ from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from pydantic import BaseModel
+from sqlalchemy.sql import func
 import os
 from sqlalchemy import create_engine
+from uuid import uuid4
+from sqlalchemy.dialects.postgresql import UUID
 import random
 import string
 from hashing import hash_password
-from pydantic import BaseModel
-from hashing import hash_password
-from sqlalchemy.ext.declarative import declarative_base
-from typing import Generator
-from sqlalchemy.orm import Session
+
+from sqlalchemy.orm import validates
+from pydantic import BaseModel, constr, EmailStr
+from pydantic import validator
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -20,20 +22,6 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
-
-def initialize_database():
-    from models import Base
-    Base.metadata.create_all(bind=engine)
-    print("Database initialized successfully.")
-
-# Dependency to get the database session
-def get_database() -> Generator[Session, None, None]:
-    # Provide a database session to use within the request
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 class Admin(Base):
     __tablename__ = "admins"
@@ -101,14 +89,6 @@ class Email_User(Base):
     password = Column(String)
     status = Column(String, default="Active")
     role = Column(String, default="user")  # Default role is "user"
-
-    @classmethod
-    def create_user(cls, db: Session, email: str, password: str):
-        hashed_password = hash_password(password)
-        user = cls(email=email, password=hashed_password)
-        db.add(user)
-        db.commit()
-        return user
 
 class React_User(Base):
     __tablename__ = "react_users"
