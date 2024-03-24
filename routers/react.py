@@ -318,13 +318,13 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
         print("_______________existing_user_______________", existing_user)
 
         if existing_user:
-            access_token = str(React_JWT_Token(data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES))
+            access_token = str(React_JWT_Token(data={"sub": existing_user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES))
             print("_______________access_token_______________", access_token)
 
             return {
                 "message": "Login successful!",
                 "user_info": {
-                    "id": existing_user.id,  # Convert id to string explicitly
+                    "id": existing_user.id,
                     "created_at": existing_user.created_at,
                     "email": existing_user.email,
                     "status": existing_user.status,
