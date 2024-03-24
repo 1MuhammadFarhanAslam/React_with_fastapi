@@ -47,13 +47,15 @@ def get_email_user(email: str):
         db.close()
 
 
-def verify_email_user_password(email: str, current_password: str) -> bool:
-    email_user = get_email_user(email)
-    if not email_user:
-        raise ValueError("Invalid email or password")
-    if not verify_hash(current_password, email_user.hashed_password):
-        raise ValueError("Password is incorrect")
-    return email_user
+# Helper function to verify email user password
+def verify_email_user_password(email: str, current_password: str) -> Email_User:
+    db = SessionLocal()
+    user = db.query(Email_User).filter(Email_User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not verify_hash(current_password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Incorrect password")
+    return user
 
 
 def authenticate_email_user(email: str, password: str , db: Session = Depends(get_database)) -> Union[Email_User, None]:
