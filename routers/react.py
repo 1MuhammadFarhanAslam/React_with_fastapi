@@ -5,7 +5,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 import jwt
 import os
-from models import React_User, React_user_Token, Token, Email_User, Email_user_state
+from models import React_User, React_user_Token, Token, Email_User
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
@@ -297,17 +297,13 @@ async def user_auth(
 #         print(e)
 #         raise HTTPException(status_code=500, detail="Server Error")
 
-@router.post("/react/email-signin", tags=["React"])
-async def email_signin(state: Email_user_state = Form(...), db: Session = Depends(get_database)):
-    try:
-        print("_______________state_______________", state)
-        # Extract email and password from the state object
-        email = state.get("email")
-        password = state.get("password")
 
-        # Print email received from the user
-        print("Email:", email)
-        print("Password:", password)
+@router.post("/react/email-signin", tags=["React"])
+async def email_signin(request: Request, db: Session = Depends(get_database)):
+    try:
+        data = await request.json()
+        email = data.get('email')
+        password = data.get('password')
 
         # Validate that both email and password are provided
         if not email or not password:
@@ -319,12 +315,10 @@ async def email_signin(state: Email_user_state = Form(...), db: Session = Depend
 
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
-        print("_______________existing_user_______________", existing_user)
 
         if existing_user:
-            access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-            access_token = str(React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires))
-            print("_______________access_token_______________", access_token)
+            access_token_expires = timedelta(minutes=30)
+            access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
 
             return {
                 "message": "Login successful! User already exists.",
@@ -335,9 +329,10 @@ async def email_signin(state: Email_user_state = Form(...), db: Session = Depend
                     "status": existing_user.status,
                     "role": existing_user.role
                 },
-                "access_token": access_token,
+                "access_token": str(access_token),
                 "token_type": "bearer"
             }
+        
         else:
             # User does not exist, hash the password and save the user to the database for signup
             hashed_password = hash_password(password)
@@ -345,9 +340,9 @@ async def email_signin(state: Email_user_state = Form(...), db: Session = Depend
             db.add(user)
             db.commit()
 
-            access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-            access_token = str(React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires))
-            print("_______________access_token_______________", access_token)
+            # Generate an access token for the new user
+            access_token_expires = timedelta(minutes=30)
+            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
 
             return {
                 "message": "Signup successful! User created successfully.",
@@ -358,16 +353,16 @@ async def email_signin(state: Email_user_state = Form(...), db: Session = Depend
                     "status": user.status,
                     "role": user.role
                 },
-                "access_token": access_token,
+                "access_token": str(access_token),
                 "token_type": "bearer"
             }
         
-    except HTTPException as e:
-        raise e
+
     except Exception as e:
         error_message = "An error occurred while processing the request."
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail=error_message)
+    
 
 
 @router.get("/react/auth/email_user", response_model=None, tags=["React"])
