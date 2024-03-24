@@ -369,7 +369,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
 
 @router.get("/react/auth/email_user", response_model=None, tags=["React"])
 async def email_user_auth(
-    authorization: str = Form(...),  # Get the access token from the Authorization header
+    authorization: str = Header(...),  # Get the access token from the Authorization header
     db: Session = Depends(get_database)
 ):
     try:
