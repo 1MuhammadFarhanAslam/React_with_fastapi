@@ -358,8 +358,6 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
                 "token_type": "bearer"
             }
         
-    except HTTPException as e:
-        raise e
 
     except Exception as e:
         error_message = "An error occurred while processing the request."
