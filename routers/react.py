@@ -119,43 +119,43 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
         raise HTTPException(status_code=500, detail="Server Error")
     
 
-@router.get("/react/auth/user", response_model=None, tags=["React"])
-async def user_auth(
-    authorization: str = Header(...),  # Get the access token from the Authorization header
-    db: Session = Depends(get_database)
-):
-    try:
-        # Extract the token from the Authorization header
-        token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+# @router.get("/react/auth/user", response_model=None, tags=["React"])
+# async def user_auth(
+#     authorization: str = Header(...),  # Get the access token from the Authorization header
+#     db: Session = Depends(get_database)
+# ):
+#     try:
+#         # Extract the token from the Authorization header
+#         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
         
-        # Decode and verify the JWT token
-        decoded_token = jwt.decode(token, GOOGLE_Email_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
-        print("________________decoded_token________________", decoded_token)
-        email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+#         # Decode and verify the JWT token
+#         decoded_token = jwt.decode(token, GOOGLE_Email_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+#         print("________________decoded_token________________", decoded_token)
+#         email = decoded_token.get("sub")  # Assuming "sub" contains the email address
         
-        # Query the database based on the email to get user data
-        user = db.query(React_User).filter(React_User.email == email).first()
-        print("_______________user details in jwt token___________" ,user)
+#         # Query the database based on the email to get user data
+#         user = db.query(React_User).filter(React_User.email == email).first()
+#         print("_______________user details in jwt token___________" ,user)
         
-        if user:
-            return {
-                "message": "User details retrieved successfully",
-                "userData": {
-                    "id": str(user.id),
-                    "created_at": user.created_at,
-                    "username": user.username,
-                    "email": user.email,
-                    "picture": user.picture,
-                    "email_verified": user.email_verified,
-                    "role": user.role
-                }
-            }
-        else:
-            raise HTTPException(status_code=404, detail="User not found")
-    except jwt.JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+#         if user:
+#             return {
+#                 "message": "User details retrieved successfully",
+#                 "userData": {
+#                     "id": str(user.id),
+#                     "created_at": user.created_at,
+#                     "username": user.username,
+#                     "email": user.email,
+#                     "picture": user.picture,
+#                     "email_verified": user.email_verified,
+#                     "role": user.role
+#                 }
+#             }
+#         else:
+#             raise HTTPException(status_code=404, detail="User not found")
+#     except jwt.JWTError:
+#         raise HTTPException(status_code=401, detail="Invalid token")
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail="Internal Server Error")
     
     
 
@@ -318,6 +318,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         if existing_user:
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
+            print("_______________access_token_______________", access_token)
 
             return {
                 "message": "Login successful! User already exists.",
@@ -342,6 +343,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
             # Generate an access token for the new user
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
+            print("_______________access_token_______________", access_token)
 
             return {
                 "message": "Signup successful! User created successfully.",
@@ -364,8 +366,8 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
     
 
 
-@router.get("/react/auth/email_user", response_model=None, tags=["React"])
-async def email_user_auth(
+@router.get("/react/auth/user", response_model=None, tags=["React"])
+async def combined_user_auth(
     authorization: str = Header(...),  # Get the access token from the Authorization header
     db: Session = Depends(get_database)
 ):
@@ -378,25 +380,37 @@ async def email_user_auth(
         print("________________decoded_token________________", decoded_token)
         email = decoded_token.get("sub")  # Assuming "sub" contains the email address
         
-        # Query the database based on the email to get user data
-        user = db.query(Email_User).filter(Email_User.email == email).first()
-        print("_______________user details in jwt token___________" ,user)
+        # Query the database based on the email to get user data from React_User and Email_User
+        react_user = db.query(React_User).filter(React_User.email == email).first()
+        email_user = db.query(Email_User).filter(Email_User.email == email).first()
+        print("_______________user details in jwt token (React_User)___________" , react_user)
+        print("_______________user details in jwt token (Email_User)___________" , email_user)
         
-        if user:
-            return {
-                "message": "Login successful!",
-                "user_info": {
-                    "id": user.id,
-                    "created_at": user.created_at,
-                    "email": user.email,
-                    "status": user.status,
-                    "role": user.role
-                },
-                "access_token": decoded_token,
-                "token_type": "bearer"
+        if react_user:
+            user_data = {
+                "id": str(react_user.id),
+                "created_at": react_user.created_at,
+                "username": react_user.username,
+                "email": react_user.email,
+                "picture": react_user.picture,
+                "email_verified": react_user.email_verified,
+                "role": react_user.role
+            }
+        elif email_user:
+            user_data = {
+                "id": email_user.id,
+                "created_at": email_user.created_at,
+                "email": email_user.email,
+                "status": email_user.status,
+                "role": email_user.role
             }
         else:
             raise HTTPException(status_code=404, detail="User not found")
+        
+        return {
+            "message": "User details retrieved successfully",
+            "userData": user_data
+        }
     except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
