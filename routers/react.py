@@ -323,7 +323,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
                     "status": existing_user.status,
                     "role": existing_user.role
                 },
-                "access_token": str(access_token),
+                "access_token": access_token,
                 "token_type": "bearer"
             }
         
@@ -347,7 +347,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
                     "status": user.status,
                     "role": user.role
                 },
-                "access_token": str(access_token),
+                "access_token": access_token,
                 "token_type": "bearer"
             }
         
