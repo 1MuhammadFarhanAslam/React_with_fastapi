@@ -364,3 +364,43 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
         error_message = "An error occurred while processing the request."
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail=error_message)
+    
+
+
+@router.get("/react/auth/email_user", response_model=None, tags=["React"])
+async def user_auth(
+    authorization: str = Header(...),  # Get the access token from the Authorization header
+    db: Session = Depends(get_database)
+):
+    try:
+        # Extract the token from the Authorization header
+        token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+        
+        # Decode and verify the JWT token
+        decoded_token = jwt.decode(token, GOOGLE_Email_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+        print("________________decoded_token________________", decoded_token)
+        email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+        
+        # Query the database based on the email to get user data
+        user = db.query(React_User).filter(React_User.email == email).first()
+        print("_______________user details in jwt token___________" ,user)
+        
+        if user:
+            return {
+                "message": "Login successful!",
+                "user_info": {
+                    "id": user.id,
+                    "created_at": user.created_at,
+                    "email": user.email,
+                    "status": user.status,
+                    "role": user.role
+                },
+                "access_token": decoded_token,
+                "token_type": "bearer"
+            }
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
