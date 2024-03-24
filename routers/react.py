@@ -5,7 +5,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 import jwt
 import os
-from models import React_User, React_user_Token, Token, Email_User
+from models import React_User, React_user_Token, Token, Email_User, Email_user_state
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
@@ -298,8 +298,9 @@ async def user_auth(
 #         raise HTTPException(status_code=500, detail="Server Error")
 
 @router.post("/react/email-signin", tags=["React"])
-async def email_signin(state: dict = Form(...), db: Session = Depends(get_database)):
+async def email_signin(state: Email_user_state = Form(...), db: Session = Depends(get_database)):
     try:
+        print("_______________state_______________", state)
         # Extract email and password from the state object
         email = state.get("email")
         password = state.get("password")

@@ -115,3 +115,6 @@ class AdminInfo(BaseModel):
     id: int
     username: str
 
+class Email_user_state(BaseModel):
+    email: str
+    password: str
