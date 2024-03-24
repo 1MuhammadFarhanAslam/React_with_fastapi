@@ -31,6 +31,9 @@ async def create_admin_account(
     db: Session = Depends(get_database)
 ):
     try:
+        print("username:" , username)
+        print("enter_password:" , enter_password)
+
         # Get the secret key from the database
         actual_secret_key = get_secret_key(db)
 
