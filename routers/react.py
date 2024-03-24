@@ -333,6 +333,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
             db.add(user)
             db.commit()
 
+            # Generate an access token for the new user
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
 
@@ -349,8 +350,9 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
                 "token_type": "bearer"
             }
         
-    except HTTPException as http_error:
-        raise http_error  # Re-raise HTTPException with detailed error message
+    except HTTPException as e:
+        raise e
+
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
