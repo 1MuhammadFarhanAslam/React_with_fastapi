@@ -11,7 +11,6 @@ from sqlalchemy import create_engine
 from typing import Generator
 from hashing import hash_password, verify_hash
 import re
-from datetime import datetime, timedelta, timezone
 
 router = APIRouter()
 
@@ -39,20 +38,15 @@ def get_database() -> Generator[Session, None, None]:
 
 # Get the database URL from the environment variable
 DATABASE_URL = os.environ.get("DATABASE_URL")
-GOOGLE_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_LOGIN_SECRET_KEY")
-EMAIL_SECRET_KEY = os.environ.get("EMAIL_SECRET_KEY")
+GOOGLE_Email_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_Email_LOGIN_SECRET_KEY")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
+def React_JWT_Token(data: dict, expires_delta: timedelta):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    expire = datetime.utcnow() + expires_delta
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, EMAIL_SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, GOOGLE_Email_LOGIN_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
@@ -76,7 +70,8 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 
         if existing_user:
             # User already exists, return his/her details
-            access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token_expires = timedelta(minutes=30)
+            access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
             print(access_token)
 
             return {
@@ -98,7 +93,8 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             db.add(user)
             db.commit()
 
-            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token_expires = timedelta(minutes=30)
+            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
             print(access_token)
 
             return {
@@ -130,7 +126,7 @@ async def user_auth(
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
         
         # Decode and verify the JWT token
-        decoded_token = jwt.decode(token, GOOGLE_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+        decoded_token = jwt.decode(token, GOOGLE_Email_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
         print("________________decoded_token________________", decoded_token)
         email = decoded_token.get("sub")  # Assuming "sub" contains the email address
         
@@ -318,7 +314,8 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
         print("_______________existing_user_______________", existing_user)
 
         if existing_user:
-            access_token = str(React_JWT_Token(data={"sub": existing_user.email}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)))
+            access_token_expires = timedelta(minutes=30)
+            access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
             print("_______________access_token_______________", access_token)
 
             return {
@@ -342,7 +339,8 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
             db.commit()
 
             # Generate an access token for the new user
-            access_token = str(React_JWT_Token(data={"sub": user.email}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)))
+            access_token_expires = timedelta(minutes=30)
+            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
             print("_______________access_token_______________", access_token)
 
             return {
