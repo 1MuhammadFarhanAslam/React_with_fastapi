@@ -415,8 +415,11 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
+        print(f"___________________Received data_________________: {data}")
         email = data.get('email')
+        print(f"___________________email_________________: {email}")
         password = data.get('password')
+        print(f"___________________password_________________: {password}")
 
         # Retrieve the user from the database based on the email
         user = db.query(Email_User).filter(Email_User.email == email).first()
@@ -432,7 +435,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
             if not authenticated:
                 raise HTTPException(status_code=401, detail="Incorrect password.")
             
-            if authenticated:
+            else:
                 # Generate an access token for the new user
                 access_token_expires = timedelta(minutes=30)
                 access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
