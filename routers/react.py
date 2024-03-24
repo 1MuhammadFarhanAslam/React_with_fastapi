@@ -446,8 +446,8 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                 "token_type": "bearer"
             }
         
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except:
+        raise HTTPException(status_code=400, detail="This email is already registered.")
     
 
 @router.post("/react/email-signin", tags=["React"])
