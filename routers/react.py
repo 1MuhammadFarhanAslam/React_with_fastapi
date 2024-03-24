@@ -11,6 +11,7 @@ from sqlalchemy import create_engine
 from typing import Generator
 from hashing import hash_password, verify_hash
 import re
+from datetime import datetime, timedelta, timezone
 
 router = APIRouter()
 
@@ -39,14 +40,19 @@ def get_database() -> Generator[Session, None, None]:
 # Get the database URL from the environment variable
 DATABASE_URL = os.environ.get("DATABASE_URL")
 GOOGLE_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_LOGIN_SECRET_KEY")
+EMAIL_SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY")
 ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-def React_JWT_Token(data: dict, expires_delta: timedelta):
+def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
     to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, GOOGLE_LOGIN_SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, EMAIL_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
@@ -320,7 +326,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
             return {
                 "message": "Login successful!",
                 "user_info": {
-                    "id": str(existing_user.id),  # Convert id to string explicitly
+                    "id": existing_user.id,  # Convert id to string explicitly
                     "created_at": existing_user.created_at,
                     "email": existing_user.email,
                     "status": existing_user.status,
@@ -344,7 +350,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
             return {
                 "message": "Signup successful! User created successfully.",
                 "user_info": {
-                    "id": str(user.id),
+                    "id": user.id,
                     "created_at": user.created_at,
                     "email": user.email,
                     "status": user.status,
