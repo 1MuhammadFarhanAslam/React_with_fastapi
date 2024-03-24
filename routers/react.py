@@ -407,7 +407,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             }
         
     except:
-        raise HTTPException(status_code=400, detail="An unexpected error occurred. Please try again.")
+        raise HTTPException(status_code=400, detail="User already exists. Please sign in instead.")
     
 
 @router.post("/react/email-signin", tags=["React"])
