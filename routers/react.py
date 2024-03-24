@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Depends, APIRouter, Header, Form, Request
+from fastapi import HTTPException, Depends, APIRouter, Header, Form, Request, status
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from google.oauth2 import id_token
@@ -378,7 +378,10 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 
         if existing_user:
             print("messege: User already exists. Please sign in instead.")
-            return("detail: User already exists. Please sign in instead.")
+            raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already exists. Please sign in instead.",
+        )
         
         try:
             if not existing_user:
