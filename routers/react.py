@@ -301,7 +301,10 @@ async def user_auth(
 @router.post("/react/email-signin", tags=["React"])
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
+        print("_______________request_______________", request)
+        print("_______________request.headers_______________", request.headers)
         data = await request.json()
+        print("_______________data_______________", data)
         email = data.get('email')
         password = data.get('password')
 
