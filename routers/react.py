@@ -377,6 +377,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if existing_user:
+            print("messege: User already exists. Please sign in instead.")
             raise HTTPException(status_code=400, detail="User already exists. Please sign in instead.")
         
         try:
