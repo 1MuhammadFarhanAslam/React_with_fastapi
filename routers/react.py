@@ -382,7 +382,7 @@ async def email_user_auth(
         email = decoded_token.get("sub")  # Assuming "sub" contains the email address
         
         # Query the database based on the email to get user data
-        user = db.query(React_User).filter(React_User.email == email).first()
+        user = db.query(Email_User).filter(Email_User.email == email).first()
         print("_______________user details in jwt token___________" ,user)
         
         if user:
