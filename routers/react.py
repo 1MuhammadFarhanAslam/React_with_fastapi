@@ -308,7 +308,6 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
 
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
-        print("_______________existing_user_______________", existing_user)
 
         if existing_user:
             access_token_expires = timedelta(minutes=30)
