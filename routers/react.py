@@ -1,5 +1,5 @@
 from fastapi import HTTPException, Depends, APIRouter, Header, Form, Request
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -40,11 +40,14 @@ def get_database() -> Generator[Session, None, None]:
 DATABASE_URL = os.environ.get("DATABASE_URL")
 GOOGLE_Email_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_Email_LOGIN_SECRET_KEY")
 ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-
-def React_JWT_Token(data: dict, expires_delta: timedelta):
+def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
     to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, GOOGLE_Email_LOGIN_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
