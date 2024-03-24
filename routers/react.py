@@ -305,6 +305,9 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         email = data.get('email')
         password = data.get('password')
 
+        print("_______________email_______________", email)
+        print("_______________password_______________", password)
+
         # Validate that both email and password are provided
         if not email or not password:
             raise HTTPException(status_code=400, detail="Both email and password are required.")
@@ -329,7 +332,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                     "status": existing_user.status,
                     "role": existing_user.role
                 },
-                "access_token": str(access_token),
+                "access_token": access_token,
                 "token_type": "bearer"
             }
         
@@ -353,7 +356,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                     "status": user.status,
                     "role": user.role
                 },
-                "access_token": str(access_token),
+                "access_token": access_token,
                 "token_type": "bearer"
             }
         
