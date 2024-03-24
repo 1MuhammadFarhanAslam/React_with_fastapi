@@ -322,7 +322,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
             print("_______________access_token_______________", access_token)
 
             return {
-                "message": "Login successful!",
+                "message": "Login successful! User already exists.",
                 "user_info": {
                     "id": existing_user.id,
                     "created_at": existing_user.created_at,
