@@ -366,6 +366,49 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 #         raise HTTPException(status_code=500, detail=error_message)
     
 
+# @router.post("/react/email-signup", tags=["React"])
+# async def email_signup(request: Request, db: Session = Depends(get_database)):
+#     try:
+#         data = await request.json()
+#         email = data.get('email')
+#         password = data.get('password')
+
+#         # Check if the user already exists in the database
+#         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
+
+#         if existing_user:
+#             print("messege: User already exists. Please sign in instead.")
+#             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists. Please sign in instead.")  
+        
+#         else:
+#             # User does not exist, proceed with signup.
+#             hashed_password = hash_password(password)
+#             user = Email_User(email=email, password=hashed_password)
+#             db.add(user)
+#             db.commit()
+
+
+#             # Generate an access token for the new user
+#             access_token_expires = timedelta(minutes=30)
+#             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
+#             print("_______________access_token_______________", access_token)
+
+#             return {
+#                 "message": "Signup successful! User created successfully.",
+#                 "user_info": {
+#                     "id": user.id,
+#                     "created_at": user.created_at,
+#                     "email": user.email,
+#                     "status": user.status,
+#                     "role": user.role
+#                 },
+#                 "access_token": access_token,
+#                 "token_type": "bearer"
+#             }
+        
+#     except:
+#         raise HTTPException(status_code=400, detail="An unexpected error occurred. Please try again.")
+    
 @router.post("/react/email-signup", tags=["React"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
@@ -377,8 +420,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if existing_user:
-            print("messege: User already exists. Please sign in instead.")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists. Please sign in instead.")  
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This email is already registered.")  
         
         else:
             # User does not exist, proceed with signup.
@@ -387,11 +429,9 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             db.add(user)
             db.commit()
 
-
             # Generate an access token for the new user
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
-            print("_______________access_token_______________", access_token)
 
             return {
                 "message": "Signup successful! User created successfully.",
@@ -406,8 +446,8 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                 "token_type": "bearer"
             }
         
-    except:
-        raise HTTPException(status_code=400, detail="An unexpected error occurred. Please try again.")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
     
 
 @router.post("/react/email-signin", tags=["React"])
