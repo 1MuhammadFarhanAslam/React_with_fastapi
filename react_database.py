@@ -7,8 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from typing import Generator
 from models import Email_User
-from typing import Union, Optional
-from fastapi import HTTPException , Depends
+from .hashing import verify_hash
 
 
 # Get the database URL from the environment variable
@@ -47,34 +46,12 @@ def get_email_user(email: str):
         db.close()
 
 
-# Helper function to verify email user password
-def verify_email_user_password(email: str, current_password: str) -> Email_User:
-    db = SessionLocal()
-    user = db.query(Email_User).filter(Email_User.email == email).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if not verify_hash(current_password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Incorrect password")
-    return user
 
 
-def authenticate_email_user(email: str, password: str , db: Session = Depends(get_database)) -> Union[Email_User, None]:
-    if password is None:
-        return { "error": "Password is required" }
-    
-    try:
-        email_user = db.query(Email_User).filter(Email_User.email == email).first()
+def get_email_user(db: Session, email: str) -> Email_User:
+    # Retrieve the user from the database based on the email
+    return db.query(Email_User).filter(Email_User.email == email).first()
 
-        if not email_user:
-            return {"error": "User not found"}
-
-        if not verify_hash(password, email_user.password):
-            return {"error": "Incorrect password"}
-
-        return email_user
-    
-    except Exception as e:
-        # Handle exceptions here
-        pass  # Placeholder for exception handling logic
-
-    return None  # Return None if authentication fails
+def verify_email_user_password(plain_password: str, hashed_password: str) -> bool:
+    # Verify the plain password against the hashed password using bcrypt
+    return verify_hash(plain_password, hashed_password)

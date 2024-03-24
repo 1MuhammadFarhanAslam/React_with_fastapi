@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from hashing import hash_password, verify_hash
-from react_database import verify_email_user_password
+from react_database import get_email_user, verify_email_user_password
 
 router = APIRouter()
 
@@ -415,43 +415,39 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
-        print(f"___________________Received data_________________: {data}")
         email = data.get('email')
-        print(f"___________________email_________________: {email}")
         password = data.get('password')
-        print(f"___________________password_________________: {password}")
 
         # Retrieve the user from the database based on the email
-        user = db.query(Email_User).filter(Email_User.email == email).first()
+        user = get_email_user(db, email)
 
         if not user:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found. Please sign up first.")
         
         else:
             # Verify the password
-            authenticated = verify_email_user_password(email, password)
-            print("_______________authenticated_______________", authenticated)
-            
-            # Generate an access token for the new user
+            if not verify_email_user_password(password, user.password):
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
+
+            # Generate an access token for the user
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
-            print("_______________access_token_______________", access_token)
 
             return {
                 "message": "Login successful! User already exists.",
                 "user_info": {
-                    "id": authenticated.id,
-                    "created_at": authenticated.created_at,
-                    "email": authenticated.email,
-                    "status": authenticated.status,
-                    "role": authenticated.role
+                    "id": user.id,
+                    "created_at": user.created_at,
+                    "email": user.email,
+                    "status": user.status,
+                    "role": user.role
                 },
                 "access_token": access_token,
                 "token_type": "bearer"
             }
             
-    except:
-        raise HTTPException(status_code=400, detail="User not found. Please sign up first.")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Error: " + str(e))
     
 
 
