@@ -64,3 +64,4 @@ uvicorn
 watchfiles
 websockets
 typing
+google-auth
