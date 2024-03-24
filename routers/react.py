@@ -318,7 +318,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
         print("_______________existing_user_______________", existing_user)
 
         if existing_user:
-            access_token = str(React_JWT_Token(data={"sub": existing_user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES))
+            access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES)
             print("_______________access_token_______________", access_token)
 
             return {
@@ -342,7 +342,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
             db.commit()
 
             # Generate an access token for the new user
-            access_token = str(React_JWT_Token(data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES))
+            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES)
             print("_______________access_token_______________", access_token)
 
             return {
