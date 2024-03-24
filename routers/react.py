@@ -297,13 +297,17 @@ async def user_auth(
 #         print(e)
 #         raise HTTPException(status_code=500, detail="Server Error")
 
-
 @router.post("/react/email-signin", tags=["React"])
-async def email_signin(email: str = Form(...), password: str = Form(..., min_length=8, max_length=16, regex="^[a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?/~\\-=|\\\\]+$"), db: Session = Depends(get_database)):
+async def email_signin(state: dict = Form(...), db: Session = Depends(get_database)):
     try:
-        # Print email and password received from the user
+        # Extract email and password from the state object
+        email = state.get("email")
+        password = state.get("password")
+
+        # Print email received from the user
         print("Email:", email)
         print("Password:", password)
+
         # Validate that both email and password are provided
         if not email or not password:
             raise HTTPException(status_code=400, detail="Both email and password are required.")
@@ -317,8 +321,8 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
         print("_______________existing_user_______________", existing_user)
 
         if existing_user:
-            access_token_expires = timedelta(minutes=30)
-            access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
+            access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token = str(React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires))
             print("_______________access_token_______________", access_token)
 
             return {
@@ -333,7 +337,6 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
                 "access_token": access_token,
                 "token_type": "bearer"
             }
-        
         else:
             # User does not exist, hash the password and save the user to the database for signup
             hashed_password = hash_password(password)
@@ -341,9 +344,8 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
             db.add(user)
             db.commit()
 
-            # Generate an access token for the new user
-            access_token_expires = timedelta(minutes=30)
-            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
+            access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token = str(React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires))
             print("_______________access_token_______________", access_token)
 
             return {
@@ -359,12 +361,12 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
                 "token_type": "bearer"
             }
         
-
+    except HTTPException as e:
+        raise e
     except Exception as e:
         error_message = "An error occurred while processing the request."
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail=error_message)
-    
 
 
 @router.get("/react/auth/email_user", response_model=None, tags=["React"])
