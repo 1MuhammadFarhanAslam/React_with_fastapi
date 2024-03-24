@@ -34,12 +34,12 @@ def get_database() -> Generator[Session, None, None]:
 
 
 
-def get_email_user(username: str):
+def get_email_user(email: str):
     db = SessionLocal()
     try:
-        email_user = db.query(Email_User).filter(Email_User.username == username).first()
+        email_user = db.query(Email_User).filter(Email_User.username == email).first()
         if not email_user:
-            raise HTTPException(status_code=404, detail=f"Email_user not found with username '{username}'")
+            raise HTTPException(status_code=404, detail=f"Email_user not found with email '{email}'")
         return email_user
     except SQLAlchemyError as e:
         raise RuntimeError(f"Error retrieving email_user: {e}")
@@ -47,18 +47,27 @@ def get_email_user(username: str):
         db.close()
 
 
+def verify_email_user_password(email: str, current_password: str) -> bool:
+    email_user = get_email_user(email)
+    if not email_user:
+        raise ValueError("Invalid email or password")
+    if not verify_hash(current_password, email_user.hashed_password):
+        raise ValueError("Password is incorrect")
+    return True
+
+
 def authenticate_email_user(email: str, password: str , db: Session = Depends(get_database)) -> Union[Email_User, None]:
     if password is None:
-        return None
+        return { "error": "Password is required" }
     
     try:
         email_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if not email_user:
-            return None
+            return {"error": "User not found"}
 
         if not verify_hash(password, email_user.password):
-            return None
+            return {"error": "Incorrect password"}
 
         return email_user
     

@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from hashing import hash_password, verify_hash
-from react_database import authenticate_email_user
+from react_database import verify_email_user_password
 
 router = APIRouter()
 
@@ -408,46 +408,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         
     except:
         raise HTTPException(status_code=400, detail="User already exists. Please sign in instead.")
-    
-# @router.post("/react/email-signup", tags=["React"])
-# async def email_signup(request: Request, db: Session = Depends(get_database)):
-#     try:
-#         data = await request.json()
-#         email = data.get('email')
-#         password = data.get('password')
 
-#         # Check if the user already exists in the database
-#         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
-
-#         if existing_user:
-#             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This email is already registered.")  
-        
-#         else:
-#             # User does not exist, proceed with signup.
-#             hashed_password = hash_password(password)
-#             user = Email_User(email=email, password=hashed_password)
-#             db.add(user)
-#             db.commit()
-
-#             # Generate an access token for the new user
-#             access_token_expires = timedelta(minutes=30)
-#             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
-
-#             return {
-#                 "message": "Signup successful! User created successfully.",
-#                 "user_info": {
-#                     "id": user.id,
-#                     "created_at": user.created_at,
-#                     "email": user.email,
-#                     "status": user.status,
-#                     "role": user.role
-#                 },
-#                 "access_token": access_token,
-#                 "token_type": "bearer"
-#             }
-        
-#     except:
-#         raise HTTPException(status_code=400, detail="This email is already registered.")
     
 
 @router.post("/react/email-signin", tags=["React"])
@@ -466,7 +427,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         try:
             if user:
                 # Verify the password
-                authenticated = authenticate_email_user(password, user.password)
+                authenticated = verify_email_user_password(email, password)
 
                 if not authenticated:
                     raise HTTPException(status_code=401, detail="Incorrect password.")
