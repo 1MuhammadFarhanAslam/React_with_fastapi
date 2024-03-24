@@ -316,7 +316,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
             return {
                 "message": "Login successful!",
                 "user_info": {
-                    "id": str(existing_user.id),
+                    "id": str(existing_user.id),  # Convert id to string explicitly
                     "created_at": existing_user.created_at,
                     "email": existing_user.email,
                     "status": existing_user.status,
@@ -325,6 +325,7 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
                 "access_token": str(access_token),
                 "token_type": "bearer"
             }
+        
         else:
             # User does not exist, hash the password and save the user to the database for signup
             hashed_password = hash_password(password)
@@ -332,7 +333,6 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
             db.add(user)
             db.commit()
 
-            # Generate an access token for the new user
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
 
@@ -349,6 +349,8 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
                 "token_type": "bearer"
             }
         
+    except HTTPException as http_error:
+        raise http_error  # Re-raise HTTPException with detailed error message
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Internal Server Error")
