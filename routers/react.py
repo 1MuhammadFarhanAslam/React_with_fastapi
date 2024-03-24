@@ -424,37 +424,33 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         if not user:
             raise HTTPException(status_code=404, detail="User not found. Please sign up first.")
         
-        try:
-            if user:
-                # Verify the password
-                authenticated = verify_email_user_password(email, password)
-                print("_______________authenticated_______________", authenticated)
+        else:
+            # Verify the password
+            authenticated = verify_email_user_password(email, password)
+            print("_______________authenticated_______________", authenticated)
 
-                if not authenticated:
-                    raise HTTPException(status_code=401, detail="Incorrect password.")
-                
-                if authenticated:
-                    # Generate an access token for the new user
-                    access_token_expires = timedelta(minutes=30)
-                    access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
-                    print("_______________access_token_______________", access_token)
+            if not authenticated:
+                raise HTTPException(status_code=401, detail="Incorrect password.")
+            
+            if authenticated:
+                # Generate an access token for the new user
+                access_token_expires = timedelta(minutes=30)
+                access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
+                print("_______________access_token_______________", access_token)
 
-                    return {
-                        "message": "Login successful! User already exists.",
-                        "user_info": {
-                            "id": authenticated.id,
-                            "created_at": authenticated.created_at,
-                            "email": authenticated.email,
-                            "status": authenticated.status,
-                            "role": authenticated.role
-                        },
-                        "access_token": access_token,
-                        "token_type": "bearer"
-                    }
-        except:
-            # Handle any exceptions from password verification or token decoding
-            raise HTTPException(status_code=401, detail="Invalid credentials or token.")
-
+                return {
+                    "message": "Login successful! User already exists.",
+                    "user_info": {
+                        "id": authenticated.id,
+                        "created_at": authenticated.created_at,
+                        "email": authenticated.email,
+                        "status": authenticated.status,
+                        "role": authenticated.role
+                    },
+                    "access_token": access_token,
+                    "token_type": "bearer"
+                }
+            
     except:
         raise HTTPException(status_code=400, detail="User already exists. Please sign in instead.")
     
