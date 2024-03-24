@@ -7,7 +7,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from typing import Generator
 from models import Email_User
-from .hashing import verify_hash
 
 
 # Get the database URL from the environment variable
