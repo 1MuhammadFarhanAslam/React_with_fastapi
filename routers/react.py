@@ -354,5 +354,6 @@ async def email_signin(email: str = Form(...), password: str = Form(..., min_len
         raise e
 
     except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        error_message = "An error occurred while processing the request."
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail=error_message)
