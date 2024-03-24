@@ -298,6 +298,9 @@ async def user_auth(
 @router.post("/react/email-signin", tags=["React"])
 async def email_signin(email: str = Form(...), password: str = Form(..., min_length=8, max_length=16, regex="^[a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?/~\\-=|\\\\]+$"), db: Session = Depends(get_database)):
     try:
+        # Print email and password received from the user
+        print("Email:", email)
+        print("Password:", password)
         # Validate that both email and password are provided
         if not email or not password:
             raise HTTPException(status_code=400, detail="Both email and password are required.")
