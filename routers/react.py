@@ -410,7 +410,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             raise HTTPException(status_code=400, detail="User creation failed. Please try again.")
         
     except:
-        raise HTTPException(status_code=500, detail="An unexpected error occurred. Please try again.")
+        raise HTTPException(status_code=400, detail="An unexpected error occurred. Please try again.")
     
 
 @router.post("/react/email-signin", tags=["React"])
@@ -422,7 +422,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
 
         # Retrieve the user from the database based on the email
         user = db.query(Email_User).filter(Email_User.email == email).first()
-        
+
         if not user:
             raise HTTPException(status_code=404, detail="User not found. Please sign up first.")
         
