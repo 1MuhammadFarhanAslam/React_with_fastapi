@@ -428,6 +428,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
             if user:
                 # Verify the password
                 authenticated = verify_email_user_password(email, password)
+                print("_______________authenticated_______________", authenticated)
 
                 if not authenticated:
                     raise HTTPException(status_code=401, detail="Incorrect password.")
@@ -441,11 +442,11 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                     return {
                         "message": "Login successful! User already exists.",
                         "user_info": {
-                            "id": user.id,
-                            "created_at": user.created_at,
-                            "email": user.email,
-                            "status": user.status,
-                            "role": user.role
+                            "id": authenticated.id,
+                            "created_at": authenticated.created_at,
+                            "email": authenticated.email,
+                            "status": authenticated.status,
+                            "role": authenticated.role
                         },
                         "access_token": access_token,
                         "token_type": "bearer"

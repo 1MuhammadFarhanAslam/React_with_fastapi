@@ -53,7 +53,7 @@ def verify_email_user_password(email: str, current_password: str) -> bool:
         raise ValueError("Invalid email or password")
     if not verify_hash(current_password, email_user.hashed_password):
         raise ValueError("Password is incorrect")
-    return True
+    return email_user
 
 
 def authenticate_email_user(email: str, password: str , db: Session = Depends(get_database)) -> Union[Email_User, None]:
