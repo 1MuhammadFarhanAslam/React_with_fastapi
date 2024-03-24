@@ -308,13 +308,6 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         print("_______________email_______________", email)
         print("_______________password_______________", password)
 
-        # Validate that both email and password are provided
-        if not email or not password:
-            raise HTTPException(status_code=400, detail="Both email and password are required.")
-
-        # Validate password complexity
-        if not re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$", password):
-            raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character.")
 
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
