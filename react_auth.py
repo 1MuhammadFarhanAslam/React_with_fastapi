@@ -1,8 +1,7 @@
-from pydantic import EmailStr
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 import asyncio
 
-async def send_reset_password_email(name: str, email: EmailStr, token: str, origin: str):
+async def send_reset_password_email(name: str, email: str, token: str, origin: str):
     reset_url = f"{origin}/auth/reset-password?token={token}&email={email}"
     message = f"""
     <p>Please reset your password by clicking on the following link:</p>
