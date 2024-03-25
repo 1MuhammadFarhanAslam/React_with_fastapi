@@ -162,7 +162,7 @@ if __name__ == "__main__":
     # Check if a secret key already exists
     existing_key = SessionLocal().query(SecretKey).first()
     if existing_key:
-        action = input("A secret key already exists. Enter 'update' to update it: ")
+        action = input("A secret key already exists in database. Enter 'update' to update it: ")
         if action != 'update':
             print("Invalid action. Please enter 'update' to update the existing secret key.")
             exit()
@@ -170,7 +170,7 @@ if __name__ == "__main__":
         action = 'add'
     
     if action == 'add':
-        secret_key = input("Enter the secret key to add: ").strip()  # Remove leading/trailing spaces
+        secret_key = input("Enter the secret key to add in database: ").strip()  # Remove leading/trailing spaces
         if secret_key:
             SecretKey.add_or_update_key(secret_key)
         else:
