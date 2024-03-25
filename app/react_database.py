@@ -59,7 +59,7 @@ def verify_email_user_password(plain_password: str, hashed_password: str) -> boo
 
 
 
-async def send_reset_password_email(name: str, email: str, token: str, origin: str):
+async def send_reset_password_email(email: str, token: str, origin: str):
     reset_url = f"{origin}/auth/reset-password?token={token}&email={email}"
     message = f"""
     <p>Please reset your password by clicking on the following link:</p>
@@ -70,7 +70,7 @@ async def send_reset_password_email(name: str, email: str, token: str, origin: s
     conf = ConnectionConfig(
         MAIL_USERNAME="your_email@example.com",
         MAIL_PASSWORD="your_email_password",
-        MAIL_FROM="your_email@example.com",
+        MAIL_FROM="noreply@example.com",
         MAIL_PORT=587,
         MAIL_SERVER="smtp.example.com",
         MAIL_TLS=True,

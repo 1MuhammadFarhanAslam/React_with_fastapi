@@ -66,3 +66,4 @@ websockets
 typing
 google-auth
 fastapi_mail
+python-jose[cryptography]

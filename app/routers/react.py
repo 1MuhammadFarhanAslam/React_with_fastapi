@@ -275,8 +275,8 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
         user.password_token = hash_password(password_token)
         db.commit()
 
-        origin = "http://staging-2023-03-30.pivottinc.com:3000"
-        await send_reset_password_email(user.name, user.email, password_token, origin)
+        origin = "http://localhost:3000/"
+        await send_reset_password_email(user.email, password_token, origin)
 
         return {"msg": "Please check your email for the reset password link."}
     except Exception as e:
