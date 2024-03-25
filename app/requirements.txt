@@ -65,3 +65,4 @@ watchfiles
 websockets
 typing
 google-auth
+fastapi_mail
