@@ -10,8 +10,9 @@ from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from hashing import hash_password, verify_hash
-from react_database import get_email_user, verify_email_user_password
+from react_database import get_email_user, verify_email_user_password, send_reset_password_email
 import secrets
+
 
 router = APIRouter()
 
@@ -261,7 +262,9 @@ async def combined_user_auth(
 async def forgot_password(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
+        print("_______________data_______________", data)
         email = data.get('email')
+        print("_______________email_______________", email)
 
         user = db.query(Email_User).filter(Email_User.email == email).first()
 
