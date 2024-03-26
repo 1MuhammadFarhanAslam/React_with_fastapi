@@ -258,7 +258,7 @@ async def combined_user_auth(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.post("/react/forgot-password", tags=["Authentication"])
+@router.post("/react/forgot-password", tags=["React"])
 async def forgot_password(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
