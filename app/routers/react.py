@@ -287,6 +287,11 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 @router.post("/api/ttm_endpoint/")
 async def text_to_music(request: Request):
     # Extract authorization token (JWT token) from header
+
+    data = await request.json()
+    print("_______________data_______________", data)
+
+
     authorization = request.headers.get("Authorization")
     if authorization is None:
         raise HTTPException(status_code=401, detail="Authorization header is missing")
