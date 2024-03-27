@@ -286,6 +286,8 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 
 @router.post("/api/ttm_endpoint/")
 async def text_to_music(request: Request):
+
+
     # Extract authorization token (JWT token) from header
     authorization = request.headers.get("Authorization")
     if authorization is None:
@@ -310,7 +312,7 @@ async def text_to_music(request: Request):
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json"
     }
-    response = requests.post(tts_url, headers=headers, json=data)
+    response = requests.request('POST', tts_url, headers=headers, json=data)  # Using explicit namespace
 
     # Check response from TTS service
     if response.status_code == 200:
@@ -320,3 +322,42 @@ async def text_to_music(request: Request):
     else:
         # Raise HTTPException for error handling
         raise HTTPException(status_code=response.status_code, detail=response.text)
+
+
+
+# @router.post("/api/ttm_endpoint/")
+# async def text_to_music(request: Request):
+#     # Extract authorization token (JWT token) from header
+#     authorization = request.headers.get("Authorization")
+#     if authorization is None:
+#         raise HTTPException(status_code=401, detail="Authorization header is missing")
+#     access_token = authorization.split(" ")[1]  # Assuming Bearer token format
+
+#     # Extract "prompt" from request body
+#     ttm_data = await request.json()
+#     prompt = ttm_data.get("prompt")
+#     if prompt is None:
+#         raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
+
+#     # Prepare data for forwarding to the TTS service
+#     data = {
+#         "prompt": prompt
+#     }
+
+#     # Forward request to the TTS service
+#     tts_url = "http://149.11.242.18:14094/ttm_service/"  # Adjust the URL as needed
+#     headers = {
+#         "accept": "application/json",
+#         "Authorization": authorization,  # Using the extracted authorization header directly
+#         "Content-Type": "application/json"
+#     }
+#     response = requests.post(tts_url, headers=headers, json=data)
+
+#     # Check response from TTS service
+#     if response.status_code == 200:
+#         # Extract and return audio data
+#         audio_data = response.json().get("audio_data")
+#         return {"audio_data": audio_data}
+#     else:
+#         # Raise HTTPException for error handling
+#         raise HTTPException(status_code=response.status_code, detail=response.text)
