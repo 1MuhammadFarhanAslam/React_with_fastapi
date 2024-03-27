@@ -42,7 +42,7 @@ def get_database() -> Generator[Session, None, None]:
 DATABASE_URL = os.environ.get("DATABASE_URL")
 GOOGLE_Email_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_Email_LOGIN_SECRET_KEY")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
     to_encode = data.copy()
