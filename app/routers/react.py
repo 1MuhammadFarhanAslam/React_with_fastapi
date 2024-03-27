@@ -312,7 +312,7 @@ async def text_to_music(request: Request):
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json"
     }
-    response = requests.request('POST', tts_url, headers=headers, json=data)  # Using explicit namespace
+    response = requests.post(tts_url, headers=headers, json=data)  # Using explicit namespace
 
     # Check response from TTS service
     if response.status_code == 200:
