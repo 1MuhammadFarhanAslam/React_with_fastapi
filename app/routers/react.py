@@ -286,8 +286,11 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 
 @router.post("/api/ttm_endpoint/")
 async def text_to_music(request: Request):
+    try:
+        request_data = await request.json()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format in the request body")
 
-    request_data = await request.json()
     print("_________________Request Body_______________:", request_data)
     print("_________________Prompt_______________:", request_data.get("prompt"))
 
@@ -304,7 +307,6 @@ async def text_to_music(request: Request):
     access_token = parts[1]  # Extract the token
 
     # Extract "prompt" from request body
-    request_data = await request.json()
     prompt = request_data.get("prompt")
     if prompt is None:
         raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
