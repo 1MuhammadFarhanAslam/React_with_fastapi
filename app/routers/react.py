@@ -289,17 +289,22 @@ async def text_to_music(request: Request):
 
     request_data = await request.json()
     print("_________________Request Body_______________:", request_data)
-    # Print the data coming from the request
-    print("_________________Authorization header_________________:", request_data.get("Authorization"))
     print("_________________Prompt_______________:", request_data.get("prompt"))
 
-    # Extract authorization token (JWT token) from header
-    authorization = request_data.get("Authorization")
+    authorization = request.headers.get("Authorization")
+    print("_________________Authorization header_________________:", authorization)
     if authorization is None:
         raise HTTPException(status_code=401, detail="Authorization header is missing")
-    access_token = authorization.split(" ")[1]  # Assuming Bearer token format
+    
+    # Check if the Authorization header has the correct format (Bearer token)
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(status_code=401, detail="Invalid Authorization header format")
+    
+    access_token = parts[1]  # Extract the token
 
     # Extract "prompt" from request body
+    request_data = await request.json()
     prompt = request_data.get("prompt")
     if prompt is None:
         raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
