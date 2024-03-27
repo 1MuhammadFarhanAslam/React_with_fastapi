@@ -287,19 +287,14 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 @router.post("/api/ttm_endpoint/")
 async def text_to_music(request: Request):
     # Extract authorization token (JWT token) from header
-
-    data = await request.json()
-    print("_______________data_______________", data)
-
-
     authorization = request.headers.get("Authorization")
     if authorization is None:
         raise HTTPException(status_code=401, detail="Authorization header is missing")
-    access_token = authorization.split(" ")[1]
+    access_token = authorization.split(" ")[1]  # Assuming Bearer token format
 
     # Extract "prompt" from request body
-    tts_data = await request.json()
-    prompt = tts_data.get("prompt")
+    ttm_data = await request.json()
+    prompt = ttm_data.get("prompt")
     if prompt is None:
         raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
 
@@ -309,13 +304,13 @@ async def text_to_music(request: Request):
     }
 
     # Forward request to the TTS service
-    ttm_url = "http://149.11.242.18:14094/ttm_service/"
+    tts_url = "http://149.11.242.18:14094/ttm_service/"  # Adjust the URL as needed
     headers = {
         "accept": "application/json",
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json"
     }
-    response = requests.post(ttm_url, headers=headers, json=data)
+    response = requests.post(tts_url, headers=headers, json=data)
 
     # Check response from TTS service
     if response.status_code == 200:
