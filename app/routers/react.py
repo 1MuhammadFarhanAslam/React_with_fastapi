@@ -288,6 +288,7 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 async def text_to_music(request: Request):
 
     request_data = await request.json()
+    print("_________________Request Body_______________:", request_data)
     # Print the data coming from the request
     print("_________________Authorization header_________________:", request_data.get("Authorization"))
     print("_________________Prompt_______________:", request_data.get("prompt"))
