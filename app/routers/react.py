@@ -56,7 +56,7 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
 
 
 
-@router.post("/react/google-signin", tags=["React"])
+@router.post("/api/google-signin", tags=["React"])
 async def google_signin(token: React_user_Token, db: Session = Depends(get_database)):
     try:
         # Verify the Google ID token
@@ -122,7 +122,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
         raise HTTPException(status_code=500, detail="Server Error")
     
 
-@router.post("/react/email-signup", tags=["React"])
+@router.post("/api/email-signup", tags=["React"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
@@ -167,7 +167,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 
     
 
-@router.post("/react/email-signin", tags=["React"])
+@router.post("/api/email-signin", tags=["React"])
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
@@ -207,7 +207,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
     
 
 
-@router.get("/react/auth/user", response_model=None, tags=["React"])
+@router.get("/api/auth/user", response_model=None, tags=["React"])
 async def combined_user_auth(
     authorization: str = Header(...),  # Get the access token from the Authorization header
     db: Session = Depends(get_database)
@@ -258,7 +258,7 @@ async def combined_user_auth(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.post("/react/forgot-password", tags=["React"])
+@router.post("/api/forgot-password", tags=["React"])
 async def forgot_password(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
@@ -281,3 +281,42 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
         return {"msg": "Please check your email for the reset password link."}
     except Exception as e:
         raise HTTPException(status_code=400, detail="Error: " + str(e))
+    
+
+
+@router.post("/api/ttm_endpoint/")
+async def text_to_music(request: Request):
+    # Extract authorization token (JWT token) from header
+    authorization = request.headers.get("Authorization")
+    if authorization is None:
+        raise HTTPException(status_code=401, detail="Authorization header is missing")
+    access_token = authorization.split(" ")[1]
+
+    # Extract "prompt" from request body
+    tts_data = await request.json()
+    prompt = tts_data.get("prompt")
+    if prompt is None:
+        raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
+
+    # Prepare data for forwarding to the TTS service
+    data = {
+        "prompt": prompt
+    }
+
+    # Forward request to the TTS service
+    ttm_url = "http://149.11.242.18:14094/ttm_service/"
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    response = requests.post(ttm_url, headers=headers, json=data)
+
+    # Check response from TTS service
+    if response.status_code == 200:
+        # Extract and return audio data
+        audio_data = response.json().get("audio_data")
+        return {"audio_data": audio_data}
+    else:
+        # Raise HTTPException for error handling
+        raise HTTPException(status_code=response.status_code, detail=response.text)
