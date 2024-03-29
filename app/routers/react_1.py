@@ -82,9 +82,12 @@ async def text_to_music(request: Request):
     }
     response = requests.post(ttm_url, headers=headers, json=data)
 
+    # Inside your route handler function
     if response.status_code == 200:
         audio_data = response.content
         audio_filename = "audio.mp3"  # Provide a filename for the audio file
-        return FileResponse(content=audio_data, media_type="audio/mpeg", filename=audio_filename)
+        with open(audio_filename, "wb") as audio_file:
+            audio_file.write(audio_data)
+        return FileResponse(audio_filename, media_type="audio/mpeg")
     else:
         raise HTTPException(status_code=response.status_code, detail=response.text)
