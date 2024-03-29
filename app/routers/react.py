@@ -12,7 +12,6 @@ from typing import Generator
 from hashing import hash_password, verify_hash
 from react_database import get_email_user, verify_email_user_password, send_reset_password_email
 import secrets
-from json import JSONDecodeError
 
 
 router = APIRouter()
@@ -286,62 +285,39 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 
 
 @router.post("/api/ttm_endpoint")
-async def generate_audio(request_from_frontend: Request):
+async def text_to_music(request: Request):
     try:
-        data = await request_from_frontend.json()
-    except JSONDecodeError:
+        request_data = await request.json()
+        prompt = request_data.get("prompt")
+        if prompt is None:
+            raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
+    except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request body")
 
-    prompt = data.get("prompt")
-    authorization = request_from_frontend.headers.get("Authorization")
-
-    token = authorization.split(" ")[1] if authorization else None
-
-    # Process the prompt and token as needed
-    print("Received prompt:", prompt)
-    print("Received token:", token)
-
-    # Add your logic here to generate audio data or perform other operations
-
-    return {"message": "Audio generated successfully"}
-
-
-    # authorization = request.headers.get("Authorization")
-    # print("_________________Authorization header_________________:", authorization)
-    # if authorization is None:
-    #     raise HTTPException(status_code=401, detail="Authorization header is missing")
+    authorization = request.headers.get("Authorization")
+    if authorization is None:
+        raise HTTPException(status_code=401, detail="Authorization header is missing")
     
-    # # Check if the Authorization header has the correct format (Bearer token)
-    # parts = authorization.split()
-    # if len(parts) != 2 or parts[0].lower() != "bearer":
-    #     raise HTTPException(status_code=401, detail="Invalid Authorization header format")
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(status_code=401, detail="Invalid Authorization header format")
     
-    # access_token = parts[1]  # Extract the token
+    access_token = parts[1]
 
-    # # Extract "prompt" from request body
-    # prompt = request_data.get("prompt")
-    # if prompt is None:
-    #     raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
+    data = {
+        "prompt": prompt
+    }
 
-    # # Prepare data for forwarding to the TTS service
-    # data = {
-    #     "prompt": prompt
-    # }
+    ttm_url = "http://149.11.242.18:14094/ttm_service/"  # Adjust the URL as needed
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    response = requests.post(ttm_url, headers=headers, json=data)
 
-    # # Forward request to the TTS service
-    # tts_url = "http://149.11.242.18:14094/tts_service/"  # Adjust the URL as needed
-    # headers = {
-    #     "accept": "application/json",
-    #     "Authorization": f"Bearer {access_token}",
-    #     "Content-Type": "application/json"
-    # }
-    # response = requests.post(tts_url, headers=headers, json=data)  # Using explicit namespace
-
-    # # Check response from TTS service
-    # if response.status_code == 200:
-    #     # Extract and return audio data
-    #     audio_data = response.json().get("audio_data")
-    #     return {"audio_data": audio_data}
-    # else:
-    #     # Raise HTTPException for error handling
-    #     raise HTTPException(status_code=response.status_code, detail=response.text)
+    if response.status_code == 200:
+        audio_data = response.json().get("audio_data")
+        return {"audio_data": audio_data}
+    else:
+        raise HTTPException(status_code=response.status_code, detail=response.text)
