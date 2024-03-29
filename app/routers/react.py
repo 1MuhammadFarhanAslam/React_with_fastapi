@@ -12,6 +12,7 @@ from typing import Generator
 from hashing import hash_password, verify_hash
 from react_database import get_email_user, verify_email_user_password, send_reset_password_email
 import secrets
+from json import JSONDecodeError
 
 
 router = APIRouter()
@@ -288,7 +289,7 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 async def generate_audio(request_from_frontend: Request):
     try:
         data = await request_from_frontend.json()
-    except request_from_frontend:
+    except JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request body")
 
     prompt = data.get("prompt")
@@ -303,6 +304,7 @@ async def generate_audio(request_from_frontend: Request):
     # Add your logic here to generate audio data or perform other operations
 
     return {"message": "Audio generated successfully"}
+
 
     # authorization = request.headers.get("Authorization")
     # print("_________________Authorization header_________________:", authorization)
