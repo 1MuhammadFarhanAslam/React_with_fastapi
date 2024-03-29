@@ -285,18 +285,24 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 
 
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request):
+async def generate_audio(request_from_frontend: Request):
     try:
-        request_data = await request.json()
-    except ValueError:
+        data = await request_from_frontend.json()
+    except request_from_frontend:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request body")
 
-    print("_________________Request Body_______________:", request_data)
-    print("_________________Prompt_______________:", request_data.get("prompt"))
+    prompt = data.get("prompt")
+    authorization = request_from_frontend.headers.get("Authorization")
 
-    return {
-        "prompt": request_data.get("prompt")
-    }
+    token = authorization.split(" ")[1] if authorization else None
+
+    # Process the prompt and token as needed
+    print("Received prompt:", prompt)
+    print("Received token:", token)
+
+    # Add your logic here to generate audio data or perform other operations
+
+    return {"message": "Audio generated successfully"}
 
     # authorization = request.headers.get("Authorization")
     # print("_________________Authorization header_________________:", authorization)
