@@ -45,7 +45,7 @@ app.add_middleware(
 # Include routers
 app.include_router(login.router, prefix="", tags=["Authentication"])
 app.include_router(react.router, prefix="", tags=["React"])
-app.include_router(react_1, prefix="", tags=["React_1"])
+app.include_router(react_1.router, prefix="", tags=["React_1"])
 app.include_router(admin.router, prefix="", tags=["Admin"])
 app.include_router(user.router, prefix="", tags=["User"])
 
