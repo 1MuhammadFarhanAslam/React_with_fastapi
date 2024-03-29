@@ -288,13 +288,16 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 async def text_to_music(request: Request):
     try:
         request_data = await request.json()
+        print("_______________request_data_______________", request_data)
         prompt = request_data.get("prompt")
+        print("_______________prompt_______________", prompt)
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request body")
 
     authorization = request.headers.get("Authorization")
+    print("_______________authorization_______________", authorization)
     if authorization is None:
         raise HTTPException(status_code=401, detail="Authorization header is missing")
     
@@ -303,10 +306,12 @@ async def text_to_music(request: Request):
         raise HTTPException(status_code=401, detail="Invalid Authorization header format")
     
     access_token = parts[1]
+    print("_______________access_token_______________", access_token)
 
     data = {
         "prompt": prompt
     }
+    print("_______________data_______________", data)
 
     ttm_url = "http://149.11.242.18:14094/ttm_service"  # Adjust the URL as needed
     headers = {
