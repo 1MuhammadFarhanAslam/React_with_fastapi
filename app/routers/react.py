@@ -308,12 +308,13 @@ async def text_to_music(request: Request):
         "prompt": prompt
     }
 
-    ttm_url = "http://149.11.242.18:14094/ttm_service/"  # Adjust the URL as needed
+    ttm_url = "http://149.11.242.18:14094/ttm_service"  # Adjust the URL as needed
     headers = {
         "accept": "application/json",
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json"
     }
+    print("_______________headers_______________", headers)
     response = requests.post(ttm_url, headers=headers, json=data)
 
     if response.status_code == 200:
