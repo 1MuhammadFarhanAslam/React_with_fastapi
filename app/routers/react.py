@@ -286,7 +286,7 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 
 
 
-@router.post("/api/ttm_endpoint/")
+@router.post("/api/ttm_endpoint", tags=["React"])
 async def generate_audio(request: Request, authorization: str = Header(...)):
     # Extract prompt from request body
     data = await request.json()
@@ -299,45 +299,3 @@ async def generate_audio(request: Request, authorization: str = Header(...)):
 
     # Process the prompt and authorization token as needed
     return {"prompt": prompt, "token": authorization}
-
-
-
-    # authorization = request.headers.get("Authorization")
-    # print("_________________Authorization header_________________:", authorization)
-    # if authorization is None:
-    #     raise HTTPException(status_code=401, detail="Authorization header is missing")
-    
-    # # Check if the Authorization header has the correct format (Bearer token)
-    # parts = authorization.split()
-    # if len(parts) != 2 or parts[0].lower() != "bearer":
-    #     raise HTTPException(status_code=401, detail="Invalid Authorization header format")
-    
-    # access_token = parts[1]  # Extract the token
-
-    # # Extract "prompt" from request body
-    # prompt = request_data.get("prompt")
-    # if prompt is None:
-    #     raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
-
-    # # Prepare data for forwarding to the TTS service
-    # data = {
-    #     "prompt": prompt
-    # }
-
-    # # Forward request to the TTM service
-    # ttm_url = "vhttp://149.11.242.18:14094/ttm_service"  # Adjust the URL as needed
-    # headers = {
-    #     "accept": "application/json",
-    #     "Authorization": f"Bearer {access_token}",
-    #     "Content-Type": "application/json"
-    # }
-    # response = requests.post(ttm_url, headers=headers, json=data)  # Using explicit namespace
-
-    # # Check response from TTS service
-    # if response.status_code == 200:
-    #     # Extract and return audio data
-    #     audio_data = response.json().get("audio_data")
-    #     return {"audio_data": audio_data}
-    # else:
-    #     # Raise HTTPException for error handling
-    #     raise HTTPException(status_code=response.status_code, detail=response.text)
