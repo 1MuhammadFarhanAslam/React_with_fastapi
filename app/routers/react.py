@@ -284,15 +284,23 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
     
 
 
+
+
 @router.post("/api/ttm_endpoint/")
-async def text_to_music(request: Request):
-    # Extract the request body
-    request_data = await request.json()
+async def generate_audio(request: Request, authorization: str = Header(...)):
+    # Extract prompt from request body
+    data = await request.json()
+    print("_______________data_______________", data)
+    prompt = data.get("prompt")
 
-    print("_________________Request Body_______________:", request_data)
-    print("_________________Prompt_______________:", request_data.get("prompt"))
+    # Print extracted values
+    print("Prompt:", prompt)
+    print("Token:", authorization)
 
-    return {"msg": "Text to music endpoint"}
+    # Process the prompt and authorization token as needed
+    return {"prompt": prompt, "token": authorization}
+
+
 
     # authorization = request.headers.get("Authorization")
     # print("_________________Authorization header_________________:", authorization)
