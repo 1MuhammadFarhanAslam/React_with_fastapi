@@ -286,10 +286,19 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 
 
 
-@router.post("/api/ttm_endpoint", tags=["React"])
+@router.post("/api/ttm_endpoint")
 async def generate_audio(request: Request):
-    # Extract prompt from request body
-    print("_______________data_______________", request)
-
-    # Process the prompt and authorization token as needed
-    return {"data": data}
+    try:
+        data = await request.json()
+        print("Received data:", data)
+        if not data:
+            raise ValueError("Empty request body")
+        prompt = data.get("prompt")
+        if not prompt:
+            raise ValueError("Prompt not found in request body")
+        
+        # Process the prompt and authorization token as needed
+        # For demonstration, returning a simple response
+        return {"prompt": prompt, "message": "Received data successfully"}
+    except ValueError as e:
+        return {"error": str(e)}, 400  # Return a 400 Bad Request status for invalid requests
