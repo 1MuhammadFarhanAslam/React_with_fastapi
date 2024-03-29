@@ -289,8 +289,7 @@ async def forgot_password(request: Request, db: Session = Depends(get_database))
 @router.post("/api/ttm_endpoint", tags=["React"])
 async def generate_audio(request: Request):
     # Extract prompt from request body
-    data = await request.json()
-    print("_______________data_______________", data)
+    print("_______________data_______________", request)
 
     # Process the prompt and authorization token as needed
     return {"data": data}
