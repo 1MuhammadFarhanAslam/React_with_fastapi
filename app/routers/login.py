@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from models import Token
 from admin_database import get_admin, authenticate_admin
@@ -36,20 +36,44 @@ router = APIRouter()
 #     return Token(access_token=access_token, token_type="bearer")
 
 
-class CustomOAuth2PasswordRequestForm(OAuth2PasswordRequestForm):
-    grant_type: str = "password"
-    scope: str = ""
-    client_id: str = ""
-    client_secret: str = ""
+# class CustomOAuth2PasswordRequestForm(OAuth2PasswordRequestForm):
+#     grant_type: str = "password"
+#     scope: str = ""
+#     client_id: str = ""
+#     client_secret: str = ""
+
+# @router.post("/login", tags=["Authentication"])
+# async def login_for_access_token(
+#     form_data: CustomOAuth2PasswordRequestForm = Depends(),
+#     db: Session = Depends(get_database)
+# ) -> Token:
+#     username = form_data.username
+#     password = form_data.password
+
+#     # Attempt authentication for both admin and user
+#     admin = authenticate_admin(username, password, db=db)
+#     user = authenticate_user(username, password, db=db)
+
+#     if admin:
+#         access_token = create_admin_access_token(data={"sub": admin.username})
+#     elif user:
+#         access_token = create_user_access_token(data={"sub": user.username})
+#     else:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Incorrect username or password",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+
+#     return Token(access_token=access_token, token_type="bearer")
+
 
 @router.post("/login", tags=["Authentication"])
 async def login_for_access_token(
-    form_data: CustomOAuth2PasswordRequestForm = Depends(),
+    username: str = Form(...),
+    password: str = Form(...),
     db: Session = Depends(get_database)
 ) -> Token:
-    username = form_data.username
-    password = form_data.password
-
     # Attempt authentication for both admin and user
     admin = authenticate_admin(username, password, db=db)
     user = authenticate_user(username, password, db=db)
