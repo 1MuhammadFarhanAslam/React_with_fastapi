@@ -2,6 +2,7 @@ from fastapi import HTTPException, Depends, APIRouter, Header, Form, Request, st
 import requests
 from fastapi.responses import FileResponse
 import os
+import io
 
 router = APIRouter()
 
@@ -58,33 +59,34 @@ async def text_to_music(request: Request):
         prompt = request_data.get("prompt")
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
+
+        authorization = request.headers.get("Authorization")
+        if authorization is None:
+            raise HTTPException(status_code=401, detail="Authorization header is missing")
+        
+        parts = authorization.split()
+        if len(parts) != 2 or parts[0].lower() != "bearer":
+            raise HTTPException(status_code=401, detail="Invalid Authorization header format")
+        
+        access_token = parts[1]
+
+        data = {
+            "prompt": prompt
+        }
+
+        ttm_url = "http://149.11.242.18:14094/ttm_service"  # Adjust the URL as needed
+        headers = {
+            "Accept": "application/json",  # Specify the desired response format
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+        response = requests.post(ttm_url, headers=headers, json=data)
+
+        if response.status_code == 200:
+            # Return the audio file using FileResponse
+            return FileResponse(io.BytesIO(response.content), media_type="audio/wav", filename="generated_audio.wav")
+        else:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request body")
-
-    authorization = request.headers.get("Authorization")
-    if authorization is None:
-        raise HTTPException(status_code=401, detail="Authorization header is missing")
-    
-    parts = authorization.split()
-    if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise HTTPException(status_code=401, detail="Invalid Authorization header format")
-    
-    access_token = parts[1]
-
-    data = {
-        "prompt": prompt
-    }
-
-    ttm_url = "http://149.11.242.18:14094/ttm_service"  # Adjust the URL as needed
-    headers = {
-        "accept": "audio/wav",  # Specify the desired audio format
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json"
-    }
-    response = requests.post(ttm_url, headers=headers, json=data)
-
-    if response.status_code == 200:
-        # Return the audio file using FileResponse
-        return FileResponse(io.BytesIO(response.content), media_type="audio/wav", filename="generated_audio.wav")
-    else:
-        raise HTTPException(status_code=response.status_code, detail=response.text)
