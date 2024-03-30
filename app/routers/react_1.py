@@ -77,21 +77,14 @@ async def text_to_music(request: Request):
 
     ttm_url = "http://149.11.242.18:14094/ttm_service"  # Adjust the URL as needed
     headers = {
-        "accept": "application/json",
+        "accept": "audio/wav",  # Specify the desired audio format
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json"
     }
     response = requests.post(ttm_url, headers=headers, json=data)
 
-    # Inside your route handler function
     if response.status_code == 200:
-        audio_data = response
-        file_extension = os.path.splitext(audio_data)[1].lower()
-
-        # Set the appropriate content type based on the file extension
-        content_type = "audio/wav" if file_extension == '.wav' else "audio/mpeg"
-        
         # Return the audio file using FileResponse
-        return FileResponse(path=audio_data, media_type=content_type, filename=os.path.basename(audio_data))
+        return FileResponse(io.BytesIO(response.content), media_type="audio/wav", filename="generated_audio.wav")
     else:
         raise HTTPException(status_code=response.status_code, detail=response.text)
