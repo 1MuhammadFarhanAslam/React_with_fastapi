@@ -254,7 +254,7 @@ async def combined_user_auth(
         }
     except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 

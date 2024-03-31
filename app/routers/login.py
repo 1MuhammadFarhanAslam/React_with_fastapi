@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 router = APIRouter()
 
+#-------------------------------This endpoint is also 200 OK-----------------------------------------------
 # @router.post("/login", tags=["Authentication"])
 # async def login_for_access_token(
 #     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -36,6 +37,9 @@ router = APIRouter()
 #     return Token(access_token=access_token, token_type="bearer")
 
 
+
+
+#-------------------------------This endpoint is also 200 OK-----------------------------------------------
 # class CustomOAuth2PasswordRequestForm(OAuth2PasswordRequestForm):
 #     grant_type: str = "password"
 #     scope: str = ""
@@ -68,6 +72,8 @@ router = APIRouter()
 #     return Token(access_token=access_token, token_type="bearer")
 
 
+
+#-------------------------------This endpoint is also 200 OK-----------------------------------------------
 # @router.post("/login", tags=["Authentication"])
 # async def login_for_access_token(
 #     username: str = Form(...),
@@ -92,6 +98,7 @@ router = APIRouter()
 #     return Token(access_token=access_token, token_type="bearer")
 
 
+#-------------------------------This endpoint is also 200 OK-----------------------------------------------
 @router.post("/login", tags=["Authentication"])
 async def login_for_access_token(
     username: str = Form(...),
