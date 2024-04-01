@@ -1,14 +1,9 @@
 from fastapi import FastAPI
 import os
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from fastapi.middleware.cors import CORSMiddleware
 from routers import admin, user, login, react, react_1
-from typing import Generator
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import Session
-from typing import Generator
 
 app = FastAPI()
 
