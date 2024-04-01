@@ -1,15 +1,14 @@
-from fastapi import HTTPException, Depends, APIRouter, Header, Form, Request, status
+from fastapi import HTTPException, Depends, APIRouter, Header, Request, status
 from datetime import datetime, timedelta, timezone
-from uuid import uuid4
 from google.oauth2 import id_token
 from google.auth.transport import requests
 import jwt
 import os
-from models import React_User, React_user_Token, Token, Email_User
+from models import React_User, React_user_Token, Email_User
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
-from hashing import hash_password, verify_hash
+from hashing import hash_password
 from react_database import get_email_user, verify_email_user_password, send_reset_password_email
 import secrets
 
@@ -162,7 +161,8 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                 "token_type": "bearer"
             }
         
-    except:
+    except Exception as e:
+        print(e)
         raise HTTPException(status_code=400, detail="User already exists. Please sign in instead.")
 
     
