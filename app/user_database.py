@@ -9,7 +9,6 @@ import logging
 from datetime import datetime, timedelta
 from typing import Optional
 from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime, timedelta
 from typing import  Union
 from typing import Generator
 

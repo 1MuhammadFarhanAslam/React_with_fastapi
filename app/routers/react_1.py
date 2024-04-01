@@ -1,8 +1,6 @@
-from fastapi import HTTPException, Depends, APIRouter, Header, Form, Request, status
+from fastapi import HTTPException, APIRouter, Request
 import requests
 from fastapi.responses import FileResponse
-import os
-import io
 import tempfile
 
 router = APIRouter()

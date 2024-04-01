@@ -3,9 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, File
 from user_database import get_user, verify_user_credentials, update_user_password, get_database
 import logging
 from mimetypes import guess_type
-from fastapi import Depends
 from datetime import datetime
-from models import User, User
+from models import User
 from user_auth import get_current_active_user
 import re
 from fastapi.encoders import jsonable_encoder
@@ -101,8 +100,6 @@ async def ttm_service(user: User = Depends(get_current_active_user)):
     else:
         print("You do not have any roles assigned.")
         raise HTTPException(status_code=403, detail="Your does not have any roles assigned")
-
-from fastapi import UploadFile, File
 
 
 @router.post("/user/vc_service")

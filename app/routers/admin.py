@@ -1,15 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Form, status
 from admin_database import (
-    create_admin,
     get_admin,
     update_admin_password,
-    get_all_admins,
     delete_admin_by_username)
 
 from user_database import create_user , get_user, get_role_details, assign_user_roles, update_user_password
 from hashing import hash_password, verify_hash
 from models import Admin , User
-from typing import List
+
 from fastapi.logger import logger
 from admin_auth import get_current_active_admin
 import re
@@ -226,6 +224,8 @@ async def delete_admin(
         raise e
 
     except Exception as e:
+        # Log the error and return a generic error response
+        logger.error(f"Error during admin deletion: {e}")
         # Return a generic error response
         raise HTTPException(status_code=500, detail="Internal Server Error")
 

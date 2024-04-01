@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from typing import Union, List
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from typing import Union, Optional
+from typing import Optional
 from typing import Generator
 
 
@@ -170,9 +170,7 @@ def authenticate_admin(username: str, password: Optional[str] = None, db: Sessio
         return admin
     
     except Exception as e:
-        # Handle exceptions here
-        pass  # Placeholder for exception handling logic
-
+        print(f"Error authenticating admin: {e}")
     return None  # Return None if authentication fails
 
 

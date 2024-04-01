@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Table, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -7,7 +7,6 @@ import os
 from sqlalchemy import create_engine
 import random
 import string
-from pydantic import BaseModel
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
