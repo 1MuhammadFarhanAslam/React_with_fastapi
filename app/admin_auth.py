@@ -7,7 +7,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from models import TokenData, Admin
 from admin_database import get_admin
-import psycopg2
 
 SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY")
 ALGORITHM = "HS256"
