@@ -57,7 +57,7 @@ starlette==0.14.0
 sympy==1.10
 torch
 typing-extensions==4.0.1
-urllib3==1.26.7
+urllib3==1.26.18
 uvicorn==0.15.0
 watchfiles
 websockets
