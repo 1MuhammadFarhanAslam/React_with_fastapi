@@ -14,7 +14,7 @@ defusedxml
 dnspython
 ecdsa
 email-validator
-fastapi
+fastapi==0.110.0
 filelock
 fsspec
 greenlet
@@ -25,6 +25,7 @@ httptools
 httpx
 idna
 itsdangerous
+jose==1.0.0
 Jinja2
 Mako
 markdown-it-py
@@ -34,7 +35,7 @@ mpmath
 multidict
 networkx
 orjson
-passlib
+passlib==1.7.4
 pip
 psycopg2-binary
 pyasn1
@@ -53,7 +54,7 @@ rsa
 setuptools
 six
 sniffio
-sqlalchemy
+sqlalchemy==2.0.29
 starlette
 sympy
 torch

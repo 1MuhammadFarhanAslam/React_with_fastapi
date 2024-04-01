@@ -3,18 +3,11 @@ from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from pydantic import BaseModel
-from sqlalchemy.sql import func
 import os
 from sqlalchemy import create_engine
-from uuid import uuid4
-from sqlalchemy.dialects.postgresql import UUID
 import random
 import string
-from hashing import hash_password
-
-from sqlalchemy.orm import validates
-from pydantic import BaseModel, constr, EmailStr
-from pydantic import validator
+from pydantic import BaseModel
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
