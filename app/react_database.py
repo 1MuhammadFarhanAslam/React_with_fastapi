@@ -45,13 +45,13 @@ def verify_email_user(email: str, password: str):
 
         if not email_user:
             print("User not found as email does not exist. Please sign up first.")
-            raise HTTPException(status_code=404, detail="User not found as email does not exist. Please sign up first.")
+            return HTTPException(status_code=404, detail="User not found as email does not exist. Please sign up first.")
         
         # Verify the password
         if email_user:
             if not verify_email_user_password(password, email_user.password):
                 print("Ooops...........Incorrect password.")
-                raise HTTPException(status_code=401, detail="Ooops...........Incorrect password.")
+                return HTTPException(status_code=401, detail="Ooops...........Incorrect password.")
             else:
                 return email_user
 

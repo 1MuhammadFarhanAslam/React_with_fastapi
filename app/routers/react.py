@@ -378,8 +378,15 @@ async def email_signin(request: Request):
         user = verify_email_user(email, password)
         print("______________user________________: ", user)
         print(type(user))
+
+        if not user:
+            return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found. Please sign up first.")
+
+        else:
+            # Verify the password
+            if not verify_email_user(password, user.password):
+                return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
             
-        if user:
             access_token = React_JWT_Token({"sub": user.email})
             print("_______________access_token_______________", access_token)
             print(type(access_token))
@@ -400,7 +407,7 @@ async def email_signin(request: Request):
             }
 
             print(resp)
-            
+
             # Set the access token as a cookie
             response = JSONResponse(content=resp)
             response.set_cookie(key="access_token", value=str(access_token),max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
