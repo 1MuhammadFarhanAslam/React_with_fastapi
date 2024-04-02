@@ -74,7 +74,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 
         if existing_user:
             # User exists, return an access token
-            access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token = React_JWT_Token(data={"sub": existing_user.email})
             print(access_token)
 
             return {
@@ -99,7 +99,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             db.refresh(user)
 
             # Create a new access token for the user
-            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token = React_JWT_Token(data={"sub": user.email})
             print(access_token)
 
             return {
@@ -147,7 +147,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             db.commit()
 
             # Create a new access token
-            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token = React_JWT_Token(data={"sub": user.email})
             print("_______________access_token_______________", access_token)
 
             return {
@@ -188,7 +188,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
 
             # Create a new access token
-            access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token = React_JWT_Token(data={"sub": user.email})
 
             return {
                 "message": "Login successful! User already exists.",
