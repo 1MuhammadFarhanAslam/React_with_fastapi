@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from hashing import hash_password
-from react_database import get_email_user, verify_email_user_password, send_reset_password_email
+from react_database import verify_email_user, verify_email_user_password, send_reset_password_email
 import secrets
 from fastapi.responses import JSONResponse
 
@@ -338,7 +338,8 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                     "status": user.status,
                     "role": user.role
                 },
-                "access_token": str(access_token),
+
+                "access_token": access_token,
                 "token_type": "bearer"
             }
 
@@ -354,7 +355,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 
 # Your existing endpoint code for email signin
 @router.post("/api/email-signin", tags=["React"])
-async def email_signin(request: Request, db: Session = Depends(get_database)):
+async def email_signin(request: Request):
     try:
         data = await request.json()
         email = data.get('email')
@@ -364,17 +365,11 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         print("______________password________________: ", password)
         print(type(password))
 
-        user = get_email_user(email)
+        user = verify_email_user(email, password)
         print("______________user________________: ", user)
         print(type(user))
-
-        if not user:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found. Please sign up first.")
-        
-        else:
-            if not verify_email_user_password(password, user.password):
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
-
+            
+        if user:
             access_token = React_JWT_Token({"sub": user.email})
             print("_______________access_token_______________", access_token)
             print(type(access_token))
@@ -389,6 +384,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                     "status": user.status,
                     "role": user.role
                 },
+
                 "access_token": access_token,
                 "token_type": "bearer"
             }

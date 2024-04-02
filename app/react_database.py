@@ -33,24 +33,46 @@ def get_database() -> Generator[Session, None, None]:
 
 
 
-def get_email_user(email: str):
-    db = SessionLocal()
-    try:
-        email_user = db.query(Email_User).filter(Email_User.username == email).first()
-        if not email_user:
-            raise HTTPException(status_code=404, detail=f"Email_user not found with email '{email}'")
-        return email_user
-    except SQLAlchemyError as e:
-        raise RuntimeError(f"Error retrieving email_user: {e}")
-    finally:
-        db.close()
-
-
 
 
 def verify_email_user_password(plain_password: str, hashed_password: str) -> bool:
     # Verify the plain password against the hashed password using bcrypt
     return verify_hash(plain_password, hashed_password)
+
+
+# def verify_email_user(email: str, password: str):
+#     db = SessionLocal()
+#     try:
+#         email_user = db.query(Email_User).filter(Email_User.email == email).first()
+#         if not email_user:
+#             raise HTTPException(status_code=404, detail=f"Email_user not found with email '{email}'")
+#         if not verify_email_user_password(password, email_user.password):
+#             return HTTPException(status_code=401, detail=f"Incorrect password for email_user with email '{email}'")
+#         return email_user
+#     except SQLAlchemyError as e:
+#         raise RuntimeError(f"Error retrieving email_user: {e}")
+#     finally:
+#         db.close()
+        
+def verify_email_user(email: str, password: str):
+    db = SessionLocal()
+    try:
+        # Check if the email exists in the database
+        email_user = db.query(Email_User).filter(Email_User.email == email).first()
+        if not email_user:
+            raise HTTPException(status_code=404, detail="User not found. Please sign up first.")
+        
+        # If email exists, validate the password
+        if not verify_email_user_password(password, email_user.password):
+            raise HTTPException(status_code=401, detail="Incorrect password.")
+
+        return email_user
+
+    except SQLAlchemyError as e:
+        raise RuntimeError(f"Error retrieving user: {e}")
+    finally:
+        db.close()
+
 
 
 
