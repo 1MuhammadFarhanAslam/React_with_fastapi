@@ -9,8 +9,7 @@ from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from hashing import hash_password
-from react_database import verify_email_user
-import secrets
+from react_database import verify_email_user_password
 from fastapi.responses import JSONResponse
 
 
@@ -365,7 +364,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 
 # Your existing endpoint code for email signin
 @router.post("/api/email-signin", tags=["React"])
-async def email_signin(request: Request):
+async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
         email = data.get('email')
@@ -375,43 +374,47 @@ async def email_signin(request: Request):
         print("______________password________________: ", password)
         print(type(password))
 
-        user = verify_email_user(email, password)
-        print("______________user________________: ", user)
-        print(type(user))
+        # Check if the email exists in the database
+        email_user = db.query(Email_User).filter(Email_User.email == email).first()
 
-        if not user:
+        if not email_user:
+            print("User not found as email does not exist. Please sign up first.")
             return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found. Please sign up first.")
+        
+        # Verify the password
+        if email_user:
+            # Authenticate the password
+            authenticated_user = verify_email_user_password(password, email_user.password)
 
-        else:
-            # Verify the password
-            if not verify_email_user(password, user.password):
+            if not authenticated_user:
                 return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
-            
-            access_token = React_JWT_Token({"sub": user.email})
-            print("_______________access_token_______________", access_token)
-            print(type(access_token))
 
-            # Set the access token as a cookie in the response
-            resp = {
-                "message": "Login successful! User already exists.",
-                "user_info": {
-                    "id": user.id,
-                    "created_at": user.created_at.isoformat(),  # Convert datetime to string,
-                    "email": user.email,
-                    "status": user.status,
-                    "role": user.role
-                },
+            else:
+                access_token = React_JWT_Token({"sub": authenticated_user.email})
+                print("_______________access_token_______________", access_token)
+                print(type(access_token))
 
-                "access_token": access_token,
-                "token_type": "bearer"
-            }
+                # Set the access token as a cookie in the response
+                resp = {
+                    "message": "Login successful! User already exists.",
+                    "user_info": {
+                        "id": authenticated_user.id,
+                        "created_at": authenticated_user.created_at.isoformat(),  # Convert datetime to string,
+                        "email": authenticated_user.email,
+                        "status": authenticated_user.status,
+                        "role": authenticated_user.role
+                    },
 
-            print(resp)
+                    "access_token": access_token,
+                    "token_type": "bearer"
+                }
 
-            # Set the access token as a cookie
-            response = JSONResponse(content=resp)
-            response.set_cookie(key="access_token", value=str(access_token),max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
-            return response
+                print(resp)
+
+                # Set the access token as a cookie
+                response = JSONResponse(content=resp)
+                response.set_cookie(key="access_token", value=str(access_token),max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
+                return response
             
     except Exception as e:
         raise HTTPException(status_code=400, detail="Error: " + str(e))
