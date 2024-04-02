@@ -297,15 +297,16 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 
 @router.post("/api/email-signup", tags=["React"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
-    try:
-        data = await request.json()
-        email = data.get('email')
-        print("______________email________________: ", email)
-        print(type(email))
-        password = data.get('password')
-        print("______________password________________: ", password)
-        print(type(password))
 
+    data = await request.json()
+    email = data.get('email')
+    print("______________email________________: ", email)
+    print(type(email))
+    password = data.get('password')
+    print("______________password________________: ", password)
+    print(type(password))
+    
+    try:
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
@@ -345,7 +346,9 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             return response
         
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=400, detail="Error: " + str(e))
+        
 
 # Your existing endpoint code for email signin
 @router.post("/api/email-signin", tags=["React"])
