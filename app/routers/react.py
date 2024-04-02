@@ -300,12 +300,18 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
         email = data.get('email')
+        print("______________email________________: ", email)
+        print(type(email))
         password = data.get('password')
+        print("______________password________________: ", password)
+        print(type(password))
 
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if existing_user:
+            # User already exists, return his/her details
+            print("______________existing_user________________: ", existing_user)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists. Please sign in instead.")  
         
         else:
@@ -317,6 +323,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 
             # Create a new access token
             access_token = React_JWT_Token(data={"sub": user.email})
+            print("_______________access_token_______________", access_token)
 
             # Set the access token as a cookie in the response
             resp = {
@@ -346,9 +353,15 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
         email = data.get('email')
+        print("______________email________________: ", email)
+        print(type(email))
         password = data.get('password')
+        print("______________password________________: ", password)
+        print(type(password))
 
         user = get_email_user(db, email)
+        print("______________user________________: ", user)
+        print(type(user))
 
         if not user:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found. Please sign up first.")
@@ -358,6 +371,8 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
 
             access_token = React_JWT_Token({"sub": user.email})
+            print("_______________access_token_______________", access_token)
+            print(type(access_token))
 
             # Set the access token as a cookie in the response
             resp = {
@@ -372,7 +387,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                 "access_token": access_token,
                 "token_type": "bearer"
             }
-            
+
             # Set the access token as a cookie
             response = JSONResponse(content=resp)
             response.set_cookie(key="access_token", value=access_token,max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
