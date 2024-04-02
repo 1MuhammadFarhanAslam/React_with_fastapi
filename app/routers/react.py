@@ -43,14 +43,14 @@ GOOGLE_Email_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_Email_LOGIN_SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES), secure=False):
+def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, GOOGLE_Email_LOGIN_SECRET_KEY, algorithm=ALGORITHM, secure=secure)
+    encoded_jwt = jwt.encode(to_encode, GOOGLE_Email_LOGIN_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
