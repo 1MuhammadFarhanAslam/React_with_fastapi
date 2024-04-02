@@ -320,7 +320,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 
         if existing_user:
             # User already exists, return his/her details
-            print("______________existing_user________________: ", existing_user)
+            print("Ooops..................User already exists. Please sign in instead.")
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists. Please sign in instead.")  
         
         else:
@@ -378,16 +378,15 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         email_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if not email_user:
-            print("User not found as email does not exist. Please sign up first.")
-            return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found. Please sign up first.")
+            print("OooPS..............User not found as this email does not exist. Please sign up first.")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found. Please sign up first.")
         
-        # Verify the password
         if email_user:
             # Authenticate the password
             authenticated_user = verify_email_user_password(password, email_user.password)
 
             if not authenticated_user:
-                return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
 
             else:
                 access_token = React_JWT_Token({"sub": authenticated_user.email})

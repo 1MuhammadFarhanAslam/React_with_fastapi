@@ -32,7 +32,7 @@ def get_database() -> Generator[Session, None, None]:
 
 
 
-def verify_email_user_password(plain_password: str, hashed_password: str) -> bool:
+def verify_email_user_password(plain_password: str, hashed_password: str):
     # Verify the plain password against the hashed password using bcrypt
     return verify_hash(plain_password, hashed_password)
 
