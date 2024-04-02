@@ -16,6 +16,8 @@ from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
+# 
+
 # Get the database URL from the environment variable
 DATABASE_URL = os.environ.get("DATABASE_URL")
 # Create the SQLAlchemy engine
@@ -137,6 +139,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             "email_verified": ticket.get("email_verified"),
         }
 
+        print("_________user_data__________:", user_data)
         # Check if the user already exists in the database
         existing_user = db.query(React_User).filter(React_User.email == user_data["email"]).first()
 
@@ -149,7 +152,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             resp = {
                 "message": "Log-in successfully! User already exists.",
                 "userData": {
-                    "id": str(existing_user.id),
+                    "id": existing_user.id,
                     "username": existing_user.username,
                     "email": existing_user.email,
                     "picture": existing_user.picture,
@@ -181,7 +184,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             response = {
                 "message": "Sign-up successfully. User created successfully.",
                 "userData": {
-                    "id": str(user.id),
+                    "id": user.id,
                     "username": user.username,
                     "email": user.email,
                     "picture": user.picture,
@@ -196,7 +199,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             response = JSONResponse(content=response)
             response.set_cookie(key="access_token", value=access_token, max_age=1800, secure=False, httponly=True, samesite="none")
 
-            return resp
+            return response
     
     except Exception as e:
         print(e)
