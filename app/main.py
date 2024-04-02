@@ -31,7 +31,7 @@ initialize_database()
 # Allow CORS for only the React frontend server
 origins = [
     "http://85.239.241.96:3000",  # Your React frontend server's HTTP URL
-    'http://85.239.241.96:8000/'
+    'http://85.239.241.96:8000'
 ]
 
 # Allow CORS for all domains in this example
