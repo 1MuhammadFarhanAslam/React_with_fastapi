@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from hashing import hash_password
-from react_database import verify_email_user, verify_email_user_password, send_reset_password_email
+from react_database import verify_email_user
 import secrets
 from fastapi.responses import JSONResponse
 
@@ -40,7 +40,7 @@ def get_database() -> Generator[Session, None, None]:
 
 # Get the database URL from the environment variable
 DATABASE_URL = os.environ.get("DATABASE_URL")
-GOOGLE_Email_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_Email_LOGIN_SECRET_KEY")
+GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
@@ -51,7 +51,7 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, GOOGLE_Email_LOGIN_SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
@@ -409,7 +409,7 @@ async def combined_user_auth(
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
         
         # Decode and verify the JWT token
-        decoded_token = jwt.decode(token, GOOGLE_Email_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+        decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
         print("________________decoded_token________________", decoded_token)
         email = decoded_token.get("sub")  # Assuming "sub" contains the email address
         
@@ -448,29 +448,4 @@ async def combined_user_auth(
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception:
         raise HTTPException(status_code=500, detail="Internal Server Error")
-    
-
-@router.post("/api/forgot-password", tags=["React"])
-async def forgot_password(request: Request, db: Session = Depends(get_database)):
-    try:
-        data = await request.json()
-        print("_______________data_______________", data)
-        email = data.get('email')
-        print("_______________email_______________", email)
-
-        user = db.query(Email_User).filter(Email_User.email == email).first()
-
-        if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
-
-        password_token = secrets.token_hex(35)
-        user.password_token = hash_password(password_token)
-        db.commit()
-
-        origin = "http://localhost:3000/"
-        await send_reset_password_email(user.email, password_token, origin)
-
-        return {"msg": "Please check your email for the reset password link."}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Error: " + str(e))
     
