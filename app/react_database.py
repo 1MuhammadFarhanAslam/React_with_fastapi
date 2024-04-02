@@ -42,14 +42,16 @@ def verify_email_user(email: str, password: str):
     try:
         # Check if the email exists in the database
         email_user = db.query(Email_User).filter(Email_User.email == email).first()
-        if not email_user:
-            raise HTTPException(status_code=404, detail="User not found. Please sign up first.")
-        
-        # If email exists, validate the password
-        if not verify_email_user_password(password, email_user.password):
-            raise HTTPException(status_code=401, detail="Incorrect password.")
 
-        return email_user
+        if not email_user:
+            raise HTTPException(status_code=404, detail="User not found as email does not exist. Please sign up first.")
+        
+        # Verify the password
+        if email_user:
+            if not verify_email_user_password(password, email_user.password):
+                raise HTTPException(status_code=401, detail="Ooops...........Incorrect password.")
+            else:
+                return email_user
 
     except SQLAlchemyError as e:
         raise RuntimeError(f"Error retrieving user: {e}")

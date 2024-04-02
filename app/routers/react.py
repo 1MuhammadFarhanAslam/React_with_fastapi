@@ -193,7 +193,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             }
 
             # Set the access token as a cookie
-            resp = JSONResponse(content=response)
+            response = JSONResponse(content=response)
             response.set_cookie(key="access_token", value=access_token, max_age=1800, secure=False, httponly=True, samesite="none")
 
             return resp
