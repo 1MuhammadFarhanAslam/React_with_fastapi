@@ -323,7 +323,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                 "message": "Signup successful! User created successfully.",
                 "user_info": {
                     "id": user.id,
-                    "created_at": user.created_at,
+                    "created_at": user.created_at.isoformat(),  # Convert datetime to string,
                     "email": user.email,
                     "status": user.status,
                     "role": user.role
@@ -364,7 +364,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                 "message": "Login successful! User already exists.",
                 "user_info": {
                     "id": user.id,
-                    "created_at": user.created_at,
+                    "created_at": user.created_at.isoformat(),  # Convert datetime to string,
                     "email": user.email,
                     "status": user.status,
                     "role": user.role
