@@ -44,7 +44,7 @@ def verify_email_user(email: str, password: str):
         email_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if not email_user:
-            print("User not found as email does not exist.")
+            print("User not found as email does not exist. Please sign up first.")
             raise HTTPException(status_code=404, detail="User not found as email does not exist. Please sign up first.")
         
         # Verify the password
