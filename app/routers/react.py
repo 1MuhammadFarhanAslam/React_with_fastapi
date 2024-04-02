@@ -181,7 +181,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             print(access_token)
             print(type(access_token))
 
-            response = {
+            resp = {
                 "message": "Sign-up successfully. User created successfully.",
                 "userData": {
                     "id": user.id,
@@ -196,7 +196,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             }
 
             # Set the access token as a cookie
-            response = JSONResponse(content=response)
+            response = JSONResponse(content=resp)
             response.set_cookie(key="access_token", value=access_token, max_age=1800, secure=False, httponly=True, samesite="none")
 
             return response
