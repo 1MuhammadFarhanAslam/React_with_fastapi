@@ -449,6 +449,9 @@ async def combined_user_auth(
                 "email_verified": react_user.email_verified,
                 "role": react_user.role
             }
+
+            print("_______________user details_______________", user_data)
+
         elif email_user:
             user_data = {
                 "id": email_user.id,
@@ -457,6 +460,9 @@ async def combined_user_auth(
                 "status": email_user.status,
                 "role": email_user.role
             }
+
+            print("_______________user details_______________", user_data)
+
         else:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -464,6 +470,7 @@ async def combined_user_auth(
             "message": "User details retrieved successfully",
             "userData": user_data
         }
+    
     except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception:
