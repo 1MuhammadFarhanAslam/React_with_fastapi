@@ -163,12 +163,12 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
                 "token_type": "bearer"
             }
 
+            print(resp)
+
             # Set the access token as a cookie
             response = JSONResponse(content=resp)
             response.set_cookie(key="access_token", value=access_token, max_age=1800, secure=False, httponly=True, samesite="none")
 
-            # Return the response
-            print(response)
 
             return response
         
@@ -198,12 +198,11 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
                 "token_type": "bearer"
             }
 
+            print(resp)
+
             # Set the access token as a cookie
             response = JSONResponse(content=resp)
             response.set_cookie(key="access_token", value=access_token, max_age=1800, secure=False, httponly=True, samesite="none")
-
-            # Return the response
-            print(response)
 
             return response
     
