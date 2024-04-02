@@ -381,37 +381,38 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
             print("OooPS..............User not found as this email does not exist. Please sign up first.")
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found. Please sign up first.")
         
-        if not verify_email_user_password(password, email_user.password):
-            print("OooPS..............Incorrect password. Please try again")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
-        
-
         else:
-            access_token = React_JWT_Token({"sub": email_user.email})
-            print("_______________access_token_______________", access_token)
-            print(type(access_token))
+            # Verify the password
+            if not verify_email_user_password(password, email_user.password):
+                print("OooPS..............Incorrect password. Please try again")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
+            else:
+                # Generate an access token for the user
+                access_token = React_JWT_Token({"sub": email_user.email})
+                print("_______________access_token_______________", access_token)
+                print(type(access_token))
 
-            # Set the access token as a cookie in the response
-            resp = {
-                "message": "Login successful! User already exists.",
-                "user_info": {
-                    "id": email_user.id,
-                    "created_at": email_user.created_at.isoformat(),  # Convert datetime to string,
-                    "email": email_user.email,
-                    "status": email_user.status,
-                    "role": email_user.role
-                },
+                # Set the access token as a cookie in the response
+                resp = {
+                    "message": "Login successful! User already exists.",
+                    "user_info": {
+                        "id": email_user.id,
+                        "created_at": email_user.created_at.isoformat(),  # Convert datetime to string,
+                        "email": email_user.email,
+                        "status": email_user.status,
+                        "role": email_user.role
+                    },
 
-                "access_token": access_token,
-                "token_type": "bearer"
-            }
+                    "access_token": access_token,
+                    "token_type": "bearer"
+                }
 
-            print(resp)
+                print(resp)
 
-            # Set the access token as a cookie
-            response = JSONResponse(content=resp)
-            response.set_cookie(key="access_token", value=str(access_token),max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
-            return response
+                # Set the access token as a cookie
+                response = JSONResponse(content=resp)
+                response.set_cookie(key="access_token", value=str(access_token),max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
+                return response
             
     except Exception as e:
         raise HTTPException(status_code=400, detail="Error: " + str(e))
