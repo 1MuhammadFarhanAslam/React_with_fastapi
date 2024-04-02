@@ -11,6 +11,7 @@ from typing import Generator
 from hashing import hash_password
 from react_database import get_email_user, verify_email_user_password, send_reset_password_email
 import secrets
+from fastapi.responses import JSONResponse
 
 
 router = APIRouter()
@@ -187,10 +188,10 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
             if not verify_email_user_password(password, user.password):
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
 
-            # Create a new access token
-            access_token = React_JWT_Token(data={"sub": user.email})
+            # Generate an access token for the user
+            access_token = React_JWT_Token({"sub": user.email})
 
-            return {
+            response = {
                 "message": "Login successful! User already exists.",
                 "user_info": {
                     "id": user.id,
@@ -202,6 +203,8 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                 "access_token": access_token,
                 "token_type": "bearer"
             }
+
+            return JSONResponse(content=response, headers={"Access-Control-Allow-Origin": "http://85.239.241.96:3000", "Access-Control-Allow-Credentials": "true"})
             
     except Exception as e:
         raise HTTPException(status_code=400, detail="Error: " + str(e))
