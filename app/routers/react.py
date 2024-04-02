@@ -11,6 +11,7 @@ from typing import Generator
 from hashing import hash_password
 from react_database import get_email_user, verify_email_user_password, send_reset_password_email
 import secrets
+from fastapi.responses import JSONResponse
 
 
 router = APIRouter()
@@ -78,7 +79,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             access_token = React_JWT_Token(data={"sub": existing_user.email}, expires_delta=access_token_expires)
             print(access_token)
 
-            return {
+            response = {
                 "message": "Log-in successfully! User already exists.",
                 "userData": {
                     "id": str(existing_user.id),
@@ -102,7 +103,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
             print(access_token)
 
-            return {
+            response = {
                 "message": "Sign-up successfully. User created successfully.",
                 "userData": {
                     "id": str(user.id),
@@ -116,10 +117,12 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
                 "token_type": "bearer"
             }
     
+        return JSONResponse(content=response, headers={"Access-Control-Allow-Origin": "http://85.239.241.96:3000", "Access-Control-Allow-Credentials": "true"})
+    
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
-    
+
 
 @router.post("/api/email-signup", tags=["React"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
@@ -148,7 +151,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
             print("_______________access_token_______________", access_token)
 
-            return {
+            response = {
                 "message": "Signup successful! User created successfully.",
                 "user_info": {
                     "id": user.id,
@@ -160,6 +163,8 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                 "access_token": access_token,
                 "token_type": "bearer"
             }
+
+            return JSONResponse(content=response, headers={"Access-Control-Allow-Origin": "http://85.239.241.96:3000", "Access-Control-Allow-Credentials": "true"})
         
     except Exception as e:
         print(e)
@@ -189,7 +194,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
             access_token_expires = timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
 
-            return {
+            response = {
                 "message": "Login successful! User already exists.",
                 "user_info": {
                     "id": user.id,
@@ -201,6 +206,8 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                 "access_token": access_token,
                 "token_type": "bearer"
             }
+
+            return JSONResponse(content=response, headers={"Access-Control-Allow-Origin": "http://85.239.241.96:3000", "Access-Control-Allow-Credentials": "true"})
             
     except Exception as e:
         raise HTTPException(status_code=400, detail="Error: " + str(e))
@@ -248,10 +255,13 @@ async def combined_user_auth(
         else:
             raise HTTPException(status_code=404, detail="User not found")
         
-        return {
+        response = {
             "message": "User details retrieved successfully",
             "userData": user_data
         }
+
+        return JSONResponse(content=response, headers={"Access-Control-Allow-Origin": "http://85.239.241.96:3000", "Access-Control-Allow-Credentials": "true"})
+    
     except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception:
