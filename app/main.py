@@ -28,10 +28,15 @@ def initialize_database():
 # Call the database initialization function
 initialize_database()
 
+# Allow CORS for only the React frontend server
+origins = [
+    "http://85.239.241.96:3000",  # Your React frontend server's HTTP URL
+]
+
 # Allow CORS for all domains in this example
 app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
