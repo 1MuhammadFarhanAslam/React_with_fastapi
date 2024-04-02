@@ -351,6 +351,8 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                 "token_type": "bearer"
             }
 
+            print(resp)
+
             # Set the access token as a cookie
             response = JSONResponse(content=resp)
             response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
@@ -397,6 +399,8 @@ async def email_signin(request: Request):
                 "token_type": "bearer"
             }
 
+            print(resp)
+            
             # Set the access token as a cookie
             response = JSONResponse(content=resp)
             response.set_cookie(key="access_token", value=str(access_token),max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
