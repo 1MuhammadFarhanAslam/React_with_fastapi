@@ -194,7 +194,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
             access_token_expires = 30 # timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
 
-            response = {
+            response = JSONResponse (content={
                 "message": "Login successful! User already exists.",
                 "user_info": {
                     "id": user.id,
@@ -205,7 +205,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                 },
                 "access_token": access_token,
                 "token_type": "bearer"
-            }
+            })
 
             return JSONResponse(content=response, headers={"Access-Control-Allow-Origin": "http://85.239.241.96:3000", "Access-Control-Allow-Credentials": "true"})
             
