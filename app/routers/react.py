@@ -191,7 +191,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password.")
 
             # Generate an access token for the user
-            access_token_expires = timedelta(minutes=30)
+            access_token_expires = 30 # timedelta(minutes=30)
             access_token = React_JWT_Token(data={"sub": user.email}, expires_delta=access_token_expires)
 
             response = {
