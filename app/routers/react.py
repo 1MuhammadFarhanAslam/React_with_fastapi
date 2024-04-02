@@ -338,13 +338,13 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                     "status": user.status,
                     "role": user.role
                 },
-                "access_token": access_token,
+                "access_token": str(access_token),
                 "token_type": "bearer"
             }
 
             # Set the access token as a cookie
             response = JSONResponse(content=resp)
-            response.set_cookie(key="access_token", value=access_token, max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
+            response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
             return response
         
     except Exception as e:
@@ -364,7 +364,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         print("______________password________________: ", password)
         print(type(password))
 
-        user = get_email_user(db, email)
+        user = get_email_user(email)
         print("______________user________________: ", user)
         print(type(user))
 
@@ -395,7 +395,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
 
             # Set the access token as a cookie
             response = JSONResponse(content=resp)
-            response.set_cookie(key="access_token", value=access_token,max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
+            response.set_cookie(key="access_token", value=str(access_token),max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
             return response
             
     except Exception as e:
