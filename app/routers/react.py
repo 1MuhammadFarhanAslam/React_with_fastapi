@@ -144,6 +144,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             # User exists, return an access token
             access_token = React_JWT_Token(data={"sub": existing_user.email})
             print(access_token)
+            print(type(access_token))
 
             resp = {
                 "message": "Log-in successfully! User already exists.",
@@ -175,6 +176,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             # Create a new access token for the user
             access_token = React_JWT_Token(data={"sub": user.email})
             print(access_token)
+            print(type(access_token))
 
             response = {
                 "message": "Sign-up successfully. User created successfully.",
@@ -297,16 +299,15 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 
 @router.post("/api/email-signup", tags=["React"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
-
-    data = await request.json()
-    email = data.get('email')
-    print("______________email________________: ", email)
-    print(type(email))
-    password = data.get('password')
-    print("______________password________________: ", password)
-    print(type(password))
-    
     try:
+        data = await request.json()
+        email = data.get('email')
+        print("______________email________________: ", email)
+        print(type(email))
+        password = data.get('password')
+        print("______________password________________: ", password)
+        print(type(password))
+
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
@@ -325,6 +326,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             # Create a new access token
             access_token = React_JWT_Token(data={"sub": user.email})
             print("_______________access_token_______________", access_token)
+            print(type(access_token))
 
             # Set the access token as a cookie in the response
             resp = {
