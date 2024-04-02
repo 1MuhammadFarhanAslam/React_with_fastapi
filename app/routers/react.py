@@ -164,7 +164,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                     "status": user.status,
                     "role": user.role
                 },
-                "access_token": access_token,
+                "access_token": str(access_token),
                 "token_type": "bearer"
             }
 
@@ -208,7 +208,8 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                     "status": user.status,
                     "role": user.role
                 },
-                "access_token": access_token,
+
+                "access_token": str(access_token),
                 "token_type": "bearer"
             }
 
