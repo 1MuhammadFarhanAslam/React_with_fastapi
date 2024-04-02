@@ -360,7 +360,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
             access_token = React_JWT_Token({"sub": user.email})
 
             # Set the access token as a cookie in the response
-            resp = JSONResponse(content={
+            resp = {
                 "message": "Login successful! User already exists.",
                 "user_info": {
                     "id": user.id,
@@ -371,7 +371,8 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                 },
                 "access_token": access_token,
                 "token_type": "bearer"
-            })
+            }
+            
             # Set the access token as a cookie
             response = JSONResponse(content=resp)
             response.set_cookie(key="access_token", value=access_token,max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
