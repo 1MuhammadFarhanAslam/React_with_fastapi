@@ -78,7 +78,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             access_token = React_JWT_Token(data={"sub": existing_user.email})
             print(access_token)
 
-            return {
+            response = {
                 "message": "Log-in successfully! User already exists.",
                 "userData": {
                     "id": str(existing_user.id),
@@ -92,6 +92,8 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
                 "token_type": "bearer"
             }
         
+            return JSONResponse(content=response, headers={"Access-Control-Allow-Origin": "http://85.239.241.96:3000", "Access-Control-Allow-Credentials": "true"})
+        
         else:
             # User does not exist, create a new user and save it to the database
             user = React_User(**user_data)
@@ -103,7 +105,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
             access_token = React_JWT_Token(data={"sub": user.email})
             print(access_token)
 
-            return {
+            response = {
                 "message": "Sign-up successfully. User created successfully.",
                 "userData": {
                     "id": str(user.id),
@@ -116,6 +118,8 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
                 "access_token": access_token,
                 "token_type": "bearer"
             }
+        
+            return JSONResponse(content=response, headers={"Access-Control-Allow-Origin": "http://85.239.241.96:3000", "Access-Control-Allow-Credentials": "true"})
     
     except Exception as e:
         print(e)
@@ -151,7 +155,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             access_token = React_JWT_Token(data={"sub": user.email})
             print("_______________access_token_______________", access_token)
 
-            return {
+            response = {
                 "message": "Signup successful! User created successfully.",
                 "user_info": {
                     "id": user.id,
@@ -163,6 +167,8 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                 "access_token": access_token,
                 "token_type": "bearer"
             }
+
+            return JSONResponse(content=response, headers={"Access-Control-Allow-Origin": "http://85.239.241.96:3000", "Access-Control-Allow-Credentials": "true"})
         
     except Exception as e:
         print(e)
@@ -175,7 +181,9 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
         email = data.get('email')
+        print("______________email________________: ", email)
         password = data.get('password')
+        print("______________password________________: ", password)
 
         # Retrieve the user from the database based on the email
         user = get_email_user(db, email)
@@ -241,6 +249,7 @@ async def combined_user_auth(
                 "email_verified": react_user.email_verified,
                 "role": react_user.role
             }
+            
         elif email_user:
             user_data = {
                 "id": email_user.id,
@@ -249,6 +258,7 @@ async def combined_user_auth(
                 "status": email_user.status,
                 "role": email_user.role
             }
+
         else:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -256,6 +266,7 @@ async def combined_user_auth(
             "message": "User details retrieved successfully",
             "userData": user_data
         }
+    
     except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception:
