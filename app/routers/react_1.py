@@ -155,11 +155,6 @@ LOGIN_PASSWORD = "Opentensor@12345"
 
 # Define a function to log in the user and get the access token
 def login_user():
-    # Check if the access token is already available in the headers
-    access_token = requests.headers.get("Authorization")
-    if access_token:
-        return access_token
-
     # Make a request to the login endpoint to log in the user
     login_url = "http://149.11.242.18:14094/login"  # Adjust the URL as needed
     login_payload = {
@@ -174,7 +169,8 @@ def login_user():
 
     if login_response.status_code == 200:
         # Login successful, extract and return the access token
-        access_token = login_response.json().get("access_token")
+        response_data = login_response.json()
+        access_token = response_data.get("access_token")
         return access_token
     else:
         # Login failed
