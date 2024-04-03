@@ -192,7 +192,7 @@ async def text_to_music(request: Request):
             "prompt": prompt
         }
 
-        ttm_url = "http://149.11.242.18:14094/ttm_service"  # Adjust the URL as needed
+        ttm_url = "http://149.11.242.18:40337/ttm_service"  # Adjust the URL as needed
         headers = {
             "Accept": "audio/wav",  # Specify the desired audio format
             "Authorization": f"Bearer {access_token}",
