@@ -142,10 +142,15 @@
 
 
 
-from fastapi import HTTPException, APIRouter, Request
+from fastapi import HTTPException, APIRouter, Request, Header, Depends
 import requests
 from fastapi.responses import FileResponse
 import tempfile
+import os
+import jwt
+from sqlalchemy.orm import Session
+from react import get_database
+from models import React_User, Email_User
 
 router = APIRouter()
 
@@ -213,29 +218,47 @@ def login_user():
 
 #     except ValueError:
 #         raise HTTPException(status_code=400, detail="Invalid JSON format in the request body")
+    
+GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request):
+async def text_to_music(request: Request, authorization: str = Header(...), db: Session = Depends(get_database))  -> FileResponse:
     try:
+        # Extract the request data
         request_data = await request.json()
-        print(request_data)
+        print("________________request_data________________", request_data)
         prompt = request_data.get("prompt")
-        print(prompt)
-        frontend_access_token = request.headers.get("Authorization")
-        print(frontend_access_token)
-
-        if frontend_access_token is None:
-            print("Access token not provided in the Authorization header")
-            raise HTTPException(status_code=401, detail="Access token not provided in the Authorization header")
+        print("________________prompt________________", prompt)
         if prompt is None:
-            print("Prompt not provided in the request body")
-            raise HTTPException(status_code=400, detail="Prompt is missing in the request headers")
-        
-        # Log in the user and get the access token
-        access_token = login_user()
+            raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
 
-        data = {
+        # Extract the token from the Authorization header
+        token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+        
+        # Decode and verify the JWT token
+        decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+        print("________________decoded_token________________", decoded_token)
+        email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+        
+        # Query the database based on the email to get user data from React_User and Email_User
+        react_user = db.query(React_User).filter(React_User.email == email).first()
+        email_user = db.query(Email_User).filter(Email_User.email == email).first()
+        print("_______________user details in jwt token (React_User)___________" , react_user)
+        print("_______________user details in jwt token (Email_User)___________" , email_user)
+
+        # If the user is not registered in the database, raise an exception
+        if not react_user or email_user:
+            raise HTTPException(status_code=401, detail="User is not registered in the database")
+        
+        else:
+            # Log in the user and get the access token
+            access_token = login_user()
+            print("_______________access_token___________" , access_token)
+
+            data = {
             "prompt": prompt
         }
 
@@ -245,6 +268,7 @@ async def text_to_music(request: Request):
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json"
         }
+
         response = requests.post(ttm_url, headers=headers, json=data)
 
         if response.status_code == 200:
