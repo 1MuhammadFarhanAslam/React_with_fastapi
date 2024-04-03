@@ -283,37 +283,35 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
         print("_______________user details in jwt token (Email_User)___________" , email_user)
 
         # If the user is not registered in either React_User or Email_User, raise an exception
-        if not react_user or not email_user:
-            print("User is not registered in the database")
-            raise HTTPException(status_code=401, detail="User is not registered in the database")
+        if react_user or email_user:
         
-        # Log in the user and get the access token
-        access_token = login_user()
-        print("_______________access_token___________" , access_token)
+            # Log in the user and get the access token
+            access_token = login_user()
+            print("_______________access_token___________" , access_token)
 
-        data = {
-        "prompt": prompt
-    }
-
-        ttm_url = "http://38.80.122.248:40337/ttm_service"  # Adjust the URL as needed
-        headers = {
-            "Accept": "audio/wav",  # Specify the desired audio format
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json"
+            data = {
+            "prompt": prompt
         }
 
-        response = requests.post(ttm_url, headers=headers, json=data)
+            ttm_url = "http://38.80.122.248:40337/ttm_service"  # Adjust the URL as needed
+            headers = {
+                "Accept": "audio/wav",  # Specify the desired audio format
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json"
+            }
 
-        if response.status_code == 200:
-            # Create a temporary file to save the audio data
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                temp_file.write(response.content)
-                temp_file_path = temp_file.name
+            response = requests.post(ttm_url, headers=headers, json=data)
 
-            # Return the temporary file using FileResponse
-            return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_audio.wav")
-        else:
-            raise HTTPException(status_code=response.status_code, detail=response.text)
+            if response.status_code == 200:
+                # Create a temporary file to save the audio data
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                    temp_file.write(response.content)
+                    temp_file_path = temp_file.name
+
+                # Return the temporary file using FileResponse
+                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_audio.wav")
+            else:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
