@@ -228,32 +228,31 @@ async def text_to_music(request: Request):
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
         
+        # Log in the user and get the access token
+        access_token = login_user()
+
+        data = {
+            "prompt": prompt
+        }
+
+        ttm_url = "http://38.80.122.248:40337/ttm_service"  # Adjust the URL as needed
+        headers = {
+            "Accept": "audio/wav",  # Specify the desired audio format
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+        response = requests.post(ttm_url, headers=headers, json=data)
+
+        if response.status_code == 200:
+            # Create a temporary file to save the audio data
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                temp_file.write(response.content)
+                temp_file_path = temp_file.name
+
+            # Return the temporary file using FileResponse
+            return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_audio.wav")
         else:
-            # Log in the user and get the access token
-            access_token = login_user()
-
-            data = {
-                "prompt": prompt
-            }
-
-            ttm_url = "http://38.80.122.248:40337/ttm_service"  # Adjust the URL as needed
-            headers = {
-                "Accept": "audio/wav",  # Specify the desired audio format
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json"
-            }
-            response = requests.post(ttm_url, headers=headers, json=data)
-
-            if response.status_code == 200:
-                # Create a temporary file to save the audio data
-                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                    temp_file.write(response.content)
-                    temp_file_path = temp_file.name
-
-                # Return the temporary file using FileResponse
-                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_audio.wav")
-            else:
-                raise HTTPException(status_code=response.status_code, detail=response.text)
+            raise HTTPException(status_code=response.status_code, detail=response.text)
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request body")
