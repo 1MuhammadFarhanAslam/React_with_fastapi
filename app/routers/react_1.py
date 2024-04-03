@@ -264,10 +264,12 @@ async def text_to_music(request: Request, authorization: str = Header(None), db:
         print("________________prompt________________", prompt)
         
         if prompt is None:
+            print("Prompt is missing in the request body.")
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
         # Check if the Authorization header is present
         if authorization is None:
+            print("Authorization header is missing.")
             raise HTTPException(status_code=401, detail="Authorization header is missing.")
         
         # Extract the token from the Authorization header
@@ -289,7 +291,7 @@ async def text_to_music(request: Request, authorization: str = Header(None), db:
 
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
-                raise HTTPException(status_code=401, detail="User is not registered.")
+                raise HTTPException(status_code=401, detail="___________User is not registered___________")
             
             else:
                 # Log in the user and get the access token
