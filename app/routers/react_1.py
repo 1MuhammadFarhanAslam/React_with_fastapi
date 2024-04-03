@@ -149,7 +149,7 @@ import tempfile
 import os
 import jwt
 from sqlalchemy.orm import Session
-from .react import get_database
+from react import get_database
 from models import React_User, Email_User
 
 router = APIRouter()
