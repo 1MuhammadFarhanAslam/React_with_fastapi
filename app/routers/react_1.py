@@ -233,12 +233,14 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
         prompt = request_data.get("prompt")
         print("________________prompt________________", prompt)
         if prompt is None:
-            raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
+            print("Prompt is missing in the request body")
+            raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
 
         if token is None:
+            print("Access token is missing in the Authorization header")
             raise HTTPException(status_code=401, detail="Access token is missing in the Authorization header")
         
         # Decode and verify the JWT token
@@ -254,6 +256,7 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
 
         # If the user is not registered in the database, raise an exception
         if not react_user or email_user:
+            print("User is not registered in the database")
             raise HTTPException(status_code=401, detail="User is not registered in the database")
         
         else:
