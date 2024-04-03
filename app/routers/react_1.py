@@ -149,10 +149,42 @@ import tempfile
 import os
 import jwt
 from sqlalchemy.orm import Session
-from react import get_database
 from models import React_User, Email_User
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy import create_engine
+from typing import Generator
+
 
 router = APIRouter()
+
+# 
+
+# Get the database URL from the environment variable
+DATABASE_URL = os.environ.get("DATABASE_URL")
+GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+# Create the SQLAlchemy engine
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# SQLAlchemy models
+Base = declarative_base()
+
+def initialize_database():
+    from models import Base
+    Base.metadata.create_all(bind=engine)
+    print("Database initialized successfully.")
+
+# Dependency to get the database session
+def get_database() -> Generator[Session, None, None]:
+    # Provide a database session to use within the request
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 # Define constants for login credentials
 LOGIN_USERNAME = "Opentensor@hotmail.com"
@@ -218,10 +250,7 @@ def login_user():
 
 #     except ValueError:
 #         raise HTTPException(status_code=400, detail="Invalid JSON format in the request body")
-    
-GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
 
 
 @router.post("/api/ttm_endpoint")
