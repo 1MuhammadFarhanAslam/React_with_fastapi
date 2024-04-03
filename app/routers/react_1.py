@@ -237,6 +237,9 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
 
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+
+        if token is None:
+            raise HTTPException(status_code=401, detail="Access token is missing in the Authorization header")
         
         # Decode and verify the JWT token
         decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
