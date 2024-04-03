@@ -259,10 +259,9 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
         # Extract the request data
         request_data = await request.json()
         print("________________request_data________________", request_data)
-        
         prompt = request_data.get("prompt")
         print("________________prompt________________", prompt)
-
+        
         if prompt is None:
             print("Prompt is missing in the request body")
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
@@ -284,8 +283,8 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
         print("_______________user details in jwt token (React_User)___________" , react_user)
         print("_______________user details in jwt token (Email_User)___________" , email_user)
 
-        # If the user is not registered in the database, raise an exception
-        if not react_user or email_user:
+        # If the user is not registered in either React_User or Email_User, raise an exception
+        if not react_user or not email_user:
             print("User is not registered in the database")
             raise HTTPException(status_code=401, detail="User is not registered in the database")
         
