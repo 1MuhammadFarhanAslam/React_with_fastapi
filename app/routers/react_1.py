@@ -254,7 +254,7 @@ def login_user():
 
 
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request, authorization: str = Header(...), db: Session = Depends(get_database))  -> FileResponse:
+async def text_to_music(request: Request, authorization: str = Header(None), db: Session = Depends(get_database))  -> FileResponse:
     try:
         # Extract the request data
         request_data = await request.json()
@@ -263,9 +263,12 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
         print("________________prompt________________", prompt)
         
         if prompt is None:
-            print("Prompt is missing in the request body")
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
+        # Check if the Authorization header is present
+        if authorization is None:
+            raise HTTPException(status_code=401, detail="Authorization header is missing.")
+        
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
         
@@ -283,15 +286,17 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
         print("_______________user details in jwt token (Email_User)___________" , email_user)
 
         # If the user is not registered in either React_User or Email_User, raise an exception
-        if react_user or email_user:
+        if not react_user and not email_user:
+            raise HTTPException(status_code=401, detail="User is not registered.")
         
+        else:
             # Log in the user and get the access token
             access_token = login_user()
             print("_______________access_token___________" , access_token)
 
             data = {
-            "prompt": prompt
-        }
+                "prompt": prompt
+            }
 
             ttm_url = "http://38.80.122.248:40337/ttm_service"  # Adjust the URL as needed
             headers = {
