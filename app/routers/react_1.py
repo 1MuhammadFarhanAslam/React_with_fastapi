@@ -227,8 +227,7 @@ async def text_to_music(request: Request):
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
         
-        if frontend_access_token and prompt:
-
+        else:
             # Log in the user and get the access token
             access_token = login_user()
 
