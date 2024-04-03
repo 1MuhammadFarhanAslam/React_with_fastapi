@@ -259,23 +259,24 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
         # Extract the request data
         request_data = await request.json()
         print("________________request_data________________", request_data)
+        
         prompt = request_data.get("prompt")
         print("________________prompt________________", prompt)
+
         if prompt is None:
             print("Prompt is missing in the request body")
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
+
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
-
-        if token is None:
-            print("Access token is missing in the Authorization header")
-            raise HTTPException(status_code=401, detail="Access token is missing in the Authorization header")
         
         # Decode and verify the JWT token
         decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
         print("________________decoded_token________________", decoded_token)
+
         email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+        print("________________email________________", email)
         
         # Query the database based on the email to get user data from React_User and Email_User
         react_user = db.query(React_User).filter(React_User.email == email).first()
