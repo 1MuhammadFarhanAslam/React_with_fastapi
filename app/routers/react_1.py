@@ -151,7 +151,7 @@ router = APIRouter()
 
 # Define constants for login credentials
 LOGIN_USERNAME = "Opentensor@hotmail.com"
-LOGIN_PASSWORD = "Opentensor@12345"
+LOGIN_PASSWORD = "Opentensor@123"
 
 # Define a function to log in the user and get the access token
 def login_user():
