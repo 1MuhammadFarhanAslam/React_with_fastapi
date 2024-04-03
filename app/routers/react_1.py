@@ -266,7 +266,6 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
             print("Prompt is missing in the request body")
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
-
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
         
@@ -288,14 +287,13 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
             print("User is not registered in the database")
             raise HTTPException(status_code=401, detail="User is not registered in the database")
         
-        else:
-            # Log in the user and get the access token
-            access_token = login_user()
-            print("_______________access_token___________" , access_token)
+        # Log in the user and get the access token
+        access_token = login_user()
+        print("_______________access_token___________" , access_token)
 
-            data = {
-            "prompt": prompt
-        }
+        data = {
+        "prompt": prompt
+    }
 
         ttm_url = "http://38.80.122.248:40337/ttm_service"  # Adjust the URL as needed
         headers = {
