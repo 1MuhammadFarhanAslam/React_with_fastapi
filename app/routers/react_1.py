@@ -226,8 +226,10 @@ async def text_to_music(request: Request):
         print(frontend_access_token)
 
         if frontend_access_token is None:
+            print("Access token not provided in the Authorization header")
             raise HTTPException(status_code=401, detail="Access token not provided in the Authorization header")
         if prompt is None:
+            print("Prompt not provided in the request body")
             raise HTTPException(status_code=400, detail="Prompt is missing in the request headers")
         
         # Log in the user and get the access token
