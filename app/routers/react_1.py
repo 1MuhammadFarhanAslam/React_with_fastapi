@@ -156,7 +156,7 @@ LOGIN_PASSWORD = "Opentensor@12345"
 # Define a function to log in the user and get the access token
 def login_user():
     # Make a request to the login endpoint to log in the user
-    login_url = "http://149.11.242.18:40337/login"  # Adjust the URL as needed
+    login_url = "http://38.80.122.248:40337/login"  # Adjust the URL as needed
     login_payload = {
         "username": LOGIN_USERNAME,
         "password": LOGIN_PASSWORD
@@ -192,7 +192,7 @@ async def text_to_music(request: Request):
             "prompt": prompt
         }
 
-        ttm_url = "http://149.11.242.18:40337/ttm_service"  # Adjust the URL as needed
+        ttm_url = "http://38.80.122.248:40337/ttm_service"  # Adjust the URL as needed
         headers = {
             "Accept": "audio/wav",  # Specify the desired audio format
             "Authorization": f"Bearer {access_token}",
