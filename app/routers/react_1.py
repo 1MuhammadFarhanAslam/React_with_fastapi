@@ -220,13 +220,13 @@ async def text_to_music(request: Request):
     try:
         request_data = await request.json()
         print(request_data)
-        frontend_access_token = request_data.get("access_token")
         prompt = request_data.get("prompt")
+        frontend_access_token = request.headers.get("Authorization")
 
         if frontend_access_token is None:
-            raise HTTPException(status_code=401, detail="Access token not provided")
+            raise HTTPException(status_code=401, detail="Access token not provided in the Authorization header")
         if prompt is None:
-            raise HTTPException(status_code=400, detail="Prompt is missing in the request body")
+            raise HTTPException(status_code=400, detail="Prompt is missing in the request headers")
         
         # Log in the user and get the access token
         access_token = login_user()
@@ -255,4 +255,4 @@ async def text_to_music(request: Request):
             raise HTTPException(status_code=response.status_code, detail=response.text)
 
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid JSON format in the request body")
+        raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
