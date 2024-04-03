@@ -229,6 +229,10 @@ async def text_to_music(request: Request):
         
         if frontend_access_token and prompt:
             # Proceed with generating audio data using the obtained access token
+
+            # Log in the user and get the access token
+            access_token = login_user()
+
             data = {
                 "prompt": prompt
             }
@@ -236,7 +240,7 @@ async def text_to_music(request: Request):
             ttm_url = "http://38.80.122.248:40337/ttm_service"  # Adjust the URL as needed
             headers = {
                 "Accept": "audio/wav",  # Specify the desired audio format
-                "Authorization": f"Bearer {frontend_access_token}",
+                "Authorization": f"Bearer {access_token}",
                 "Content-Type": "application/json"
             }
             response = requests.post(ttm_url, headers=headers, json=data)
