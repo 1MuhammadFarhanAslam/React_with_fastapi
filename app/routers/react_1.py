@@ -219,6 +219,7 @@ def login_user():
 async def text_to_music(request: Request):
     try:
         request_data = await request.json()
+        print(request_data)
         frontend_access_token = request_data.get("access_token")
         prompt = request_data.get("prompt")
 
