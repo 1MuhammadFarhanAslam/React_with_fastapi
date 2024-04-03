@@ -221,7 +221,9 @@ async def text_to_music(request: Request):
         request_data = await request.json()
         print(request_data)
         prompt = request_data.get("prompt")
+        print(prompt)
         frontend_access_token = request.headers.get("Authorization")
+        print(frontend_access_token)
 
         if frontend_access_token is None:
             raise HTTPException(status_code=401, detail="Access token not provided in the Authorization header")
