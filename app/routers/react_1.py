@@ -416,7 +416,12 @@ async def text_to_music(request: Request, authorization: str = Header(None), db:
     
 
 @router.post("/api/vc_endpoint")
-async def voice_clone(request: Request, audio_file: UploadFile = File(...), authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
+async def voice_clone(
+    request: Request,
+    audio_file: UploadFile = File(...),
+    authorization: str = Header(None),
+    db: Session = Depends(get_database)
+) -> FileResponse:
     try:
         # Extract the request data
         request_data = await request.json()
@@ -459,16 +464,22 @@ async def voice_clone(request: Request, audio_file: UploadFile = File(...), auth
                 # Adjust the URL to point to API no 1 (/vc_service)
                 vc_service_url = "http://38.80.122.248:40337/vc_service"  # Adjust the URL as needed
                 headers = {
+                    "Accept": "audio/wav",  # Specify the desired audio format
                     "Authorization": f"Bearer {access_token}",
                     "Content-Type": "multipart/form-data"
                 }
 
                 # Send the request to API no 1
-                response = requests.post(vc_service_url, headers=headers, files={"audio_file": (audio_file.filename, audio_file.file)}, data=data)
+                files = {"audio_file": (audio_file.filename, audio_file.file, audio_file.content_type)}
+                response = requests.post(vc_service_url, headers=headers, files=files, data=data)
 
                 if response.status_code == 200:
                     # Return the response from API no 1
-                    return FileResponse(response.content, media_type="audio/wav", filename="generated_vc_audio.wav")
+                    return FileResponse(
+                        response.content,
+                        media_type=response.headers["Content-Type"],
+                        filename="generated_vc_audio.wav",
+                    )
                 else:
                     raise HTTPException(status_code=response.status_code, detail=response.text)
 
