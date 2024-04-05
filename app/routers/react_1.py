@@ -326,7 +326,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                         temp_file_path = temp_file.name
 
                     # Return the temporary file using FileResponse
-                    return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_audio.wav")
+                    return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
                 else:
                     raise HTTPException(status_code=response.status_code, detail=response.text)
 
@@ -402,7 +402,7 @@ async def text_to_music(request: Request, authorization: str = Header(None), db:
                         temp_file_path = temp_file.name
 
                     # Return the temporary file using FileResponse
-                    return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_audio.wav")
+                    return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
                 else:
                     raise HTTPException(status_code=response.status_code, detail=response.text)
 
@@ -468,7 +468,7 @@ async def voice_clone(request: Request, audio_file: UploadFile = File(...), auth
 
                 if response.status_code == 200:
                     # Return the response from API no 1
-                    return FileResponse(response.content, media_type="audio/wav", filename="generated_audio.wav")
+                    return FileResponse(response.content, media_type="audio/wav", filename="generated_vc_audio.wav")
                 else:
                     raise HTTPException(status_code=response.status_code, detail=response.text)
 
