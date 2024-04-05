@@ -534,9 +534,7 @@ async def voice_clone(
                 # Adjust the URL to point to API no 1 (/vc_service)
                 vc_service_url = "http://38.80.122.248:40337/vc_service"  # Adjust the URL as needed
                 headers = {
-                    "Accept": "audio/wav",  # Specify the desired audio format
-                    "Authorization": f"Bearer {access_token}",
-                    "Content-Type": "multipart/form-data"
+                    "Authorization": f"Bearer {access_token}"
                 }
 
                 # Send the request to API no 1
