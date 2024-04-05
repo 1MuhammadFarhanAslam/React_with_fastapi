@@ -493,16 +493,12 @@ async def text_to_music(request: Request, authorization: str = Header(None), db:
 
 @router.post("/api/vc_endpoint")
 async def voice_clone(
-    request: Request,
-    audio_file: bytes = File(...),
+    audio_file: UploadFile = File(...),
     prompt: str = Form(...),
     authorization: str = Header(None),
     db: Session = Depends(get_database)
 ) -> FileResponse:
     try:
-        request_data = await request.json()
-        print("________________request_data________________", request_data)
-
         # Validate prompt
         if not prompt:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
@@ -544,7 +540,7 @@ async def voice_clone(
                 }
 
                 # Send the request to API no 1
-                files = {"audio_file": ("audio_file.wav", audio_file, "audio/wav")}
+                files = {"audio_file": ("audio_file.wav", audio_file.file, "audio/wav")}
                 response = requests.post(vc_service_url, headers=headers, files=files, data=data)
 
                 if response.status_code == 200:
