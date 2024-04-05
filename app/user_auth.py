@@ -11,10 +11,10 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 from user_database import SessionLocal
 
-USER_SECRET_KEY = os.environ.get('SECRET_KEY')
+USER_SECRET_KEY = os.environ.get('USER_SECRET_KEY')
 
 if USER_SECRET_KEY is None:
-    raise Exception("SECRET_KEY environment variable is not set")
+    raise Exception("USER_SECRET_KEY environment variable is not set")
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
