@@ -325,7 +325,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         if existing_user:
             # User already exists, return his/her details
             print("Ooops..................User already exists. Please sign in instead.")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists. Please sign in instead.")  
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ooops..................User already exists. Please sign in instead.")  
         
         else:
             hashed_password = hash_password(password)
