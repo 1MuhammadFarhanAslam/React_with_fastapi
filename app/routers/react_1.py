@@ -154,6 +154,8 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from jwt.exceptions import ExpiredSignatureError  # Import the ExpiredSignatureError
+from fastapi import UploadFile, File
+from typing import Annotated
 
 
 router = APIRouter()
@@ -401,6 +403,72 @@ async def text_to_music(request: Request, authorization: str = Header(None), db:
 
                     # Return the temporary file using FileResponse
                     return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_audio.wav")
+                else:
+                    raise HTTPException(status_code=response.status_code, detail=response.text)
+
+        except ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
+
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+    
+
+    
+
+@router.post("/api/vc_endpoint")
+async def voice_clone(request: Request, audio_file: UploadFile = File(...), authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
+    try:
+        # Extract the request data
+        request_data = await request.json()
+        print("________________request_data________________", request_data)
+        prompt = request_data.get("prompt")
+        print("________________prompt________________", prompt)
+
+        # Validate prompt
+        if not prompt:
+            raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
+
+        # Check if the Authorization header is present
+        if authorization is None:
+            raise HTTPException(status_code=401, detail="Authorization header is missing.")
+
+        # Extract the token from the Authorization header
+        token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+
+        try:
+            # Decode and verify the JWT token
+            decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+            email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+
+            # Query the database based on the email to get user data from React_User and Email_User
+            react_user = db.query(React_User).filter(React_User.email == email).first()
+            email_user = db.query(Email_User).filter(Email_User.email == email).first()
+
+            # If the user is not registered in either React_User or Email_User, raise an exception
+            if not react_user and not email_user:
+                raise HTTPException(status_code=401, detail="User is not registered.")
+
+            else:
+                # Log in the user and get the access token
+                access_token = login_user()
+
+                data = {
+                    "prompt": prompt
+                }
+
+                # Adjust the URL to point to API no 1 (/vc_service)
+                vc_service_url = "http://38.80.122.248:40337/vc_service"  # Adjust the URL as needed
+                headers = {
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "multipart/form-data"
+                }
+
+                # Send the request to API no 1
+                response = requests.post(vc_service_url, headers=headers, files={"audio_file": (audio_file.filename, audio_file.file)}, data=data)
+
+                if response.status_code == 200:
+                    # Return the response from API no 1
+                    return FileResponse(response.content, media_type="audio/wav", filename="generated_audio.wav")
                 else:
                     raise HTTPException(status_code=response.status_code, detail=response.text)
 
