@@ -18,8 +18,6 @@ from admin_database import get_secret_key, get_database
 router = APIRouter()
 
 
-
-
 @router.post("/admin/create", response_model=dict, tags=["Admin"])
 async def create_admin_account(
     secret_key: str = Form(...),

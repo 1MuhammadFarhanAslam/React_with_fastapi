@@ -8,7 +8,11 @@ from typing import Annotated
 from models import TokenData, Admin
 from admin_database import get_admin
 
-SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY")
+ADMIN_SECRET_KEY = os.environ.get("ADMIN_SECRET_KEY")
+
+if ADMIN_SECRET_KEY is None:
+    raise Exception("ADMIN_SECRET_KEY environment variable is not set")
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -22,7 +26,7 @@ def create_admin_access_token(data: dict, expires_delta=timedelta(minutes=ACCESS
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, ADMIN_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
@@ -33,7 +37,7 @@ async def get_current_admin(token: Annotated[str, Depends(oauth2_scheme)]):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, ADMIN_SECRET_KEY, algorithms=[ALGORITHM])
         print('______________payload______________', payload)
         username: str = payload.get("sub")
         print('______________username______________', username)

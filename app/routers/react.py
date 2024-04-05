@@ -19,6 +19,10 @@ router = APIRouter()
 
 # Get the database URL from the environment variable
 DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL is None:
+    raise Exception("DATABASE_URL environment variable is not set")
+
 # Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
