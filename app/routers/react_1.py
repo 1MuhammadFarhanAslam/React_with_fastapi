@@ -543,11 +543,16 @@ async def voice_clone(
 
                 if response.status_code == 200:
                     # Return the response from API no 1
-                    return FileResponse(
-                        response.content,
-                        media_type=response.headers["Content-Type"],
-                        filename="generated_vc_audio.wav",
-                    )
+                    # Create a temporary file to save the audio data
+                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                        temp_file.write(response.content)
+                        temp_file_path = temp_file.name
+                        # Return the response from API no 1
+                        return FileResponse(
+                            temp_file_path,
+                            media_type="audio/wav",
+                            filename="generated_vc_audio.wav",
+                        )
                 else:
                     raise HTTPException(status_code=response.status_code, detail=response.text)
 
