@@ -690,8 +690,16 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                 raise HTTPException(status_code=401, detail="User is not registered.")
 
             else:
+                # Define login credentials based on the request URL
+                if "79.116.48.205:24942" in request.client.host:
+                    username = LOGIN_USERNAME_1
+                    password = LOGIN_PASSWORD_1
+                else:
+                    username = LOGIN_USERNAME_2
+                    password = LOGIN_PASSWORD_2
+
                 # Log in the user and get the access token
-                access_token = await login_user()
+                access_token = await login_user(username, password)
 
                 data = {"prompt": prompt}
                 headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
@@ -767,8 +775,16 @@ async def text_to_music(request: Request, authorization: str = Header(None), db:
                 raise HTTPException(status_code=401, detail="User is not registered.")
 
             else:
+                # Define login credentials based on the request URL
+                if "79.116.48.205:24942" in request.client.host:
+                    username = LOGIN_USERNAME_1
+                    password = LOGIN_PASSWORD_1
+                else:
+                    username = LOGIN_USERNAME_2
+                    password = LOGIN_PASSWORD_2
+
                 # Log in the user and get the access token
-                access_token = await login_user()
+                access_token = await login_user(username, password)
 
                 data = {"prompt": prompt}
                 headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
@@ -810,6 +826,7 @@ async def text_to_music(request: Request, authorization: str = Header(None), db:
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+
 
 
 @router.post("/api/vc_endpoint")
