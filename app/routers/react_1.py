@@ -626,13 +626,12 @@ async def login_user(username: str, password: str, login_url: str) -> str:
     login_response = requests.post(login_url, headers=login_headers, data=login_payload)
 
     if login_response.status_code == 200:
-        # Login successful, return the access token
         return login_response.json().get("access_token")
     else:
         # Login failed, raise an HTTPException
         raise HTTPException(status_code=401, detail="Login failed.")
 
-async def send_request(url: str, data: dict, headers: dict) -> requests.Response:
+async def send_request(url: str, data: dict, headers: dict):
     # Send a POST request to the specified URL with data and headers
     return requests.post(url, json=data, headers=headers)
 
