@@ -638,6 +638,7 @@ async def send_request(url: str, data: dict, headers: dict) -> requests.Response
     # Send a POST request to the specified URL with data and headers
     return requests.post(url, json=data, headers=headers)
 
+
 @router.post("/api/tts_endpoint")
 async def text_to_speech(request: Request, authorization: Optional[str] = Header(None), db: Session = Depends(get_database)) -> FileResponse:
     try:
@@ -702,7 +703,7 @@ async def text_to_speech(request: Request, authorization: Optional[str] = Header
                     return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
 
                 else:
-                    # Send request to the second text-to-speech URL
+                    # Send request to the second text-to-speech URL if the first one fails
                     response_2 = await send_request(TTS_URL_2, data, headers_2)
 
                     if response_2.status_code == 200:
