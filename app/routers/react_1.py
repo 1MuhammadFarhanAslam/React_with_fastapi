@@ -685,22 +685,21 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
             react_user = db.query(React_User).filter(React_User.email == email).first()
             email_user = db.query(Email_User).filter(Email_User.email == email).first()
 
-             # If the user is not registered in either React_User or Email_User, raise an exception
+            # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
                 raise HTTPException(status_code=401, detail="User is not registered.")
 
             else:
                 # Log in the user based on the URL being accessed
-                if "79.116.48.205:24942" in request.url:
-                    access_token = await login_user(LOGIN_USERNAME_2, LOGIN_PASSWORD_2)
-                elif "38.80.122.166:40440" in request.url:
+                if "79.116.48.205:24942" in str(request.url):
                     access_token = await login_user(LOGIN_USERNAME_1, LOGIN_PASSWORD_1)
+                elif "38.80.122.166:40440" in str(request.url):
+                    access_token = await login_user(LOGIN_USERNAME_2, LOGIN_PASSWORD_2)
                 else:
                     raise HTTPException(status_code=500, detail="Invalid URL.")
 
                 data = {"prompt": prompt}
                 headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
-
 
                 # Define additional URLs here
                 additional_urls = [
@@ -739,6 +738,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+
     
 
 
