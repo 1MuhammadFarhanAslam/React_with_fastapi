@@ -668,10 +668,10 @@ async def text_to_speech(request: Request, authorization: Optional[str] = Header
                 # Define the login URLs and credentials
                 LOGIN_URL_1 = "http://38.80.122.166:40440"
                 LOGIN_URL_2 = "http://79.116.48.205:24942"
-                LOGIN_USERNAME_1 = "user1"
-                LOGIN_PASSWORD_1 = "pass1"
-                LOGIN_USERNAME_2 = "user2"
-                LOGIN_PASSWORD_2 = "pass2"
+                LOGIN_USERNAME_1 = "Opentensor@hotmail.com_val3"
+                LOGIN_PASSWORD_1 = "Opentensor@12345"
+                LOGIN_USERNAME_2 = "Opentensor@hotmail.com_val4"
+                LOGIN_PASSWORD_2 = "Opentensor@12345"
 
                 # Log in the user asynchronously using the appropriate credentials and login URLs
                 access_token_1 = await login_user(LOGIN_USERNAME_1, LOGIN_PASSWORD_1, LOGIN_URL_1)
@@ -683,8 +683,8 @@ async def text_to_speech(request: Request, authorization: Optional[str] = Header
                 headers_2 = {"Authorization": f"Bearer {access_token_2}", "Content-Type": "application/json"}
 
                 # Define the URLs for the text-to-speech service
-                TTS_URL_1 = "http://example.com/tts1"
-                TTS_URL_2 = "http://example.com/tts2"
+                TTS_URL_1 = "http://38.80.122.166:40440/tts_service"
+                TTS_URL_2 = "http://79.116.48.205:24942/tts_service"
 
                 # Send requests to both text-to-speech URLs asynchronously
                 tasks = [
@@ -698,11 +698,12 @@ async def text_to_speech(request: Request, authorization: Optional[str] = Header
                     if isinstance(response, Exception):
                         raise response  # Raise any exceptions that occurred during the requests
                     elif response.status_code == 200:
-                        # If response is 200 OK, return the FileResponse
-                        # You can modify this part based on your actual response handling needs
-                        return FileResponse(response.content, media_type="audio/wav")
-                    else:
-                        continue  # Continue to the next URL if response status code is not 200
+                    #Return the response from API no 1 and create a temporary file to save the audio data
+                        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                            temp_file.write(response.content)
+                            temp_file_path = temp_file.name
+                            # Return the response to the client
+                            return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_vc_audio.wav")
 
             # If all requests failed, raise an HTTPException
             raise HTTPException(status_code=500, detail="All validators failed after retry attempts.")
