@@ -626,17 +626,20 @@ async def login_user(username: str, password: str, login_url: str) -> str:
     login_response = requests.post(login_url, headers=login_headers, data=login_payload)
 
     if login_response.status_code == 200:
-        return login_response.json().get("access_token")
+        # Login successful, return the access token
+        response_data = login_response.json()
+        access_token = response_data.get("access_token")
+        return access_token
     else:
-        # Login failed, raise an HTTPException
-        raise HTTPException(status_code=401, detail="Login failed.")
+        # Login failed
+        return None
 
-async def send_request(url: str, data: dict, headers: dict):
+async def send_request(url: str, data: dict, headers: dict) -> requests.Response:
     # Send a POST request to the specified URL with data and headers
     return requests.post(url, json=data, headers=headers)
 
 @router.post("/api/tts_endpoint")
-async def text_to_speech(request: Request, authorization: Optional[str] = Header(None), db : Session = Depends(get_database)):
+async def text_to_speech(request: Request, authorization: Optional[str] = Header(None), db: Session = Depends(get_database)) -> FileResponse:
     try:
         # Extract the request data
         request_data = await request.json()
@@ -652,7 +655,7 @@ async def text_to_speech(request: Request, authorization: Optional[str] = Header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
         
         try:
-            # Decode and verify the JWT token (if needed)
+            # Decode and verify the JWT token
             decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
             email = decoded_token.get("sub")
 
@@ -663,6 +666,7 @@ async def text_to_speech(request: Request, authorization: Optional[str] = Header
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
                 raise HTTPException(status_code=401, detail="User is not registered.")
+            
             else:
                 # Define the login URLs and credentials
                 LOGIN_URL_1 = "http://38.80.122.166:40440/login"
@@ -685,30 +689,35 @@ async def text_to_speech(request: Request, authorization: Optional[str] = Header
                 TTS_URL_1 = "http://38.80.122.166:40440/tts_service"
                 TTS_URL_2 = "http://79.116.48.205:24942/tts_service"
 
-                # Send requests to both text-to-speech URLs asynchronously
-                tasks = [
-                    send_request(TTS_URL_1, data, headers_1),
-                    send_request(TTS_URL_2, data, headers_2)
-                ]
-                responses = await asyncio.gather(*tasks, return_exceptions=True)
+                # Send request to the first text-to-speech URL
+                response_1 = await send_request(TTS_URL_1, data, headers_1)
 
-                # Check responses and handle accordingly
-                for response in responses:
-                    if isinstance(response, Exception):
-                        raise response  # Raise any exceptions that occurred during the requests
-                    elif response.status_code == 200:
-                    #Return the response from API no 1 and create a temporary file to save the audio data
+                if response_1.status_code == 200:
+                    # Create a temporary file to save the audio data
+                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                        temp_file.write(response_1.content)
+                        temp_file_path = temp_file.name
+
+                    # Return the temporary file using FileResponse
+                    return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
+
+                else:
+                    # Send request to the second text-to-speech URL
+                    response_2 = await send_request(TTS_URL_2, data, headers_2)
+
+                    if response_2.status_code == 200:
+                        # Create a temporary file to save the audio data
                         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                            temp_file.write(response.content)
+                            temp_file.write(response_2.content)
                             temp_file_path = temp_file.name
-                            # Return the response to the client
-                            return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
 
-            # If all requests failed, raise an HTTPException
-            raise HTTPException(status_code=500, detail="All validators failed after retry attempts.")
+                        # Return the temporary file using FileResponse
+                        return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
+                    else:
+                        raise HTTPException(status_code=response_2.status_code, detail=response_2.text)
 
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        except ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
