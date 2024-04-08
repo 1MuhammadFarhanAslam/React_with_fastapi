@@ -628,15 +628,15 @@ async def login_user(username: str, password: str):
         # Use credentials for the first service
         login_url = login_url_1
         login_payload = {
-            "username": LOGIN_USERNAME_1,
-            "password": LOGIN_PASSWORD_1
+            "username": LOGIN_USERNAME_2,
+            "password": LOGIN_PASSWORD_2
         }
     else:
         # Use credentials for the second service
         login_url = login_url_2
         login_payload = {
-            "username": LOGIN_USERNAME_2,
-            "password": LOGIN_PASSWORD_2
+            "username": LOGIN_USERNAME_1,
+            "password": LOGIN_PASSWORD_1
         }
 
     login_headers = {
@@ -685,24 +685,22 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
             react_user = db.query(React_User).filter(React_User.email == email).first()
             email_user = db.query(Email_User).filter(Email_User.email == email).first()
 
-            # If the user is not registered in either React_User or Email_User, raise an exception
+             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
                 raise HTTPException(status_code=401, detail="User is not registered.")
 
             else:
-                # Define login credentials based on the request URL
-                if "79.116.48.205:24942" in request.client.host:
-                    username = LOGIN_USERNAME_1
-                    password = LOGIN_PASSWORD_1
+                # Log in the user based on the URL being accessed
+                if "79.116.48.205:24942" in request.url:
+                    access_token = await login_user(LOGIN_USERNAME_2 LOGIN_PASSWORD_2)
+                elif "38.80.122.166:40440" in request.url:
+                    access_token = await login_user(LOGIN_USERNAME_1, LOGIN_PASSWORD_1)
                 else:
-                    username = LOGIN_USERNAME_2
-                    password = LOGIN_PASSWORD_2
-
-                # Log in the user and get the access token
-                access_token = await login_user(username, password)
+                    raise HTTPException(status_code=500, detail="Invalid URL.")
 
                 data = {"prompt": prompt}
                 headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
+
 
                 # Define additional URLs here
                 additional_urls = [
