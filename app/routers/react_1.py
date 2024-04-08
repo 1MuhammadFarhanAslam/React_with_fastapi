@@ -618,27 +618,15 @@ LOGIN_PASSWORD_1 = "Opentensor@12345"
 LOGIN_USERNAME_2 = "Opentensor@hotmail.com_val2"
 LOGIN_PASSWORD_2 = "Opentensor@12345"
 
-# Define a function to log in the user and get the access token
-async def login_user(username: str, password: str):
-    # Define the login URLs for different services
-    login_url_1 = "http://79.116.48.205:24942/login"  # Login URL for first service
-    login_url_2 = "http://38.80.122.166:40440/login"  # Login URL for second service
+LOGIN_URL_1 = "http://149.11.242.18:14094/login"
+LOGIN_URL_2 = "http://149.11.242.18:14095/login"
 
-    if "79.116.48.205:24942" in username:
-        # Use credentials for the first service
-        login_url = login_url_1
-        login_payload = {
-            "username": LOGIN_USERNAME_2,
-            "password": LOGIN_PASSWORD_2
-        }
-    else:
-        # Use credentials for the second service
-        login_url = login_url_2
-        login_payload = {
-            "username": LOGIN_USERNAME_1,
-            "password": LOGIN_PASSWORD_1
-        }
-
+# Define the login function to log in users
+async def login_user(username, password, login_url):
+    login_payload = {
+        "username": username,
+        "password": password
+    }
     login_headers = {
         "accept": "application/json",
         "Content-Type": "application/x-www-form-urlencoded"
@@ -646,16 +634,13 @@ async def login_user(username: str, password: str):
     login_response = requests.post(login_url, headers=login_headers, data=login_payload)
 
     if login_response.status_code == 200:
-        # Login successful, extract and return the access token
-        response_data = login_response.json()
-        access_token = response_data.get("access_token")
-        return access_token
+        # Login successful, return the access token or True based on your needs
+        return True
     else:
-        # Login failed
-        return None
+        # Login failed, return False or handle the error as needed
+        return False
 
-
-
+# Define a function to send requests asynchronously
 async def send_request(url, data, headers):
     response = requests.post(url, headers=headers, json=data)
     return response
@@ -692,9 +677,9 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
             else:
                 # Log in the user based on the URL being accessed
                 if "79.116.48.205:24942" in str(request.url):
-                    access_token = await login_user(LOGIN_USERNAME_1, LOGIN_PASSWORD_1)
+                    access_token = await login_user(LOGIN_USERNAME_1, LOGIN_PASSWORD_1, LOGIN_URL_1)
                 elif "38.80.122.166:40440" in str(request.url):
-                    access_token = await login_user(LOGIN_USERNAME_2, LOGIN_PASSWORD_2)
+                    access_token = await login_user(LOGIN_USERNAME_2, LOGIN_PASSWORD_2, LOGIN_URL_2)
                 else:
                     raise HTTPException(status_code=500, detail="Invalid URL.")
 
