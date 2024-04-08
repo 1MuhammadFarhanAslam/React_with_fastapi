@@ -569,7 +569,7 @@ from sqlalchemy.orm import Session
 from models import React_User, Email_User
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
-from typing import Generator
+from typing import Generator, Optional
 from jwt.exceptions import ExpiredSignatureError  # Import the ExpiredSignatureError
 from fastapi import UploadFile, File
 import asyncio
@@ -612,17 +612,9 @@ def get_database() -> Generator[Session, None, None]:
     finally:
         db.close()
 
-LOGIN_USERNAME_1 = "Opentensor@hotmail.com_val1"
-LOGIN_PASSWORD_1 = "Opentensor@12345"
 
-LOGIN_USERNAME_2 = "Opentensor@hotmail.com_val2"
-LOGIN_PASSWORD_2 = "Opentensor@12345"
-
-LOGIN_URL_1 = "http://149.11.242.18:14094/login"
-LOGIN_URL_2 = "http://149.11.242.18:14095/login"
-
-# Define the login function to log in users
-async def login_user(username, password, login_url):
+async def login_user(username: str, password: str, login_url: str) -> str:
+    # Make a request to the login endpoint to log in the user
     login_payload = {
         "username": username,
         "password": password
@@ -634,19 +626,18 @@ async def login_user(username, password, login_url):
     login_response = requests.post(login_url, headers=login_headers, data=login_payload)
 
     if login_response.status_code == 200:
-        # Login successful, return the access token or True based on your needs
-        return True
+        # Login successful, return the access token
+        return login_response.json().get("access_token")
     else:
-        # Login failed, return False or handle the error as needed
-        return False
+        # Login failed, raise an HTTPException
+        raise HTTPException(status_code=401, detail="Login failed.")
 
-# Define a function to send requests asynchronously
-async def send_request(url, data, headers):
-    response = requests.post(url, headers=headers, json=data)
-    return response
+async def send_request(url: str, data: dict, headers: dict) -> requests.Response:
+    # Send a POST request to the specified URL with data and headers
+    return requests.post(url, json=data, headers=headers)
 
 @router.post("/api/tts_endpoint")
-async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
+async def text_to_speech(request: Request, authorization: Optional[str] = Header(None), db : Session = Depends(get_database)):
     try:
         # Extract the request data
         request_data = await request.json()
@@ -657,14 +648,14 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
         # Check if the Authorization header is present
         if authorization is None:
             raise HTTPException(status_code=401, detail="Authorization header is missing.")
-
+        
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
-
+        
         try:
-            # Decode and verify the JWT token
+            # Decode and verify the JWT token (if needed)
             decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
-            email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+            email = decoded_token.get("sub")
 
             # Query the database based on the email to get user data from React_User and Email_User
             react_user = db.query(React_User).filter(React_User.email == email).first()
@@ -673,56 +664,55 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
                 raise HTTPException(status_code=401, detail="User is not registered.")
-
             else:
-                # Log in the user based on the URL being accessed
-                if "79.116.48.205:24942" in str(request.url):
-                    access_token = await login_user(LOGIN_USERNAME_1, LOGIN_PASSWORD_1, LOGIN_URL_1)
-                elif "38.80.122.166:40440" in str(request.url):
-                    access_token = await login_user(LOGIN_USERNAME_2, LOGIN_PASSWORD_2, LOGIN_URL_2)
-                else:
-                    raise HTTPException(status_code=500, detail="Invalid URL.")
+                # Define the login URLs and credentials
+                LOGIN_URL_1 = "http://38.80.122.166:40440"
+                LOGIN_URL_2 = "http://79.116.48.205:24942"
+                LOGIN_USERNAME_1 = "user1"
+                LOGIN_PASSWORD_1 = "pass1"
+                LOGIN_USERNAME_2 = "user2"
+                LOGIN_PASSWORD_2 = "pass2"
 
+                # Log in the user asynchronously using the appropriate credentials and login URLs
+                access_token_1 = await login_user(LOGIN_USERNAME_1, LOGIN_PASSWORD_1, LOGIN_URL_1)
+                access_token_2 = await login_user(LOGIN_USERNAME_2, LOGIN_PASSWORD_2, LOGIN_URL_2)
+
+                # Define the data and headers for the requests to the text-to-speech service
                 data = {"prompt": prompt}
-                headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
+                headers_1 = {"Authorization": f"Bearer {access_token_1}", "Content-Type": "application/json"}
+                headers_2 = {"Authorization": f"Bearer {access_token_2}", "Content-Type": "application/json"}
 
-                # Define additional URLs here
-                additional_urls = [
-                    "http://79.116.48.205:24942",
-                    "http://38.80.122.166:40440"
+                # Define the URLs for the text-to-speech service
+                TTS_URL_1 = "http://example.com/tts1"
+                TTS_URL_2 = "http://example.com/tts2"
+
+                # Send requests to both text-to-speech URLs asynchronously
+                tasks = [
+                    send_request(TTS_URL_1, data, headers_1),
+                    send_request(TTS_URL_2, data, headers_2)
                 ]
-
-                # Send requests to additional URLs concurrently using asyncio.gather
-                tasks = []
-                for url in additional_urls:
-                    tasks.append(send_request(url, data, headers))
-
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-                # Handle responses
+                # Check responses and handle accordingly
                 for response in responses:
                     if isinstance(response, Exception):
-                        # Handle exceptions if any
-                        raise response
+                        raise response  # Raise any exceptions that occurred during the requests
                     elif response.status_code == 200:
-                        # If response is 200 OK, return the FileResponse from API no 1 and create a temporary file to save the audio data
-                        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                            temp_file.write(response.content)
-                            temp_file_path = temp_file.name
-                            return FileResponse(temp_file_path, media_type="audio/wav",
-                                                filename="generated_tts_audio.wav")
+                        # If response is 200 OK, return the FileResponse
+                        # You can modify this part based on your actual response handling needs
+                        return FileResponse(response.content, media_type="audio/wav")
                     else:
-                        # If response status code is not 200, continue to the next URL
-                        continue
+                        continue  # Continue to the next URL if response status code is not 200
 
-                # If all requests fail for all URLs, raise an exception
-                raise HTTPException(status_code=500, detail="All validators failed after retry attempts.")
+            # If all requests failed, raise an HTTPException
+            raise HTTPException(status_code=500, detail="All validators failed after retry attempts.")
 
-        except ExpiredSignatureError:
-            raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+
 
     
 
