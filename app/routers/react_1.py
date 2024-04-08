@@ -612,19 +612,33 @@ def get_database() -> Generator[Session, None, None]:
     finally:
         db.close()
 
+LOGIN_USERNAME_1 = "Opentensor@hotmail.com_val1"
+LOGIN_PASSWORD_1 = "Opentensor@12345"
 
-# Define constants for login credentials
-LOGIN_USERNAME = "Opentensor@hotmail.com"
-LOGIN_PASSWORD = "Opentensor@123"
+LOGIN_USERNAME_2 = "Opentensor@hotmail.com_val2"
+LOGIN_PASSWORD_2 = "Opentensor@12345"
 
-# # Define a function to log in the user and get the access token
-def login_user():
-    # Make a request to the login endpoint to log in the user
-    login_url = "http://38.80.122.248:40337/login"  # Adjust the URL as needed
-    login_payload = {
-        "username": LOGIN_USERNAME,
-        "password": LOGIN_PASSWORD
-    }
+# Define a function to log in the user and get the access token
+async def login_user(username: str, password: str):
+    # Define the login URLs for different services
+    login_url_1 = "http://79.116.48.205:24942/login"  # Login URL for first service
+    login_url_2 = "http://38.80.122.166:40440/login"  # Login URL for second service
+
+    if "79.116.48.205:24942" in username:
+        # Use credentials for the first service
+        login_url = login_url_1
+        login_payload = {
+            "username": LOGIN_USERNAME_1,
+            "password": LOGIN_PASSWORD_1
+        }
+    else:
+        # Use credentials for the second service
+        login_url = login_url_2
+        login_payload = {
+            "username": LOGIN_USERNAME_2,
+            "password": LOGIN_PASSWORD_2
+        }
+
     login_headers = {
         "accept": "application/json",
         "Content-Type": "application/x-www-form-urlencoded"
@@ -639,6 +653,7 @@ def login_user():
     else:
         # Login failed
         return None
+
 
 
 async def send_request(url, data, headers):
