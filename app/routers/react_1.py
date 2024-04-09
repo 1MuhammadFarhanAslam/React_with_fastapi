@@ -842,10 +842,12 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
         prompt = request_data.get("prompt")
         
         if prompt is None:
+            print("Prompt is missing in the request body.")
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
         # Check if the Authorization header is present
         if authorization is None:
+            print("No token provided")
             raise HTTPException(status_code=401, detail="Authorization header is missing.")
         
         # Extract the token from the Authorization header
@@ -855,19 +857,24 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
             # Decode and verify the JWT token
             decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
             email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+            print(f"Email from token: {email}")
             
             # Query the database based on the email to get user data from React_User and Email_User
             react_user = db.query(React_User).filter(React_User.email == email).first()
             email_user = db.query(Email_User).filter(Email_User.email == email).first()
+            print("______________react_user______________")
+            print("______________email_user______________")
 
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
+                print("User not registered")
                 raise HTTPException(status_code=401, detail="User is not registered.")
 
             # Perform actions for the current URL
             url = list(URL_CREDENTIALS.keys())[current_url_index]
             print(f"Selected URL: {url}")
             credentials = URL_CREDENTIALS[url]
+            print(f"Using credentials: {credentials}")
             access_token = login_user(url, credentials["username"], credentials["password"])
 
             if access_token:
