@@ -811,7 +811,7 @@ def login_user(url: str, username: str, password: str) -> str:
 
 # Define the text to speech endpoint
 @router.post("/api/tts_endpoint")
-async def text_to_speech(request: Request, authorization: str = Header(None), db : Session = Depends(get_database)) -> FileResponse:
+async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
     global current_url_index
     try:
         # Extract the request data
