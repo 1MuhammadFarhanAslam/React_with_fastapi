@@ -819,10 +819,12 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
         prompt = request_data.get("prompt")
         
         if prompt is None:
+            print("Prompt is missing in the request body.")
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
         # Check if the Authorization header is present
         if authorization is None:
+            print("Authorization header is missing.")
             raise HTTPException(status_code=401, detail="Authorization header is missing.")
         
         # Extract the token from the Authorization header
@@ -844,10 +846,12 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
 
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
+                print("User is not registered")
                 raise HTTPException(status_code=401, detail="___________User is not registered___________")
             
             # Perform actions for the current URL
             url = list(URL_CREDENTIALS.keys())[current_url_index]
+            print(f"Selected URL: {url}")
             credentials = URL_CREDENTIALS[url]
             access_token = login_user(url, credentials["username"], credentials["password"])
 
@@ -862,30 +866,37 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                 response = requests.post(f"{url}/tts_service", headers=headers, json=data)
 
                 if response.status_code == 200:
+                    print("TTS service response success == 200 OK")
                     # Create a temporary file to save the audio data
                     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
                         temp_file.write(response.content)
                         temp_file_path = temp_file.name
 
                     # Return the temporary file using FileResponse
+                    print("Returning generated audio file")
                     return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
                 else:
                     # Move to the next URL if response status code is not 200
+                    print(f"Failed to get a successful response from {url}. Status code: {response.status_code}, Response: {response.text}")
                     current_url_index = (current_url_index + 1) % len(URL_CREDENTIALS)
 
                     # Retry the request with the next URL if available
                     if current_url_index < len(URL_CREDENTIALS):
                         return await text_to_speech(request, authorization, db)
                     else:
+                        print("All URLs failed to provide a successful response.")
                         raise HTTPException(status_code=500, detail="All URLs failed to provide a successful response.")
 
             else:
+                print("Failed to log in user.")
                 raise HTTPException(status_code=500, detail="Failed to log in user.")
 
         except jwt.ExpiredSignatureError:
+            print("JWT token has expired.")
             raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
 
     except ValueError:
+        print("Invalid JSON format in the request headers")
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
 
     
