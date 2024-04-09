@@ -866,6 +866,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
 
             # Perform actions for the current URL
             url = list(URL_CREDENTIALS.keys())[current_url_index]
+            print(f"Selected URL: {url}")
             credentials = URL_CREDENTIALS[url]
             access_token = login_user(url, credentials["username"], credentials["password"])
 
