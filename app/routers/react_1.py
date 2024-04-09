@@ -767,8 +767,8 @@ def login_user(credentials):
     else:
         raise HTTPException(status_code=401, detail="Login failed")
 
-# @router.post("/api/tts_endpoint")
-async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = None) -> FileResponse:
+@router.post("/api/tts_endpoint")
+async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
     try:
         # Extract the request data
         request_data = await request.json()
