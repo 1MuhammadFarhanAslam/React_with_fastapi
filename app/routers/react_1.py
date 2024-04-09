@@ -157,9 +157,7 @@ from jwt.exceptions import ExpiredSignatureError  # Import the ExpiredSignatureE
 from fastapi import UploadFile, File
 from typing import Optional
 import asyncio
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
-import logger
+import logging
 
 
 router = APIRouter()
@@ -762,7 +760,8 @@ def login_user(credentials):
                 access_token = response_data.get("access_token")
                 return access_token, credential['url']  # Return the access token and corresponding URL
         except requests.exceptions.RequestException as e:
-            logger.error(f"Error logging in to {credential['url']}: {e}")
+            logging.error(f"Error occurred while logging in: {e}")
+            continue  # Try with the next credential
 
         index += 1  # Move to the next credential if unsuccessful
 
