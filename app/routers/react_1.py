@@ -742,7 +742,7 @@ LOGIN_CREDENTIALS = [
 
 def create_session():
     session = requests.Session()
-    retries = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+    retries = Retry(total=1, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
     adapter = HTTPAdapter(max_retries=retries)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
