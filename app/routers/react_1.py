@@ -879,6 +879,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                     else:
                         print(f"Failed to get a successful response from {url}. Status code: {response.status_code}, Response: {response.text}")
                         current_url_index += 1  # Move to the next URL
+                        continue
 
                 else:
                     print("Failed to log in user.")
