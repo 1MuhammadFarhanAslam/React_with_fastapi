@@ -788,7 +788,7 @@ URL_CREDENTIALS = {
 current_url_index = 0
 
 # Define a function to log in the user and get the access token for a specific URL
-def login_user(url: str) -> str:
+def login_user(url: str, username: str, password: str) -> str:
     credentials = URL_CREDENTIALS.get(url)
     if credentials:
         login_payload = {
@@ -849,7 +849,8 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
             
             # Perform actions for the current URL
             url = list(URL_CREDENTIALS.keys())[current_url_index]
-            access_token = login_user(url)
+            credentials = URL_CREDENTIALS[url]
+            access_token = login_user(url, credentials["username"], credentials["password"])
 
             if access_token:
                 data = {"prompt": prompt}
