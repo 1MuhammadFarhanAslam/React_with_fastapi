@@ -559,170 +559,6 @@
 #         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
 
 
-# from fastapi import HTTPException, APIRouter, Request, Header, Depends, Form
-# import requests
-# from fastapi.responses import FileResponse
-# import tempfile
-# import os
-# import jwt
-# from sqlalchemy.orm import Session
-# from models import React_User, Email_User
-# from sqlalchemy.orm import sessionmaker, declarative_base
-# from sqlalchemy import create_engine
-# from typing import Generator, Optional
-# from jwt.exceptions import ExpiredSignatureError  # Import the ExpiredSignatureError
-# from fastapi import UploadFile, File
-# import asyncio
-
-
-# router = APIRouter()
-
-# # 
-
-# # Get the database URL from the environment variable
-# DATABASE_URL = os.environ.get("DATABASE_URL")
-
-# if DATABASE_URL is None:
-#     raise Exception("DATABASE_URL environment variable is not set")
-
-# GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
-# if GOOGLE_EMAIL_LOGIN_SECRET_KEY is None:
-#     raise Exception("GOOGLE_EMAIL_LOGIN_SECRET_KEY environment variable is not set")
-
-# ALGORITHM = "HS256"
-# ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-# # Create the SQLAlchemy engine
-# engine = create_engine(DATABASE_URL)
-# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-# # SQLAlchemy models
-# Base = declarative_base()
-
-# def initialize_database():
-#     from models import Base
-#     Base.metadata.create_all(bind=engine)
-#     print("Database initialized successfully.")
-
-# # Dependency to get the database session
-# def get_database() -> Generator[Session, None, None]:
-#     # Provide a database session to use within the request
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
-
-# async def login_user(username: str, password: str, login_url: str) -> str:
-#     login_payload = {
-#         "username": username,
-#         "password": password
-#     }
-#     login_headers = {
-#         "accept": "application/json",
-#         "Content-Type": "application/x-www-form-urlencoded"
-#     }
-#     login_response = requests.post(login_url, headers=login_headers, data=login_payload)
-
-#     if login_response.status_code == 200:
-#         # Login successful, return the access token
-#         response_data = login_response.json()
-#         access_token = response_data.get("access_token")
-#         return access_token
-#     else:
-#         # Login failed
-#         return None
-
-# async def send_request(url: str, data: dict, headers: dict) -> requests.Response:
-#     # Send a POST request to the specified URL with data and headers
-#     return requests.post(url, json=data, headers=headers)
-
-
-# @router.post("/api/tts_endpoint")
-# async def text_to_speech(request: Request, authorization: Optional[str] = Header(None), db: Session = Depends(get_database)) -> FileResponse:
-#     try:
-#         # Extract the request data
-#         request_data = await request.json()
-#         prompt = request_data.get("prompt")
-#         if prompt is None:
-#             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
-
-#         # Check if the Authorization header is present
-#         if authorization is None:
-#             raise HTTPException(status_code=401, detail="Authorization header is missing.")
-        
-#         # Extract the token from the Authorization header
-#         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
-        
-#         try:
-#             # Decode and verify the JWT token
-#             decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
-#             email = decoded_token.get("sub")
-
-#             # Query the database based on the email to get user data from React_User and Email_User
-#             react_user = db.query(React_User).filter(React_User.email == email).first()
-#             email_user = db.query(Email_User).filter(Email_User.email == email).first()
-
-#             # If the user is not registered in either React_User or Email_User, raise an exception
-#             if not react_user and not email_user:
-#                 raise HTTPException(status_code=401, detail="User is not registered.")
-            
-#             else:
-#                 # Define the login URLs and credentials
-#                 LOGIN_URL_1 = "http://38.80.122.166:40440/login"
-#                 LOGIN_URL_2 = "http://79.116.48.205:24942/login"
-#                 LOGIN_USERNAME_1 = "Opentensor@hotmail.com_val3"
-#                 LOGIN_PASSWORD_1 = "Opentensor@12345"
-#                 LOGIN_USERNAME_2 = "Opentensor@hotmail.com_val4"
-#                 LOGIN_PASSWORD_2 = "Opentensor@12345"
-
-#                 # Log in the user asynchronously using the appropriate credentials and login URLs
-#                 access_token_1 = await login_user(LOGIN_USERNAME_1, LOGIN_PASSWORD_1, LOGIN_URL_1)
-#                 access_token_2 = await login_user(LOGIN_USERNAME_2, LOGIN_PASSWORD_2, LOGIN_URL_2)
-
-#                 # Define the data and headers for the requests to the text-to-speech service
-#                 data = {"prompt": prompt}
-#                 headers_1 = {"Authorization": f"Bearer {access_token_1}", "Content-Type": "application/json"}
-#                 headers_2 = {"Authorization": f"Bearer {access_token_2}", "Content-Type": "application/json"}
-
-#                 # Define the URLs for the text-to-speech service
-#                 TTS_URL_1 = "http://38.80.122.166:40440/tts_service"
-#                 TTS_URL_2 = "http://79.116.48.205:24942/tts_service"
-
-#                 # Send request to the first text-to-speech URL
-#                 response_1 = await send_request(TTS_URL_1, data, headers_1)
-
-#                 if response_1.status_code == 200:
-#                     # Create a temporary file to save the audio data
-#                     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-#                         temp_file.write(response_1.content)
-#                         temp_file_path = temp_file.name
-
-#                     # Return the temporary file using FileResponse
-#                     return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
-
-#                 else:
-#                     # Send request to the second text-to-speech URL if the first one fails
-#                     response_2 = await send_request(TTS_URL_2, data, headers_2)
-
-#                     if response_2.status_code == 200:
-#                         # Create a temporary file to save the audio data
-#                         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-#                             temp_file.write(response_2.content)
-#                             temp_file_path = temp_file.name
-
-#                         # Return the temporary file using FileResponse
-#                         return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
-#                     else:
-#                         raise HTTPException(status_code=response_2.status_code, detail=response_2.text)
-
-#         except ExpiredSignatureError:
-#             raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
-
-#     except ValueError:
-#         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
-
-
 from fastapi import HTTPException, APIRouter, Request, Header, Depends, Form
 import requests
 from fastapi.responses import FileResponse
@@ -777,68 +613,37 @@ def get_database() -> Generator[Session, None, None]:
         db.close()
 
 
-# Define a dictionary to store login credentials for each URL
-URL_CREDENTIALS = {
-    "http://38.80.122.166:40440": {"username": "Opentensor@hotmail.com_val3", "password": "Opentensor@12345"},
-    "http://79.116.48.205:24942": {"username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"},
-    # Add more URLs and credentials as needed
-}
+async def login_user(username: str, password: str, login_url: str) -> str:
+    login_payload = {
+        "username": username,
+        "password": password
+    }
+    login_headers = {
+        "accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    login_response = requests.post(login_url, headers=login_headers, data=login_payload)
 
-# Global variable to track the current URL index
-current_url_index = 0
+    if login_response.status_code == 200:
+        # Login successful, return the access token
+        response_data = login_response.json()
+        access_token = response_data.get("access_token")
+        return access_token
+    else:
+        # Login failed
+        return None
 
-# Define a function to log in the user and get the access token for a specific URL
-async def login_user(url: str, username: str, password: str) -> str:
-    current_index = list(URL_CREDENTIALS.keys()).index(url)
-    max_attempts = len(URL_CREDENTIALS)
-    attempts = 0
-
-    while attempts < max_attempts:
-        credentials = URL_CREDENTIALS.get(url)
-        if credentials is None:
-            raise HTTPException(status_code=500, detail="Specified URL credentials not found.")
-
-        login_payload = {
-            "username": credentials["username"],
-            "password": credentials["password"]
-        }
-        login_headers = {
-            "accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-        login_response = await asyncio.get_event_loop().run_in_executor(None, lambda: requests.post(f"{url}/login", headers=login_headers, data=login_payload))
-
-        if login_response.status_code == 200:
-            # Login successful, extract and return the access token
-            response_data = login_response.json()
-            access_token = response_data.get("access_token")
-            return access_token
-        elif login_response.status_code == 401:
-            # Unauthorized, move to the next URL if available
-            current_index = (current_index + 1) % len(URL_CREDENTIALS)
-            url = list(URL_CREDENTIALS.keys())[current_index]
-            attempts += 1
-            continue
-        else:
-            # Other errors, try the next URL if available
-            current_index = (current_index + 1) % len(URL_CREDENTIALS)
-            url = list(URL_CREDENTIALS.keys())[current_index]
-            attempts += 1
-            continue
-
-    # If all URLs are exhausted without a successful login, raise an exception
-    raise HTTPException(status_code=500, detail="Failed to log in user. All URLs failed.")
+async def send_request(url: str, data: dict, headers: dict) -> requests.Response:
+    # Send a POST request to the specified URL with data and headers
+    return requests.post(url, json=data, headers=headers)
 
 
-# Define the text to speech endpoint
 @router.post("/api/tts_endpoint")
-async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
-    global current_url_index
+async def text_to_speech(request: Request, authorization: Optional[str] = Header(None), db: Session = Depends(get_database)) -> FileResponse:
     try:
         # Extract the request data
         request_data = await request.json()
         prompt = request_data.get("prompt")
-        
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
@@ -852,8 +657,8 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
         try:
             # Decode and verify the JWT token
             decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
-            email = decoded_token.get("sub")  # Assuming "sub" contains the email address
-            
+            email = decoded_token.get("sub")
+
             # Query the database based on the email to get user data from React_User and Email_User
             react_user = db.query(React_User).filter(React_User.email == email).first()
             email_user = db.query(Email_User).filter(Email_User.email == email).first()
@@ -861,48 +666,194 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
                 raise HTTPException(status_code=401, detail="User is not registered.")
+            
+            else:
+                # Define the login URLs and credentials
+                LOGIN_URL_1 = "http://38.80.122.166:40440/login"
+                LOGIN_URL_2 = "http://79.116.48.205:24942/login"
+                LOGIN_USERNAME_1 = "Opentensor@hotmail.com_val3"
+                LOGIN_PASSWORD_1 = "Opentensor@12345"
+                LOGIN_USERNAME_2 = "Opentensor@hotmail.com_val4"
+                LOGIN_PASSWORD_2 = "Opentensor@12345"
 
-            # Perform actions for the current URL
-            url = list(URL_CREDENTIALS.keys())[current_url_index]
-            credentials = URL_CREDENTIALS[url]
-            access_token = await login_user(url, credentials["username"], credentials["password"])
+                # Log in the user asynchronously using the appropriate credentials and login URLs
+                access_token_1 = await login_user(LOGIN_USERNAME_1, LOGIN_PASSWORD_1, LOGIN_URL_1)
+                access_token_2 = await login_user(LOGIN_USERNAME_2, LOGIN_PASSWORD_2, LOGIN_URL_2)
 
-            if access_token:
+                # Define the data and headers for the requests to the text-to-speech service
                 data = {"prompt": prompt}
-                headers = {
-                    "Accept": "audio/wav",
-                    "Authorization": f"Bearer {access_token}",
-                    "Content-Type": "application/json"
-                }
+                headers_1 = {"Authorization": f"Bearer {access_token_1}", "Content-Type": "application/json"}
+                headers_2 = {"Authorization": f"Bearer {access_token_2}", "Content-Type": "application/json"}
 
-                response = await asyncio.get_event_loop().run_in_executor(None, lambda: requests.post(f"{url}/tts_service", headers=headers, json=data))
+                # Define the URLs for the text-to-speech service
+                TTS_URL_1 = "http://38.80.122.166:40440/tts_service"
+                TTS_URL_2 = "http://79.116.48.205:24942/tts_service"
 
-                if response.status_code == 200:
+                # Send request to the first text-to-speech URL
+                response_1 = await send_request(TTS_URL_1, data, headers_1)
+
+                if response_1.status_code == 200:
                     # Create a temporary file to save the audio data
                     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                        temp_file.write(response.content)
+                        temp_file.write(response_1.content)
                         temp_file_path = temp_file.name
 
                     # Return the temporary file using FileResponse
                     return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
+
                 else:
-                    # Move to the next URL if response status code is not 200
-                    current_url_index = (current_url_index + 1) % len(URL_CREDENTIALS)
+                    # Send request to the second text-to-speech URL if the first one fails
+                    response_2 = await send_request(TTS_URL_2, data, headers_2)
 
-                    # Retry the request with the next URL if available
-                    if current_url_index < len(URL_CREDENTIALS):
-                        return await text_to_speech(request, authorization, db)
+                    if response_2.status_code == 200:
+                        # Create a temporary file to save the audio data
+                        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                            temp_file.write(response_2.content)
+                            temp_file_path = temp_file.name
+
+                        # Return the temporary file using FileResponse
+                        return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
                     else:
-                        raise HTTPException(status_code=500, detail="All URLs failed to provide a successful response.")
+                        raise HTTPException(status_code=response_2.status_code, detail=response_2.text)
 
-            else:
-                raise HTTPException(status_code=500, detail="Failed to log in user.")
-
-        except jwt.ExpiredSignatureError:
+        except ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+    
+
+####################################################
+
+
+
+
+# # Define a dictionary to store login credentials for each URL
+# URL_CREDENTIALS = {
+#     "http://38.80.122.166:40440": {"username": "Opentensor@hotmail.com_val3", "password": "Opentensor@12345"},
+#     "http://79.116.48.205:24942": {"username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"},
+#     # Add more URLs and credentials as needed
+# }
+
+# # Global variable to track the current URL index
+# current_url_index = 0
+
+# # Define a function to log in the user and get the access token for a specific URL
+# async def login_user(url: str, username: str, password: str) -> str:
+#     current_index = list(URL_CREDENTIALS.keys()).index(url)
+#     max_attempts = len(URL_CREDENTIALS)
+#     attempts = 0
+
+#     while attempts < max_attempts:
+#         credentials = URL_CREDENTIALS.get(url)
+#         if credentials is None:
+#             raise HTTPException(status_code=500, detail="Specified URL credentials not found.")
+
+#         login_payload = {
+#             "username": credentials["username"],
+#             "password": credentials["password"]
+#         }
+#         login_headers = {
+#             "accept": "application/json",
+#             "Content-Type": "application/x-www-form-urlencoded"
+#         }
+#         login_response = await asyncio.get_event_loop().run_in_executor(None, lambda: requests.post(f"{url}/login", headers=login_headers, data=login_payload))
+
+#         if login_response.status_code == 200:
+#             # Login successful, extract and return the access token
+#             response_data = login_response.json()
+#             access_token = response_data.get("access_token")
+#             return access_token
+#         elif login_response.status_code == 401:
+#             # Unauthorized, move to the next URL if available
+#             current_index = (current_index + 1) % len(URL_CREDENTIALS)
+#             url = list(URL_CREDENTIALS.keys())[current_index]
+#             attempts += 1
+#             continue
+#         else:
+#             # Other errors, try the next URL if available
+#             current_index = (current_index + 1) % len(URL_CREDENTIALS)
+#             url = list(URL_CREDENTIALS.keys())[current_index]
+#             attempts += 1
+#             continue
+
+#     # If all URLs are exhausted without a successful login, raise an exception
+#     raise HTTPException(status_code=500, detail="Failed to log in user. All URLs failed.")
+
+
+# # Define the text to speech endpoint
+# @router.post("/api/tts_endpoint")
+# async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
+#     global current_url_index
+#     try:
+#         # Extract the request data
+#         request_data = await request.json()
+#         prompt = request_data.get("prompt")
+        
+#         if prompt is None:
+#             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
+
+#         # Check if the Authorization header is present
+#         if authorization is None:
+#             raise HTTPException(status_code=401, detail="Authorization header is missing.")
+        
+#         # Extract the token from the Authorization header
+#         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+        
+#         try:
+#             # Decode and verify the JWT token
+#             decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+#             email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+            
+#             # Query the database based on the email to get user data from React_User and Email_User
+#             react_user = db.query(React_User).filter(React_User.email == email).first()
+#             email_user = db.query(Email_User).filter(Email_User.email == email).first()
+
+#             # If the user is not registered in either React_User or Email_User, raise an exception
+#             if not react_user and not email_user:
+#                 raise HTTPException(status_code=401, detail="User is not registered.")
+
+#             # Perform actions for the current URL
+#             url = list(URL_CREDENTIALS.keys())[current_url_index]
+#             credentials = URL_CREDENTIALS[url]
+#             access_token = await login_user(url, credentials["username"], credentials["password"])
+
+#             if access_token:
+#                 data = {"prompt": prompt}
+#                 headers = {
+#                     "Accept": "audio/wav",
+#                     "Authorization": f"Bearer {access_token}",
+#                     "Content-Type": "application/json"
+#                 }
+
+#                 response = await asyncio.get_event_loop().run_in_executor(None, lambda: requests.post(f"{url}/tts_service", headers=headers, json=data))
+
+#                 if response.status_code == 200:
+#                     # Create a temporary file to save the audio data
+#                     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+#                         temp_file.write(response.content)
+#                         temp_file_path = temp_file.name
+
+#                     # Return the temporary file using FileResponse
+#                     return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
+#                 else:
+#                     # Move to the next URL if response status code is not 200
+#                     current_url_index = (current_url_index + 1) % len(URL_CREDENTIALS)
+
+#                     # Retry the request with the next URL if available
+#                     if current_url_index < len(URL_CREDENTIALS):
+#                         return await text_to_speech(request, authorization, db)
+#                     else:
+#                         raise HTTPException(status_code=500, detail="All URLs failed to provide a successful response.")
+
+#             else:
+#                 raise HTTPException(status_code=500, detail="Failed to log in user.")
+
+#         except jwt.ExpiredSignatureError:
+#             raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
+
+#     except ValueError:
+#         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
 
 
     
