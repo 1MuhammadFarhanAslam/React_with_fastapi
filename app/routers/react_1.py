@@ -834,21 +834,16 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
         try:
             # Decode and verify the JWT token
             decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
-            print("________________decoded_token________________", decoded_token)
-
             email = decoded_token.get("sub")  # Assuming "sub" contains the email address
-            print("________________email________________", email)
             
             # Query the database based on the email to get user data from React_User and Email_User
             react_user = db.query(React_User).filter(React_User.email == email).first()
             email_user = db.query(Email_User).filter(Email_User.email == email).first()
-            print("_______________user details in jwt token (React_User)___________" , react_user)
-            print("_______________user details in jwt token (Email_User)___________" , email_user)
 
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
                 print("User is not registered")
-                raise HTTPException(status_code=401, detail="___________User is not registered___________")
+                raise HTTPException(status_code=401, detail="User is not registered")
             
             # Perform actions for the current URL
             while current_url_index < len(URL_CREDENTIALS):
@@ -879,15 +874,13 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                         return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
                     else:
                         print(f"Failed to get a successful response from {url}. Status code: {response.status_code}, Response: {response.text}")
-                        current_url_index += 1  # Move to the next URL
+                        current_url_index = next(URL_CREDENTIALS, None)  # Move to the next URL
                         print(f"Current URL index incremented to {current_url_index}")
-                        continue  # Move to the next iteration of the while loop
 
                 else:
                     print(f"Failed to log in user for URL: {url}. Moving to the next URL.")
-                    current_url_index += 1  # Move to the next URL
+                    current_url_index = next(URL_CREDENTIALS, None)  # Move to the next URL
                     print(f"Current URL index incremented to {current_url_index}")
-                    continue  # Move to the next iteration of the while loop
 
             # If all URLs have been exhausted without a successful response, raise an exception
             print("All URLs failed to provide a successful response.")
@@ -900,6 +893,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
     except ValueError:
         print("Invalid JSON format in the request headers")
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+
 
 
     
