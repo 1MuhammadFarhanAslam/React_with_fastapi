@@ -809,6 +809,7 @@ def login_user(url: str, username: str, password: str) -> str:
     else:
         raise HTTPException(status_code=500, detail=f"Failed to log in user. Status code: {login_response.status_code}, Response: {login_response.text}")
 
+
 # Define the text to speech endpoint
 @router.post("/api/tts_endpoint")
 async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
@@ -880,12 +881,14 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                         print(f"Failed to get a successful response from {url}. Status code: {response.status_code}, Response: {response.text}")
                         current_url_index += 1  # Move to the next URL
                         print(f"Current URL index incremented to {current_url_index}")
-                        continue
+                        continue  # Move to the next iteration of the while loop
 
                 else:
-                    print("Failed to log in user.")
-                    raise HTTPException(status_code=500, detail="Failed to log in user.")
-                
+                    print(f"Failed to log in user for URL: {url}. Moving to the next URL.")
+                    current_url_index += 1  # Move to the next URL
+                    print(f"Current URL index incremented to {current_url_index}")
+                    continue  # Move to the next iteration of the while loop
+
             # If all URLs have been exhausted without a successful response, raise an exception
             print("All URLs failed to provide a successful response.")
             raise HTTPException(status_code=500, detail="All URLs failed to provide a successful response.")
@@ -897,6 +900,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
     except ValueError:
         print("Invalid JSON format in the request headers")
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+
 
     
 
