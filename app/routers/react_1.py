@@ -850,46 +850,43 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                 raise HTTPException(status_code=401, detail="___________User is not registered___________")
             
             # Perform actions for the current URL
-            url = list(URL_CREDENTIALS.keys())[current_url_index]
-            print(f"Selected URL: {url}")
-            credentials = URL_CREDENTIALS[url]
-            access_token = login_user(url, credentials["username"], credentials["password"])
+            while current_url_index < len(URL_CREDENTIALS):
+                url = list(URL_CREDENTIALS.keys())[current_url_index]
+                print(f"Selected URL: {url}")
+                credentials = URL_CREDENTIALS[url]
+                access_token = login_user(url, credentials["username"], credentials["password"])
 
-            if access_token:
-                data = {"prompt": prompt}
-                headers = {
-                    "Accept": "audio/wav",
-                    "Authorization": f"Bearer {access_token}",
-                    "Content-Type": "application/json"
-                }
+                if access_token:
+                    data = {"prompt": prompt}
+                    headers = {
+                        "Accept": "audio/wav",
+                        "Authorization": f"Bearer {access_token}",
+                        "Content-Type": "application/json"
+                    }
 
-                response = requests.post(f"{url}/tts_service", headers=headers, json=data)
+                    response = requests.post(f"{url}/tts_service", headers=headers, json=data)
 
-                if response.status_code == 200:
-                    print("TTS service response success == 200 OK")
-                    # Create a temporary file to save the audio data
-                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                        temp_file.write(response.content)
-                        temp_file_path = temp_file.name
+                    if response.status_code == 200:
+                        print("TTS service response success == 200 OK")
+                        # Create a temporary file to save the audio data
+                        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                            temp_file.write(response.content)
+                            temp_file_path = temp_file.name
 
-                    # Return the temporary file using FileResponse
-                    print("Returning generated audio file")
-                    return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
-                else:
-                    # Move to the next URL if response status code is not 200
-                    print(f"Failed to get a successful response from {url}. Status code: {response.status_code}, Response: {response.text}")
-                    current_url_index = (current_url_index + 1) % len(URL_CREDENTIALS)
-
-                    # Retry the request with the next URL if available
-                    if current_url_index < len(URL_CREDENTIALS):
-                        return await text_to_speech(request, authorization, db)
+                        # Return the temporary file using FileResponse
+                        print("Returning generated audio file")
+                        return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
                     else:
-                        print("All URLs failed to provide a successful response.")
-                        raise HTTPException(status_code=500, detail="All URLs failed to provide a successful response.")
+                        print(f"Failed to get a successful response from {url}. Status code: {response.status_code}, Response: {response.text}")
+                        current_url_index += 1  # Move to the next URL
 
-            else:
-                print("Failed to log in user.")
-                raise HTTPException(status_code=500, detail="Failed to log in user.")
+                else:
+                    print("Failed to log in user.")
+                    raise HTTPException(status_code=500, detail="Failed to log in user.")
+                
+            # If all URLs have been exhausted without a successful response, raise an exception
+            print("All URLs failed to provide a successful response.")
+            raise HTTPException(status_code=500, detail="All URLs failed to provide a successful response.")
 
         except jwt.ExpiredSignatureError:
             print("JWT token has expired.")
