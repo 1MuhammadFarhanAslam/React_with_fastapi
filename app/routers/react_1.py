@@ -735,17 +735,20 @@ def get_database() -> Generator[Session, None, None]:
 
 
 # Define constants for login credentials and URLs
-CREDENTIALS_AND_URLS = [
-    {"credentials": {"username": "username1", "password": "password1"}, "tts_url": "http://tts_url1.com/tts_service"},
-    {"credentials": {"username": "username2", "password": "password2"}, "tts_url": "http://tts_url2.com/tts_service"},
-]
+LOGIN_CREDENTIALS = {
+    "http://38.80.122.166:40440": {"username": "Opentensor@hotmail.com_val3", "password": "Opentensor@12345"},
+    "http://79.116.48.205:24942": {"username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"}
+}
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Define a function to log in the user and get the access token for a specific set of credentials
 def login_user(credentials):
+    if credentials is None:
+        raise HTTPException(status_code=500, detail="Credentials not found for the given URL")
+    
+    login_url = f"{credentials['url']}/login"
     login_payload = {
         "username": credentials["username"],
         "password": credentials["password"]
@@ -754,27 +757,17 @@ def login_user(credentials):
         "accept": "application/json",
         "Content-Type": "application/x-www-form-urlencoded"
     }
-
-    # Configure retry mechanism for login requests
-    retries = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
-    session = requests.Session()
-    session.mount("http://", HTTPAdapter(max_retries=retries))
-
-    login_response = session.post("http://login_url.com/login", headers=login_headers, data=login_payload)
+    login_response = requests.post(login_url, headers=login_headers, data=login_payload)
 
     if login_response.status_code == 200:
-        # Login successful, extract and return the access token
         response_data = login_response.json()
         access_token = response_data.get("access_token")
-        return access_token
+        return access_token, credentials['url']  # Return the access token and corresponding URL
     else:
-        # Login failed
-        return None
+        raise HTTPException(status_code=401, detail="Login failed")
 
-
-
-@router.post("/api/tts_endpoint")
-async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
+# @router.post("/api/tts_endpoint")
+async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = None) -> FileResponse:
     try:
         # Extract the request data
         request_data = await request.json()
@@ -789,48 +782,34 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
         
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
-
-        # Decode and verify the JWT token
-        decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
-        email = decoded_token.get("sub")  # Assuming "sub" contains the email address
-
-        # Query the database based on the email to get user data from React_User and Email_User
-        react_user = db.query(React_User).filter(React_User.email == email).first()
-        email_user = db.query(Email_User).filter(Email_User.email == email).first()
-
-        if not react_user and not email_user:
-            raise HTTPException(status_code=401, detail="User is not registered")
         
-        else:
-            access_token = None
-            tts_url = None
-            for item in CREDENTIALS_AND_URLS:
-                access_token = login_user(item["credentials"])
-                if access_token:
-                    tts_url = item["tts_url"]
-                    break  # Stop iteration if login successful
-                else:
-                    logger.info(f"Login failed for credentials: {item['credentials']}")
+        try:
+            # Decode and verify the JWT token
+            decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+            email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+            
+            # Query the database based on the email to get user data from React_User and Email_User
+            react_user = db.query(React_User).filter(React_User.email == email).first()
+            email_user = db.query(Email_User).filter(Email_User.email == email).first()
 
-            if not access_token or not tts_url:
-                raise HTTPException(status_code=401, detail="Failed to login to any URL")
+            # Your logic for checking user existence and authorization goes here
 
-            data = {
-                "prompt": prompt
-            }
+            # If the user is not registered in either React_User or Email_User, raise an exception
+            if not react_user and not email_user:
+                raise HTTPException(status_code=401, detail="User is not registered")
+            
+            # Log in the user and get the access token and corresponding URL
+            access_token, login_url = login_user(LOGIN_CREDENTIALS.get(request.url.host))
+            data = {"prompt": prompt}
 
+            tts_url = f"{login_url}/tts_service"  # Construct the TTS URL based on successful login URL
             headers = {
-                "Accept": "audio/wav",  # Specify the desired audio format
+                "Accept": "audio/wav",
                 "Authorization": f"Bearer {access_token}",
                 "Content-Type": "application/json"
             }
 
-            # Configure retry mechanism for TTS requests
-            retries = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
-            session = requests.Session()
-            session.mount("http://", HTTPAdapter(max_retries=retries))
-
-            response = session.post(tts_url, headers=headers, json=data)
+            response = requests.post(tts_url, headers=headers, json=data)
 
             if response.status_code == 200:
                 # Create a temporary file to save the audio data
@@ -843,21 +822,11 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
             else:
                 raise HTTPException(status_code=response.status_code, detail=response.text)
 
-    except ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
+        except ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
+
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
-    except Exception as e:
-        logger.error(f"An error occurred: {str(e)}")
-
-        # If login was unsuccessful for all URLs, raise an exception
-        if not access_token or not tts_url:
-            raise HTTPException(status_code=401, detail="Failed to login to any URL")
-
-        # If TTS request failed, log the error and raise an exception
-        logger.error(f"TTS request failed: {str(e)}")
-        raise HTTPException(status_code=500, detail="TTS request failed")
-
     
 
 
