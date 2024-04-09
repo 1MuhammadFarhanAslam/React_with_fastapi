@@ -874,8 +874,11 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                     # Move to the next URL if response status code is not 200
                     current_url_index = (current_url_index + 1) % len(URL_CREDENTIALS)
 
-                    # Retry the request with the next URL
-                    return text_to_speech(request, authorization)
+                    # Retry the request with the next URL if available
+                    if current_url_index < len(URL_CREDENTIALS):
+                        return await text_to_speech(request, authorization)
+                    else:
+                        raise HTTPException(status_code=500, detail="All URLs failed to provide a successful response.")
 
             else:
                 raise HTTPException(status_code=500, detail="Failed to log in user.")
