@@ -784,6 +784,9 @@ URL_CREDENTIALS = {
     # Add more URLs and credentials as needed
 }
 
+# Global variable to track the current URL index
+current_url_index = 0
+
 # Define a function to log in the user and get the access token for a specific URL
 def login_user(url: str) -> str:
     credentials = URL_CREDENTIALS.get(url)
@@ -806,8 +809,8 @@ def login_user(url: str) -> str:
 
     # If login fails or URL is not found in credentials dictionary, return None
     return None
-    
 
+# Define the text to speech endpoint
 @router.post("/api/tts_endpoint")
 async def text_to_speech(request: Request, authorization: str = Header(None), db : Session = Depends(get_database)) -> FileResponse:
     global current_url_index
@@ -843,38 +846,38 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
                 raise HTTPException(status_code=401, detail="___________User is not registered___________")
-            else:
-                # Perform actions for the current URL
-                url = list(URL_CREDENTIALS.keys())[current_url_index]
-                access_token = login_user(url)
+            
+            # Perform actions for the current URL
+            url = list(URL_CREDENTIALS.keys())[current_url_index]
+            access_token = login_user(url)
 
-                if access_token:
-                    data = {"prompt": prompt}
-                    headers = {
-                        "Accept": "audio/wav",
-                        "Authorization": f"Bearer {access_token}",
-                        "Content-Type": "application/json"
-                    }
+            if access_token:
+                data = {"prompt": prompt}
+                headers = {
+                    "Accept": "audio/wav",
+                    "Authorization": f"Bearer {access_token}",
+                    "Content-Type": "application/json"
+                }
 
-                    response = requests.post(f"{url}/tts_service", headers=headers, json=data)
+                response = requests.post(f"{url}/tts_service", headers=headers, json=data)
 
-                    if response.status_code == 200:
-                        # Create a temporary file to save the audio data
-                        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                            temp_file.write(response.content)
-                            temp_file_path = temp_file.name
+                if response.status_code == 200:
+                    # Create a temporary file to save the audio data
+                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                        temp_file.write(response.content)
+                        temp_file_path = temp_file.name
 
-                        # Return the temporary file using FileResponse
-                        return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
-                    else:
-                        # Move to the next URL if response status code is not 200
-                        current_url_index = (current_url_index + 1) % len(URL_CREDENTIALS)
-
-                        # Retry the request with the next URL
-                        return await text_to_speech(request, authorization)
-
+                    # Return the temporary file using FileResponse
+                    return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
                 else:
-                    raise HTTPException(status_code=500, detail="Failed to log in user.")
+                    # Move to the next URL if response status code is not 200
+                    current_url_index = (current_url_index + 1) % len(URL_CREDENTIALS)
+
+                    # Retry the request with the next URL
+                    return await text_to_speech(request, authorization)
+
+            else:
+                raise HTTPException(status_code=500, detail="Failed to log in user.")
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
