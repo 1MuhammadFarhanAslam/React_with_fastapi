@@ -742,20 +742,18 @@ LOGIN_CREDENTIALS = [
 
 def create_session():
     session = requests.Session()
-    
-    # Define retry strategy for the session
-    retries = Retry(total=5, backoff_factor=0.5)
+    retries = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
     adapter = HTTPAdapter(max_retries=retries)
-    
     session.mount('http://', adapter)
     session.mount('https://', adapter)
-    
     return session
 
 def login_user(credentials):
     session = create_session()
+    index = 0  # Start with the first credential
 
-    for credential in credentials:
+    while index < len(credentials):
+        credential = credentials[index]
         try:
             login_url = f"{credential['url']}/login"
             login_payload = {
@@ -772,9 +770,12 @@ def login_user(credentials):
                 response_data = login_response.json()
                 access_token = response_data.get("access_token")
                 return access_token, credential['url']  # Return the access token and corresponding URL
+
         except requests.exceptions.RequestException as e:
             logging.error(f"Error occurred while logging in: {e}")
-            continue  # Move to the next credential in case of an error
+
+        # Move to the next credential
+        index += 1
 
     # If all attempts fail, raise an exception or handle it as needed
     raise HTTPException(status_code=401, detail="Login failed for all credentials")
