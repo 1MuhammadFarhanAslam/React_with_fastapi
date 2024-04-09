@@ -875,7 +875,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                     current_url_index = (current_url_index + 1) % len(URL_CREDENTIALS)
 
                     # Retry the request with the next URL
-                    return await text_to_speech(request, authorization)
+                    return text_to_speech(request, authorization)
 
             else:
                 raise HTTPException(status_code=500, detail="Failed to log in user.")
