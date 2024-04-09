@@ -779,8 +779,8 @@ def get_database() -> Generator[Session, None, None]:
 
 # Define a dictionary to store login credentials for each URL
 URL_CREDENTIALS = {
-    "http://url1.com/login": {"username": "user1", "password": "password1"},
-    "http://url2.com/login": {"username": "user2", "password": "password2"},
+    "http://38.80.122.166:40440/loginn": {"username": "Opentensor@hotmail.com_val3", "password": "Opentensor@12345"},
+    "http://79.116.48.205:24942/login": {"username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"},
     # Add more URLs and credentials as needed
 }
 
