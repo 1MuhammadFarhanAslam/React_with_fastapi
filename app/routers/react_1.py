@@ -740,17 +740,16 @@ LOGIN_CREDENTIALS = [
     {"url": "http://79.116.48.205:24942", "username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"}
 ]
 
-def create_session(retries=3, backoff_factor=0.5):
+def create_session():
     session = requests.Session()
-    retry_strategy = Retry(
-        total=retries,
-        backoff_factor=backoff_factor,
-        status_forcelist=[500, 502, 503, 504],
-        method_whitelist=["POST"],
-    )
-    adapter = HTTPAdapter(max_retries=retry_strategy)
-    session.mount("http://", adapter)
-    session.mount("https://", adapter)
+    
+    # Define retry strategy for the session
+    retries = Retry(total=5, backoff_factor=0.5)
+    adapter = HTTPAdapter(max_retries=retries)
+    
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    
     return session
 
 def login_user(credentials):
