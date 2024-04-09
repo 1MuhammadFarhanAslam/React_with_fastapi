@@ -881,8 +881,14 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                         print(f"Failed to get a successful response from {url}. Status code: {response.status_code}, Response: {response.text}")
                         current_url_index += 1  # Move to the next URL
                         print(f"Current URL index incremented to {current_url_index}")
-                        continue  # Move to the next iteration of the while loop
 
+                        if current_url_index < len(URL_CREDENTIALS):
+                            print("Moving to the next URL.")
+                            continue  # Move to the next iteration of the while loop
+                        else:
+                            print("All URLs failed to provide a successful response.")
+                            raise HTTPException(status_code=500, detail="All URLs failed to provide a successful response.")
+                
                 else:
                     print(f"Failed to log in user for URL: {url}. Moving to the next URL.")
                     current_url_index += 1  # Move to the next URL
@@ -900,7 +906,6 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
     except ValueError:
         print("Invalid JSON format in the request headers")
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
-
 
     
 
