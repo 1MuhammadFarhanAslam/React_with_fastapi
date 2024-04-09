@@ -806,10 +806,11 @@ def login_user(url: str) -> str:
 
     # If login fails or URL is not found in credentials dictionary, return None
     return None
-
+    
 
 @router.post("/api/tts_endpoint")
 async def text_to_speech(request: Request, authorization: str = Header(None), db : Session = Depends(get_database)) -> FileResponse:
+    global current_url_index
     try:
         # Extract the request data
         request_data = await request.json()
@@ -843,35 +844,37 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
             if not react_user and not email_user:
                 raise HTTPException(status_code=401, detail="___________User is not registered___________")
             else:
-                # Perform actions for each URL in the dictionary
-                for url in URL_CREDENTIALS.keys():
-                    # Log in the user and get the access token for the specific URL
-                    access_token = login_user(url)
+                # Perform actions for the current URL
+                url = list(URL_CREDENTIALS.keys())[current_url_index]
+                access_token = login_user(url)
 
-                    if access_token:
-                        data = {"prompt": prompt}
-                        headers = {
-                            "Accept": "audio/wav",
-                            "Authorization": f"Bearer {access_token}",
-                            "Content-Type": "application/json"
-                        }
+                if access_token:
+                    data = {"prompt": prompt}
+                    headers = {
+                        "Accept": "audio/wav",
+                        "Authorization": f"Bearer {access_token}",
+                        "Content-Type": "application/json"
+                    }
 
-                        response = requests.post(f"{url}/tts_service", headers=headers, json=data)
+                    response = requests.post(f"{url}/tts_service", headers=headers, json=data)
 
-                        if response.status_code == 200:
-                            # Create a temporary file to save the audio data
-                            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                                temp_file.write(response.content)
-                                temp_file_path = temp_file.name
+                    if response.status_code == 200:
+                        # Create a temporary file to save the audio data
+                        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                            temp_file.write(response.content)
+                            temp_file_path = temp_file.name
 
-                            # Return the temporary file using FileResponse
-                            return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
-                        else:
-                            # Redirect to the next URL if response status code is not 200
-                            continue
+                        # Return the temporary file using FileResponse
+                        return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
+                    else:
+                        # Move to the next URL if response status code is not 200
+                        current_url_index = (current_url_index + 1) % len(URL_CREDENTIALS)
 
-            # If no URL in the dictionary provides a successful response, raise an exception
-            raise HTTPException(status_code=500, detail="All URLs failed to provide a successful response.")
+                        # Retry the request with the next URL
+                        return await text_to_speech(request, authorization)
+
+                else:
+                    raise HTTPException(status_code=500, detail="Failed to log in user.")
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
