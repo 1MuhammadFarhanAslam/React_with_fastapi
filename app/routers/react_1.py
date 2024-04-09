@@ -789,26 +789,25 @@ current_url_index = 0
 
 # Define a function to log in the user and get the access token for a specific URL
 def login_user(url: str, username: str, password: str) -> str:
-    credentials = URL_CREDENTIALS.get(url)
-    if credentials:
-        login_payload = {
-            "username": credentials["username"],
-            "password": credentials["password"]
-        }
-        login_headers = {
-            "accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-        login_response = requests.post(url, headers=login_headers, data=login_payload)
+    login_payload = {
+        "username": username,
+        "password": password
+    }
+    login_headers = {
+        "accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+    login_response = requests.post(url, headers=login_headers, data=login_payload)
 
-        if login_response.status_code == 200:
-            # Login successful, extract and return the access token
-            response_data = login_response.json()
-            access_token = response_data.get("access_token")
-            return access_token
-
-    # If login fails or URL is not found in credentials dictionary, return None
-    return None
+    if login_response.status_code == 200:
+        # Login successful, extract and return the access token
+        response_data = login_response.json()
+        access_token = response_data.get("access_token")
+        return access_token
+    elif login_response.status_code == 401:
+        raise HTTPException(status_code=401, detail="Unauthorized: Invalid credentials.")
+    else:
+        raise HTTPException(status_code=500, detail=f"Failed to log in user. Status code: {login_response.status_code}, Response: {login_response.text}")
 
 # Define the text to speech endpoint
 @router.post("/api/tts_endpoint")
