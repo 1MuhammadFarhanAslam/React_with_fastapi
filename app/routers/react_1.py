@@ -731,7 +731,8 @@ def get_database() -> Generator[Session, None, None]:
 
 
 
-
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 # Define constants for login credentials and URLs
 LOGIN_CREDENTIALS = [
@@ -739,10 +740,23 @@ LOGIN_CREDENTIALS = [
     {"url": "http://79.116.48.205:24942", "username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"}
 ]
 
+def create_session(retries=3, backoff_factor=0.5):
+    session = requests.Session()
+    retry_strategy = Retry(
+        total=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=[500, 502, 503, 504],
+        method_whitelist=["POST"],
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
+
 def login_user(credentials):
-    index = 0  # Start with the first credential
-    while index < len(credentials):
-        credential = credentials[index]
+    session = create_session()
+
+    for credential in credentials:
         try:
             login_url = f"{credential['url']}/login"
             login_payload = {
@@ -753,7 +767,7 @@ def login_user(credentials):
                 "accept": "application/json",
                 "Content-Type": "application/x-www-form-urlencoded"
             }
-            login_response = requests.post(login_url, headers=login_headers, data=login_payload, timeout=15)
+            login_response = session.post(login_url, headers=login_headers, data=login_payload, timeout=15)
 
             if login_response.status_code == 200:
                 response_data = login_response.json()
@@ -761,9 +775,7 @@ def login_user(credentials):
                 return access_token, credential['url']  # Return the access token and corresponding URL
         except requests.exceptions.RequestException as e:
             logging.error(f"Error occurred while logging in: {e}")
-            continue  # Try with the next credential
-
-        index += 1  # Move to the next credential if unsuccessful
+            continue  # Move to the next credential in case of an error
 
     # If all attempts fail, raise an exception or handle it as needed
     raise HTTPException(status_code=401, detail="Login failed for all credentials")
