@@ -734,6 +734,7 @@ def get_database() -> Generator[Session, None, None]:
 
 
 
+
 # Define constants for login credentials and URLs
 LOGIN_CREDENTIALS = {
     "http://38.80.122.166:40440": {"username": "Opentensor@hotmail.com_val3", "password": "Opentensor@12345"},
@@ -766,8 +767,8 @@ def login_user(credentials):
     else:
         raise HTTPException(status_code=401, detail="Login failed")
 
-@router.post("/api/tts_endpoint")
-async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
+# @router.post("/api/tts_endpoint")
+async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = None) -> FileResponse:
     try:
         # Extract the request data
         request_data = await request.json()
@@ -799,7 +800,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                 raise HTTPException(status_code=401, detail="User is not registered")
             
             # Log in the user and get the access token and corresponding URL
-            access_token, login_url = login_user(LOGIN_CREDENTIALS.get(request.url.host))
+            access_token, login_url = login_user(LOGIN_CREDENTIALS.get(request.url_for().scheme + "://" + request.url_for().netloc))
             data = {"prompt": prompt}
 
             tts_url = f"{login_url}/tts_service"  # Construct the TTS URL based on successful login URL
