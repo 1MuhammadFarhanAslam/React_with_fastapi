@@ -779,8 +779,8 @@ def get_database() -> Generator[Session, None, None]:
 
 # Define a dictionary to store login credentials for each URL
 URL_CREDENTIALS = {
-    "http://38.80.122.166:40440/login": {"username": "Opentensor@hotmail.com_val3", "password": "Opentensor@12345"},
-    "http://79.116.48.205:24942/login": {"username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"},
+    "http://38.80.122.166:40440": {"username": "Opentensor@hotmail.com_val3", "password": "Opentensor@12345"},
+    "http://79.116.48.205:24942": {"username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"},
     # Add more URLs and credentials as needed
 }
 
@@ -797,7 +797,7 @@ def login_user(url: str, username: str, password: str) -> str:
         "accept": "application/json",
         "Content-Type": "application/x-www-form-urlencoded"
     }
-    login_response = requests.post(url, headers=login_headers, data=login_payload)
+    login_response = requests.post(f"{url}/login", headers=login_headers, data=login_payload)
 
     if login_response.status_code == 200:
         # Login successful, extract and return the access token
