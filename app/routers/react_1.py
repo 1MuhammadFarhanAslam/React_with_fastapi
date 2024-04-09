@@ -789,25 +789,36 @@ current_url_index = 0
 
 # Define a function to log in the user and get the access token for a specific URL
 def login_user(url: str, username: str, password: str) -> str:
-    login_payload = {
-        "username": username,
-        "password": password
-    }
-    login_headers = {
-        "accept": "application/json",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    login_response = requests.post(f"{url}/login", headers=login_headers, data=login_payload)
+    for url_key in URL_CREDENTIALS:
+        if url_key != url:
+            continue  # Skip URLs until we reach the specified URL
 
-    if login_response.status_code == 200:
-        # Login successful, extract and return the access token
-        response_data = login_response.json()
-        access_token = response_data.get("access_token")
-        return access_token
-    elif login_response.status_code == 401:
-        raise HTTPException(status_code=401, detail="Unauthorized: Invalid credentials.")
-    else:
-        raise HTTPException(status_code=500, detail=f"Failed to log in user. Status code: {login_response.status_code}, Response: {login_response.text}")
+        credentials = URL_CREDENTIALS[url_key]
+        login_payload = {
+            "username": credentials["username"],
+            "password": credentials["password"]
+        }
+        login_headers = {
+            "accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        login_response = requests.post(f"{url}/login", headers=login_headers, data=login_payload)
+
+        if login_response.status_code == 200:
+            # Login successful, extract and return the access token
+            response_data = login_response.json()
+            access_token = response_data.get("access_token")
+            return access_token
+        elif login_response.status_code == 401:
+            # Unauthorized, move to the next URL
+            continue
+        else:
+            # Other errors, raise an HTTPException
+            raise HTTPException(status_code=500, detail=f"Failed to log in user. Status code: {login_response.status_code}, Response: {login_response.text}")
+
+    # If we reach here, it means the specified URL was not found in the credentials
+    raise HTTPException(status_code=500, detail="Specified URL credentials not found.")
+
 
 
 # Define the text to speech endpoint
@@ -834,16 +845,21 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
         try:
             # Decode and verify the JWT token
             decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
+            print("________________decoded_token________________", decoded_token)
+
             email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+            print("________________email________________", email)
             
             # Query the database based on the email to get user data from React_User and Email_User
             react_user = db.query(React_User).filter(React_User.email == email).first()
             email_user = db.query(Email_User).filter(Email_User.email == email).first()
+            print("_______________user details in jwt token (React_User)___________" , react_user)
+            print("_______________user details in jwt token (Email_User)___________" , email_user)
 
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
                 print("User is not registered")
-                raise HTTPException(status_code=401, detail="User is not registered")
+                raise HTTPException(status_code=401, detail="___________User is not registered___________")
             
             # Perform actions for the current URL
             while current_url_index < len(URL_CREDENTIALS):
@@ -874,13 +890,15 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                         return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_tts_audio.wav")
                     else:
                         print(f"Failed to get a successful response from {url}. Status code: {response.status_code}, Response: {response.text}")
-                        current_url_index = next(URL_CREDENTIALS, None)  # Move to the next URL
+                        current_url_index += 1  # Move to the next URL
                         print(f"Current URL index incremented to {current_url_index}")
+                        continue  # Move to the next iteration of the while loop
 
                 else:
                     print(f"Failed to log in user for URL: {url}. Moving to the next URL.")
-                    current_url_index = next(URL_CREDENTIALS, None)  # Move to the next URL
+                    current_url_index += 1  # Move to the next URL
                     print(f"Current URL index incremented to {current_url_index}")
+                    continue  # Move to the next iteration of the while loop
 
             # If all URLs have been exhausted without a successful response, raise an exception
             print("All URLs failed to provide a successful response.")
@@ -893,7 +911,6 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
     except ValueError:
         print("Invalid JSON format in the request headers")
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
-
 
 
     
