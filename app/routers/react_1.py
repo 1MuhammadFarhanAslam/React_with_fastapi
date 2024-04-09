@@ -159,7 +159,7 @@ from typing import Optional
 import asyncio
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-import logging
+import logger
 
 
 router = APIRouter()
@@ -736,39 +736,42 @@ def get_database() -> Generator[Session, None, None]:
 
 
 # Define constants for login credentials and URLs
-LOGIN_CREDENTIALS = {
-    "http://38.80.122.166:40440": {"username": "Opentensor@hotmail.com_val3", "password": "Opentensor@12345"},
-    "http://79.116.48.205:24942": {"username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"}
-}
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+LOGIN_CREDENTIALS = [
+    {"url": "http://38.80.122.166:40440", "username": "Opentensor@hotmail.com_val3", "password": "Opentensor@12345"},
+    {"url": "http://79.116.48.205:24942", "username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"}
+]
 
 def login_user(credentials):
-    if credentials is None:
-        raise HTTPException(status_code=500, detail="Credentials not found for the given URL")
-    
-    login_url = f"{credentials['url']}/login"
-    login_payload = {
-        "username": credentials["username"],
-        "password": credentials["password"]
-    }
-    login_headers = {
-        "accept": "application/json",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    login_response = requests.post(login_url, headers=login_headers, data=login_payload)
+    index = 0  # Start with the first credential
+    while index < len(credentials):
+        credential = credentials[index]
+        try:
+            login_url = f"{credential['url']}/login"
+            login_payload = {
+                "username": credential["username"],
+                "password": credential["password"]
+            }
+            login_headers = {
+                "accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+            login_response = requests.post(login_url, headers=login_headers, data=login_payload)
 
-    if login_response.status_code == 200:
-        response_data = login_response.json()
-        access_token = response_data.get("access_token")
-        return access_token, credentials['url']  # Return the access token and corresponding URL
-    else:
-        raise HTTPException(status_code=401, detail="Login failed")
+            if login_response.status_code == 200:
+                response_data = login_response.json()
+                access_token = response_data.get("access_token")
+                return access_token, credential['url']  # Return the access token and corresponding URL
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error logging in to {credential['url']}: {e}")
+
+        index += 1  # Move to the next credential if unsuccessful
+
+    # If all attempts fail, raise an exception or handle it as needed
+    raise HTTPException(status_code=401, detail="Login failed for all credentials")
+
 
 @router.post("/api/tts_endpoint")
-async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
+async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = None) -> FileResponse:
     try:
         # Extract the request data
         request_data = await request.json()
@@ -800,7 +803,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                 raise HTTPException(status_code=401, detail="User is not registered")
             
             # Log in the user and get the access token and corresponding URL
-            access_token, login_url = login_user(LOGIN_CREDENTIALS.get(request.url_for().scheme + "://" + request.url_for().netloc))
+            access_token, login_url = login_user(LOGIN_CREDENTIALS)
             data = {"prompt": prompt}
 
             tts_url = f"{login_url}/tts_service"  # Construct the TTS URL based on successful login URL
