@@ -778,7 +778,6 @@ def get_database() -> Generator[Session, None, None]:
 
 
 # Define a dictionary to store login credentials for each URL
-# Define a dictionary to store login credentials for each URL
 URL_CREDENTIALS = {
     "http://38.80.122.166:40440": {"username": "Opentensor@hotmail.com_val3", "password": "Opentensor@12345"},
     "http://79.116.48.205:24942": {"username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"},
@@ -789,7 +788,7 @@ URL_CREDENTIALS = {
 current_url_index = 0
 
 # Define a function to log in the user and get the access token for a specific URL
-def login_user(url: str, username: str, password: str) -> str:
+async def login_user(url: str, username: str, password: str) -> str:
     current_index = list(URL_CREDENTIALS.keys()).index(url)
     max_attempts = len(URL_CREDENTIALS)
     attempts = 0
@@ -807,7 +806,7 @@ def login_user(url: str, username: str, password: str) -> str:
             "accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded"
         }
-        login_response = requests.post(f"{url}/login", headers=login_headers, data=login_payload)
+        login_response = await asyncio.get_event_loop().run_in_executor(None, lambda: requests.post(f"{url}/login", headers=login_headers, data=login_payload))
 
         if login_response.status_code == 200:
             # Login successful, extract and return the access token
@@ -831,8 +830,6 @@ def login_user(url: str, username: str, password: str) -> str:
     raise HTTPException(status_code=500, detail="Failed to log in user. All URLs failed.")
 
 
-
-
 # Define the text to speech endpoint
 @router.post("/api/tts_endpoint")
 async def text_to_speech(request: Request, authorization: str = Header(None), db: Session = Depends(get_database)) -> FileResponse:
@@ -843,12 +840,10 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
         prompt = request_data.get("prompt")
         
         if prompt is None:
-            print("Prompt is missing in the request body.")
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
         # Check if the Authorization header is present
         if authorization is None:
-            print("No token provided")
             raise HTTPException(status_code=401, detail="Authorization header is missing.")
         
         # Extract the token from the Authorization header
@@ -858,25 +853,19 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
             # Decode and verify the JWT token
             decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
             email = decoded_token.get("sub")  # Assuming "sub" contains the email address
-            print(f"Email from token: {email}")
             
             # Query the database based on the email to get user data from React_User and Email_User
             react_user = db.query(React_User).filter(React_User.email == email).first()
             email_user = db.query(Email_User).filter(Email_User.email == email).first()
-            print("______________react_user______________")
-            print("______________email_user______________")
 
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
-                print("User not registered")
                 raise HTTPException(status_code=401, detail="User is not registered.")
 
             # Perform actions for the current URL
             url = list(URL_CREDENTIALS.keys())[current_url_index]
-            print(f"Selected URL: {url}")
             credentials = URL_CREDENTIALS[url]
-            print(f"Using credentials: {credentials}")
-            access_token = login_user(url, credentials["username"], credentials["password"])
+            access_token = await login_user(url, credentials["username"], credentials["password"])
 
             if access_token:
                 data = {"prompt": prompt}
@@ -886,7 +875,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                     "Content-Type": "application/json"
                 }
 
-                response = requests.post(f"{url}/tts_service", headers=headers, json=data)
+                response = await asyncio.get_event_loop().run_in_executor(None, lambda: requests.post(f"{url}/tts_service", headers=headers, json=data))
 
                 if response.status_code == 200:
                     # Create a temporary file to save the audio data
