@@ -736,8 +736,8 @@ from requests.packages.urllib3.util.retry import Retry
 
 # Define constants for login credentials and URLs
 LOGIN_CREDENTIALS = [
-    {"url": "http://38.80.122.166:40440", "username": "Opentensor@hotmail.com_val3", "password": "Opentensor@12345"},
-    {"url": "http://79.116.48.205:24942", "username": "Opentensor@hotmail.com_val4", "password": "Opentensor@12345"}
+    {"url": "http://93.114.160.254:40306", "username": "Opentensor@hotmail.com_val1", "password": "Opentensor@12345"},
+    {"url": "http://93.114.160.254:40885", "username": "Opentensor@hotmail.com_val2", "password": "Opentensor@12345"}
 ]
 
 def create_session():
@@ -847,7 +847,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
 
 
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request, authorization: Optional[str] = Header(None), db : Session = Depends(get_database)):
+async def text_to_music(request: Request, authorization: Optional[str] = Header(None), db: Session = Depends(get_database)):
     try:
         # Extract the request data
         request_data = await request.json()
@@ -874,55 +874,37 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
                 raise HTTPException(status_code=401, detail="User is not registered.")
+        
+            # Log in the user and get the access token and corresponding URL
+            access_token, login_url = login_user(LOGIN_CREDENTIALS)
+            data = {"prompt": prompt}
+
+            ttm_url = f"{login_url}/ttm_service"  # Construct the TTM URL based on successful login URL
+            headers = {
+                "Accept": "audio/wav",
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json"
+            }
+
+            response = requests.post(ttm_url, headers=headers, json=data)
+
+            if response.status_code == 200:
+                # Create a temporary file to save the audio data
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                    temp_file.write(response.content)
+                    temp_file_path = temp_file.name
+
+                # Return the temporary file using FileResponse
+                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
             else:
-                # Define the login URLs and credentials
-                LOGIN_URL_1 = "http://38.80.122.166:40440/login"
-                LOGIN_URL_2 = "http://79.116.48.205:24942/login"
-                LOGIN_USERNAME_1 = "Opentensor@hotmail.com_val3"
-                LOGIN_PASSWORD_1 = "Opentensor@12345"
-                LOGIN_USERNAME_2 = "Opentensor@hotmail.com_val4"
-                LOGIN_PASSWORD_2 = "Opentensor@12345"
+                raise HTTPException(status_code=response.status_code, detail=response.text)
 
-                # Log in the user asynchronously using the appropriate credentials and login URLs
-                access_token_1 = await login_user(LOGIN_USERNAME_1, LOGIN_PASSWORD_1, LOGIN_URL_1)
-                access_token_2 = await login_user(LOGIN_USERNAME_2, LOGIN_PASSWORD_2, LOGIN_URL_2)
-
-                # Define the data and headers for the requests to the text-to-speech service
-                data = {"prompt": prompt}
-                headers_1 = {"Authorization": f"Bearer {access_token_1}", "Content-Type": "application/json"}
-                headers_2 = {"Authorization": f"Bearer {access_token_2}", "Content-Type": "application/json"}
-
-                # Define the URLs for the text-to-speech service
-                TTS_URL_1 = "http://38.80.122.166:40440/ttm_service"
-                TTS_URL_2 = "http://79.116.48.205:24942/ttm_service"
-
-                # Send requests to both text-to-speech URLs asynchronously
-                tasks = [
-                    send_request(TTS_URL_1, data, headers_1),
-                    send_request(TTS_URL_2, data, headers_2)
-                ]
-                responses = await asyncio.gather(*tasks, return_exceptions=True)
-
-                # Check responses and handle accordingly
-                for response in responses:
-                    if isinstance(response, Exception):
-                        raise response  # Raise any exceptions that occurred during the requests
-                    elif response.status_code == 200:
-                    #Return the response from API no 1 and create a temporary file to save the audio data
-                        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                            temp_file.write(response.content)
-                            temp_file_path = temp_file.name
-                            # Return the response to the client
-                            return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
-
-            # If all requests failed, raise an HTTPException
-            raise HTTPException(status_code=500, detail="All validators failed after retry attempts.")
-
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        except ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+
 
 
 
@@ -958,49 +940,31 @@ async def voice_clone(
             if not react_user and not email_user:
                 raise HTTPException(status_code=401, detail="User is not registered.")
 
+            # Log in the user and get the access token
+            access_token, login_url = login_user(LOGIN_CREDENTIALS)
+
+            data = {
+                "prompt": prompt
+            }
+
+            vc_url = f"{login_url}/vc_service"  # Construct the VC URL based on successful login URL
+            headers = {"Authorization": f"Bearer {access_token}"}
+
+            response = requests.post(vc_url, headers=headers, json=data)
+
+            if response.status_code == 200:
+                # Create a temporary file to save the audio data
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                    temp_file.write(response.content)
+                    temp_file_path = temp_file.name
+                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_vc_audio.wav")
             else:
-                # Log in the user and get the access token
-                access_token = await login_user()
-
-                data = {
-                    "prompt": prompt
-                }
-
-                # Define a list of VC service URLs
-                vc_service_urls = [
-                    "http://79.116.48.205:24942/vc_service",
-                    "http://38.80.122.166:40440/vc_service"]
-                
-                headers = {"Authorization": f"Bearer {access_token}"}
-
-                # Send requests to VC service URLs concurrently using asyncio.gather
-                tasks = []
-                for url in vc_service_urls:
-                    tasks.append(send_request(url, data, headers))
-
-                responses = await asyncio.gather(*tasks, return_exceptions=True)
-
-                # Handle responses
-                for response in responses:
-                    if isinstance(response, Exception):
-                        # Handle exceptions if any
-                        raise response
-                    elif response.status_code == 200:
-                        # If response is 200 OK, return the FileResponse from API no 1 and create a temporary file to save the audio data
-                        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                            temp_file.write(response.content)
-                            temp_file_path = temp_file.name
-                            return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_vc_audio.wav")
-                    else:
-                        # If response status code is not 200, continue to the next URL
-                        continue
-
-                # If all requests fail for all URLs, raise an exception
-                raise HTTPException(status_code=500, detail="All validators failed after retry attempts.")
+                raise HTTPException(status_code=response.status_code, detail=response.text)
 
         except ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+
 
