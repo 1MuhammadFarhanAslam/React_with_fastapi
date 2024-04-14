@@ -33,7 +33,7 @@ origins = [
     "http://85.239.241.96:3000",  # Your React frontend server's HTTP URL
     'http://85.239.241.96:8000',
     "http://localhost:3000",
-    "http://93.114.160.254:40308",
+    "http://35.139.134.236:30378",
     "http://93.114.160.254:40716"
 ]
 
