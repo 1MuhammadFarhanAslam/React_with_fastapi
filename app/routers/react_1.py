@@ -736,7 +736,7 @@ from requests.packages.urllib3.util.retry import Retry
 
 # Define constants for login credentials and URLs
 LOGIN_CREDENTIALS = [
-    {"url": "http://35.139.134.236:30378", "username": "Opentensor@hotmail.com_val1", "password": "Opentensor@12345"},
+    {"url": "http://35.139.134.236:30319", "username": "Opentensor@hotmail.com_val1", "password": "Opentensor@12345"},
     {"url": "http://93.114.160.254:40716", "username": "Opentensor@hotmail.com_val2", "password": "Opentensor@12345"}
 ]
 
