@@ -92,27 +92,33 @@ def token_expired(token):
         return HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
 
 def login_user(credentials, db: Session):
-    # Check if the access token exists in the database
-    email = credentials['username']
-    existing_token = db.query(AccessToken).filter_by(email=email).first()
-
-    if existing_token and not token_expired(existing_token):
-        return existing_token.token
 
     # Perform login and get the access token
     session = create_session()
 
+
     for credential in credentials:
+        email = credential['username']
+        existing_token = db.query(AccessToken).filter_by(email=email).first()
+
+        if existing_token and not token_expired(existing_token):
+            return existing_token.token
+
+        # Perform login and get the access token
+        session = create_session()
+
         try:
             login_url = f"{credential['url']}/login"
             login_payload = {
                 "username": credential["username"],
                 "password": credential["password"]
             }
+            
             login_headers = {
                 "accept": "application/json",
                 "Content-Type": "application/x-www-form-urlencoded"
             }
+
             login_response = session.post(login_url, headers=login_headers, data=login_payload, timeout=15)
 
             if login_response.status_code == 200:
