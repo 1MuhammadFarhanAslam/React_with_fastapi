@@ -173,7 +173,7 @@ async def text_to_speech(request: Request, authorization: str = Header(None), db
                 raise HTTPException(status_code=401, detail="User is not registered")
             
             # Log in the user and get the access token and corresponding URL
-            access_token, login_url = login_user(LOGIN_CREDENTIALS)
+            access_token, login_url = login_user(LOGIN_CREDENTIALS, db)
             data = {"prompt": prompt}
 
             tts_url = f"{login_url}/tts_service"  # Construct the TTS URL based on successful login URL
@@ -235,7 +235,7 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
                 raise HTTPException(status_code=401, detail="User is not registered.")
         
             # Log in the user and get the access token and corresponding URL
-            access_token, login_url = login_user(LOGIN_CREDENTIALS)
+            access_token, login_url = login_user(LOGIN_CREDENTIALS, db)
             data = {"prompt": prompt}
 
             ttm_url = f"{login_url}/ttm_service"  # Construct the TTM URL based on successful login URL
@@ -300,7 +300,7 @@ async def voice_clone(
                 raise HTTPException(status_code=401, detail="User is not registered.")
 
             # Log in the user and get the access token
-            access_token, login_url = login_user(LOGIN_CREDENTIALS)
+            access_token, login_url = login_user(LOGIN_CREDENTIALS, db)
 
             data = {
                 "prompt": prompt
