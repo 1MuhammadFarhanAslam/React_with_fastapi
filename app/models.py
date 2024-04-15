@@ -111,5 +111,7 @@ class AdminInfo(BaseModel):
 class AccessToken(Base):
     __tablename__ = 'access_tokens'
 
-    email = Column(String, unique=True, index=True)
+    id = Column(Integer, primary_key=True)  # Define a primary key column
+    email = Column(String, unique=True)
     JWT_Token = Column(String)
+
