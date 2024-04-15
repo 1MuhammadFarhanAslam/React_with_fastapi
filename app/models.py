@@ -106,3 +106,10 @@ class TokenData(BaseModel):
 class AdminInfo(BaseModel):
     id: int
     username: str
+
+
+class AccessToken(Base):
+    __tablename__ = 'access_tokens'
+
+    email = Column(String, unique=True, index=True)
+    JWT_Token = Column(String)

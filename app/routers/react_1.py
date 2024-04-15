@@ -764,7 +764,7 @@ def login_user(credentials):
                 "accept": "application/json",
                 "Content-Type": "application/x-www-form-urlencoded"
             }
-            login_response = session.post(login_url, headers=login_headers, data=login_payload, timeout=15)
+            login_response = session.post(login_url, headers=login_headers, data=login_payload, timeout=5)
 
             if login_response.status_code == 200:
                 response_data = login_response.json()
