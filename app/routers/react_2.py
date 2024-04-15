@@ -91,21 +91,18 @@ def token_expired(token):
         # Error decoding token or other issues, consider it expired
         return HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
 
-def login_user(credentials, db:Session):
-
+def login_user(credentials, db: Session):
     # Check if the access token exists in the database
     email = credentials['username']
     existing_token = db.query(AccessToken).filter_by(email=email).first()
 
-    if existing_token and not token_expired(existing_token.JWT_Token):
-        return existing_token.JWT_Token
+    if existing_token and not token_expired(existing_token):
+        return existing_token.token
 
     # Perform login and get the access token
     session = create_session()
-    index = 0  # Start with the first credential
 
-    while index < len(credentials):
-        credential = credentials[index]
+    for credential in credentials:
         try:
             login_url = f"{credential['url']}/login"
             login_payload = {
@@ -122,18 +119,18 @@ def login_user(credentials, db:Session):
                 response_data = login_response.json()
                 access_token = response_data.get("access_token")
 
-                # Save the access token to the database
-                new_token = AccessToken(email=email, JWT_Token=access_token)
-                session.add(new_token)
-                session.commit()
+                # Save or update the access token in the database
+                if existing_token:
+                    existing_token.token = access_token
+                else:
+                    new_token = AccessToken(email=email, token=access_token)
+                    db.add(new_token)
 
+                db.commit()
                 return access_token
 
         except requests.exceptions.RequestException as e:
             logging.error(f"Error occurred while logging in: {e}")
-
-        # Move to the next credential
-        index += 1
 
     # If all attempts fail, raise an exception or handle it as needed
     raise HTTPException(status_code=401, detail="Login failed for all credentials")
