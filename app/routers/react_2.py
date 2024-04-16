@@ -74,22 +74,28 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
     try:
         # Extract the request data
         request_data = await request.json()
+        print('_______________request_data_____________', request_data)
         prompt = request_data.get("prompt")
+        print('_______________prompt_____________', prompt)
         if prompt is None:
+            print('_______________prompt_____________', prompt)
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
         # Check if the Authorization header is present
         if authorization is None:
+            print('_______________authorization_____________', authorization)
             raise HTTPException(status_code=401, detail="Authorization header is missing.")
         
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+        print('_______________API no 2 token_____________', token)
         
         
         try:
             # Decode and verify the JWT token
             decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
             email = decoded_token.get("sub")  # Assuming "sub" contains the email address
+            print('_______________email_____________', email)
             
             # Query the database based on the email to get user data from React_User and Email_User
             react_user = db.query(React_User).filter(React_User.email == email).first()
@@ -99,6 +105,7 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
 
             # If the user is not registered in either React_User or Email_User, raise an exception
             if not react_user and not email_user:
+                print('_______________User is not registered_____________')
                 raise HTTPException(status_code=401, detail="User is not registered")
             
             # Log in the user and get the access token and corresponding URL
