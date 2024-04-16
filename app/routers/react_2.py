@@ -86,6 +86,9 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
             print('_______________authorization_____________', authorization)
             raise HTTPException(status_code=401, detail="Authorization header is missing.")
         
+        auth = authorization
+        print('_______________auth____________', auth)
+        
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
         print('_______________API no 2 token_____________', token)
