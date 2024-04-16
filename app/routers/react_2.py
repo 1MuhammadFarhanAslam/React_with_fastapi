@@ -36,7 +36,7 @@ GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Change to 30 minutes
 
-nginx_url = "http://localhost/api/ttm_endpoint"
+nginx_url = "http://85.239.241.96/api/ttm_endpoint"
     
 
 # Create the SQLAlchemy engine
