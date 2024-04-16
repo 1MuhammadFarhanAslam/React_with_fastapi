@@ -175,7 +175,7 @@ if GOOGLE_EMAIL_LOGIN_SECRET_KEY is None:
     raise Exception("GOOGLE_EMAIL_LOGIN_SECRET_KEY environment variable is not set")
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 100000000000000000000000
 
 # Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
