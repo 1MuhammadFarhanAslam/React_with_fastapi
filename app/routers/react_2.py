@@ -112,9 +112,9 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
                 "Content-Type": "application/json"
             }
 
-            print('________________data________________')
-            print('______________access_token______________')
-            print('________header_________')
+            print('________________data________________', data)
+            print('______________access_token______________', access_token)
+            print('________header_________', header)
 
             response = requests.post(nginx_url, headers=headers, json=data)
             print('______________response_____________')
