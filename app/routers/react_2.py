@@ -32,7 +32,9 @@ GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
 if GOOGLE_EMAIL_LOGIN_SECRET_KEY is None:
     raise Exception("GOOGLE_EMAIL_LOGIN_SECRET_KEY environment variable is not set")
 
-GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
+access_token = os.environ.get("ACCESS_TOKEN")
+if access_token is None:
+    raise Exception("ACCESS_TOKEN environment variable is not set")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Change to 30 minutes
 
@@ -113,7 +115,7 @@ async def text_to_music(request: Request, authorization: str = Header(...), db: 
             
             # Log in the user and get the access token and corresponding URL
             data = {"prompt": prompt}
-            access_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJCcm9rZW5TdWJuZXRAZ21haWwuY29tIiwiZXhwIjoyMzEzMjUxNTU1fQ.culT9hdkRopQ7cuxShNzmUUC7dGOf-_lvvSv7KOR6dg'
+            
 
             # Construct the TTS URL based on successful login URL
             headers = {
