@@ -36,7 +36,7 @@ GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Change to 30 minutes
 
-nginx_url = "http://localhost"
+nginx_url = "http://localhost/api/ttm_endpoint"
     
 
 # Create the SQLAlchemy engine
@@ -112,7 +112,12 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
                 "Content-Type": "application/json"
             }
 
+            print('________________data________________')
+            print('______________access_token______________')
+            print('________header_________')
+
             response = requests.post(nginx_url, headers=headers, json=data)
+            print('______________response_____________')
 
             if response.status_code == 200:
                 # Create a temporary file to save the audio data
@@ -123,6 +128,7 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
                 # Return the temporary file using FileResponse
                 return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
             else:
+                print('________________response.text________________')
                 raise HTTPException(status_code=response.status_code, detail=response.text)
 
         except ExpiredSignatureError:
