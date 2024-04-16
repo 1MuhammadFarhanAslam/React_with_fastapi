@@ -70,7 +70,7 @@ def get_database() -> Generator[Session, None, None]:
 
 
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request, authorization: Optional[str] = Header(...), db: Session = Depends(get_database)):
+async def text_to_music(request: Request, authorization: str = Header(...), db: Session = Depends(get_database)):
     try:
         # Extract the request data
         request_data = await request.json()
