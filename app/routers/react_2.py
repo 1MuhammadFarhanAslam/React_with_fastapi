@@ -36,7 +36,7 @@ GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Change to 30 minutes
 
-nginx_url = "http://85.239.241.96/api/ttm_endpoint"
+nginx_url = "http://85.239.241.96"
     
 
 # Create the SQLAlchemy engine
@@ -123,7 +123,7 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
             print('______________access_token______________', access_token)
             print('________header_________', headers)
 
-            response = requests.post(nginx_url, headers=headers, json=data)
+            response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
             print('______________response_____________')
 
             if response.status_code == 200:
