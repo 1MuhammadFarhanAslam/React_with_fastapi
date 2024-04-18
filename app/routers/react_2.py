@@ -132,17 +132,13 @@ async def text_to_music(request: Request):
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         
-        # Get the length parameter from the request data
-        duration = request_data.get("duration")
-        print('_______________length_____________', duration)
 
         # Log in the user and get the access token and corresponding URL
         # Assuming access_token is obtained somehow
         access_token = "your_access_token_here"
         
         data = {
-            "prompt": prompt,
-            "duration": duration
+            "prompt": prompt
         }
 
         headers = {
