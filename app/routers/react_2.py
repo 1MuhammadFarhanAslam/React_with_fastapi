@@ -71,97 +71,61 @@ def get_database() -> Generator[Session, None, None]:
 #     return session
 
 
-# @router.post("/api/ttm_endpoint")
-# async def text_to_music(request: Request):
-#     try:
-#         # Extract the request data
-#         request_data = await request.json()
-#         print('_______________request_data_____________', request_data)
-#         prompt = request_data.get("prompt")
-#         print('_______________prompt_____________', prompt)
-#         if prompt is None:
-#             print('_______________prompt_____________', prompt)
-#             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
-        
-        
-#         try:
-#             # Log in the user and get the access token and corresponding URL
-#             data = {"prompt": prompt}
-            
-
-#             # Construct the TTS URL based on successful login URL
-#             headers = {
-#                 "Accept": "audio/wav",
-#                 "Authorization": f"Bearer {access_token}",
-#                 "Content-Type": "application/json"
-#             }
-
-#             print('________________data________________', data)
-#             print('______________access_token______________', access_token)
-#             print('________header_________', headers)
-
-#             response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
-#             print('______________response_____________')
-
-#             if response.status_code == 200:
-#                 # Create a temporary file to save the audio data
-#                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-#                     temp_file.write(response.content)
-#                     temp_file_path = temp_file.name
-
-#                 # Return the temporary file using FileResponse
-#                 return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
-#             else:
-#                 print('________________response.text________________')
-#                 raise HTTPException(status_code=response.status_code, detail=response.text)
-
-#         except ExpiredSignatureError:
-#             raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
-
-#     except ValueError:
-#         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
-
-
-
 @router.post("/api/ttm_endpoint")
 async def text_to_music(request: Request):
     try:
         # Extract the request data
         request_data = await request.json()
+        print('_______________request_data_____________', request_data)
+
         prompt = request_data.get("prompt")
+        print('_______________prompt_____________', prompt)
         if prompt is None:
+            print('_______________prompt_____________', prompt)
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         
-
-        # Log in the user and get the access token and corresponding URL
-        # Assuming access_token is obtained somehow
-        access_token = "ACCESS_TOKEN"
+        duration = request_data.get("duration")
+        if duration is None:
+            print('_______________duration_____________', duration)
+            raise HTTPException(status_code=400, detail="Duration is missing in the request body.")
         
-        data = {
-            "prompt": prompt
-        }
+        
+        try:
+            data = {"prompt": prompt, "duration": duration}  # 10000 is the max length of the audio file
+            
 
-        headers = {
-            "Accept": "audio/wav",
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json"
-        }
+            # Construct the TTM URL based on successful login URL
+            headers = {
+                "Accept": "audio/wav",
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json"
+            }
 
-        response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
+            print('________________data________________', data)
+            print('______________access_token______________', access_token)
+            print('________header_________', headers)
 
-        if response.status_code == 200:
-            # Create a temporary file to save the audio data
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                temp_file.write(response.content)
-                temp_file_path = temp_file.name
+            # Send the request to the TTM endpoint using nginx URL
+            response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
+            print('______________response_____________')
 
-            # Return the temporary file using FileResponse
-            return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
-        else:
-            raise HTTPException(status_code=response.status_code, detail=response.text)
+            if response.status_code == 200:
+                # Create a temporary file to save the audio data
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                    temp_file.write(response.content)
+                    temp_file_path = temp_file.name
 
-    except ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
+                # Return the temporary file using FileResponse
+                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
+            else:
+                print('________________response.text________________')
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+
+        except ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+
+
+
