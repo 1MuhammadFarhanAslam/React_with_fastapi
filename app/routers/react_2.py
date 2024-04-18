@@ -135,7 +135,7 @@ async def text_to_music(request: Request):
 
         # Log in the user and get the access token and corresponding URL
         # Assuming access_token is obtained somehow
-        access_token = "your_access_token_here"
+        access_token = "ACCESS_TOKEN"
         
         data = {
             "prompt": prompt
