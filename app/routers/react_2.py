@@ -313,9 +313,9 @@ async def text_to_music(request: Request):
             print('________header_________', headers)
 
             # Set a longer timeout value in seconds (e.g., 60 seconds)
-            timeout = HTTPXTimeout(timeout=6000)
+            # timeout = HTTPXTimeout(timeout=6000)
 
-            async with httpx.AsyncClient(timeout=timeout) as client:
+            async with httpx.AsyncClient() as client:
                 response = await client.post(
                     f"{nginx_url}/api/ttm_endpoint",
                     headers=headers,
