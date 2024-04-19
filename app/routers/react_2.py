@@ -221,11 +221,12 @@ async def text_to_music(request: Request):
         print('_______________request_data_____________', request_data)
         prompt = request_data.get("prompt")
         print('_______________prompt_____________', prompt)
+        duration = request_data.get("duration")
+        print('_______________duration_____________', duration)
+
         if prompt is None:
             print('_______________prompt_____________', prompt)
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
-        duration = request_data.get("duration")
-        print('_______________duration_____________', duration)
         
         
         try:
