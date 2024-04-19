@@ -187,7 +187,7 @@ def get_database() -> Generator[Session, None, None]:
 #         }
 
 #         # Set the timeout value in seconds (e.g., 30 seconds)
-#         timeout = 30
+#         timeout = 60
 
 #         try:
 #             response = requests.post(
@@ -219,8 +219,10 @@ async def text_to_music(request: Request):
         # Extract the request data
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
+
         prompt = request_data.get("prompt")
         print('_______________prompt_____________', prompt)
+
         duration = request_data.get("duration")
         print('_______________duration_____________', duration)
 
