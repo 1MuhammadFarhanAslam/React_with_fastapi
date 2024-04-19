@@ -213,7 +213,7 @@ async def text_to_music(request: Request):
 
                 return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
             else:
-                raise HTTPException(status_code=404, detail="No axons available for Text-to-Music. Please try again later.")
+                raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
             
         except Timeout:
             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
