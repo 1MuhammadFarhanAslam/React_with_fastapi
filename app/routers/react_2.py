@@ -341,6 +341,7 @@ def get_database() -> Generator[Session, None, None]:
 #---------------Working endpoint-------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using aiohttp library in parallel manner) --------------------- 
 #-----------This endpoint is not same as above instead it has different use case of try block---------------------
+@router.post("/api/ttm_endpoint")
 async def ttm_endpoint(request : Request):
     try:
         # Extract the request data
@@ -389,8 +390,5 @@ async def ttm_endpoint(request : Request):
     except json.JSONDecodeError:
         raise web.HTTPBadRequest(text="Invalid JSON format in the request body")
 
-app = web.Application()
-app.router.add_post('/api/ttm_endpoint', ttm_endpoint)
 
-web.run_app(app)
 
