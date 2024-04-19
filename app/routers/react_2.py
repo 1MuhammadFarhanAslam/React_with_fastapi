@@ -204,17 +204,19 @@ async def text_to_music(request: Request):
                 json=data,
                 # timeout=timeout  # Add the timeout parameter here
             )
+
+            if response.status_code == 200:
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                    temp_file.write(response.content)
+                    temp_file_path = temp_file.name
+
+                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
+            else:
+                raise HTTPException(status_code=response.status_code, detail=response.text)
+            
         except Timeout:
             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
-
-        if response.status_code == 200:
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                temp_file.write(response.content)
-                temp_file_path = temp_file.name
-
-            return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
-        else:
-            raise HTTPException(status_code=response.status_code, detail=response.text)
+        
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
