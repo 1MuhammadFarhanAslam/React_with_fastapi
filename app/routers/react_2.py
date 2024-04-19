@@ -169,8 +169,8 @@ def get_database() -> Generator[Session, None, None]:
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-# #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
-# # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
+#-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
+# ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
 # @router.post("/api/ttm_endpoint")
 # async def text_to_music(request: Request):
 #     try:
@@ -341,54 +341,54 @@ def get_database() -> Generator[Session, None, None]:
 #---------------Working endpoint-------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using aiohttp library in parallel manner) --------------------- 
 #-----------This endpoint is not same as above instead it has different use case of try block---------------------
-@router.post("/api/ttm_endpoint")
-async def ttm_endpoint(request : Request):
-    try:
-        # Extract the request data
-        request_data = await request.json()
-        print('_______________request_data_____________', request_data)
-        prompt = request_data.get("prompt")
-        print('_______________prompt_____________', prompt)
-        duration = request_data.get("duration")
-        print('_______________duration_____________', duration)
+# @router.post("/api/ttm_endpoint")
+# async def ttm_endpoint(request : Request):
+#     try:
+#         # Extract the request data
+#         request_data = await request.json()
+#         print('_______________request_data_____________', request_data)
+#         prompt = request_data.get("prompt")
+#         print('_______________prompt_____________', prompt)
+#         duration = request_data.get("duration")
+#         print('_______________duration_____________', duration)
 
-        if prompt is None:
-            raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
+#         if prompt is None:
+#             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         
-        try:
-            # Construct the TTS URL based on successful login URL
-            data = {"prompt": prompt, "duration": duration}
+#         try:
+#             # Construct the TTS URL based on successful login URL
+#             data = {"prompt": prompt, "duration": duration}
             
-            # Construct headers (modify as needed)
-            headers = {
-                "Accept": "audio/wav",
-                "Authorization": f"Bearer {access_token}",  # Replace access_token with your token
-                "Content-Type": "application/json"
-            }
+#             # Construct headers (modify as needed)
+#             headers = {
+#                 "Accept": "audio/wav",
+#                 "Authorization": f"Bearer {access_token}",  # Replace access_token with your token
+#                 "Content-Type": "application/json"
+#             }
 
-            print('________________data________________', data)
-            print('________header_________', headers)
+#             print('________________data________________', data)
+#             print('________header_________', headers)
 
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=30)) as session:
-                async with session.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data) as response:
-                    print('________response_________', response)
-                    response_data = await response.read()
+#             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=30)) as session:
+#                 async with session.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data) as response:
+#                     print('________response_________', response)
+#                     response_data = await response.read()
                     
-            if response.status == 200:
-                # Process the response and return the audio file
-                temp_file_path = "/path/to/temp_file.wav"  # Replace with actual file path
-                with open(temp_file_path, "wb") as temp_file:
-                    temp_file.write(response_data)
+#             if response.status == 200:
+#                 # Process the response and return the audio file
+#                 temp_file_path = "/path/to/temp_file.wav"  # Replace with actual file path
+#                 with open(temp_file_path, "wb") as temp_file:
+#                     temp_file.write(response_data)
 
-                return FileResponse(temp_file_path, headers={"Content-Type": "audio/wav"})
-            else:
-                raise HTTPException(status_code=response.status, detail=response.text)
+#                 return FileResponse(temp_file_path, headers={"Content-Type": "audio/wav"})
+#             else:
+#                 raise HTTPException(status_code=response.status, detail=response.text)
 
-        except asyncio.TimeoutError:
-            raise HTTPException(status_code=504, detail="--------Gateway Timeout: The server timed out waiting for the request----------------")
+#         except asyncio.TimeoutError:
+#             raise HTTPException(status_code=504, detail="--------Gateway Timeout: The server timed out waiting for the request----------------")
 
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+#     except json.JSONDecodeError:
+#         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
 
 
 
