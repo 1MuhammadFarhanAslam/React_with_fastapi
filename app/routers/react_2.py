@@ -103,7 +103,7 @@ async def text_to_music(request: Request):
             print('______________access_token______________', access_token)
             print('________header_________', headers)
 
-            response = await requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
+            response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
             print('______________response_____________')
 
             if response.status_code == 200:
