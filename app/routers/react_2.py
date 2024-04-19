@@ -75,17 +75,6 @@ def get_database() -> Generator[Session, None, None]:
 
 REQUEST_TIMEOUT_ERROR = 120  # 2 minutes in seconds
 
-# # Adding a middleware returning a 504 error if the request processing time is above a certain threshold
-# @router.middleware("http")
-# async def timeout_middleware(request: Request, call_next):
-#     try:
-#         start_time = time.time()
-#         return await asyncio.wait_for(call_next(request), timeout=REQUEST_TIMEOUT_ERROR)
-#     except asyncio.TimeoutError:
-#         process_time = time.time() - start_time
-#         return JSONResponse({'detail': 'Request processing time exceeded limit', 'processing_time': process_time}, status_code=504)
-
-
 
 @router.post("/api/ttm_endpoint")
 async def text_to_music(request: Request):
@@ -118,7 +107,7 @@ async def text_to_music(request: Request):
             print('______________access_token______________', access_token)
             print('________header_________', headers)
 
-            response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data, timeout=REQUEST_TIMEOUT_ERROR)
+            response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
             print('______________response_____________')
 
             if response.status_code == 200:
