@@ -1,6 +1,6 @@
 from fastapi import HTTPException, APIRouter, Request, Header, Depends, Form
 import requests
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import tempfile
 import os
 import jwt
@@ -15,7 +15,10 @@ from typing import Optional
 import logging
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
+import asyncio
+
 
 
 router = APIRouter()
@@ -69,6 +72,18 @@ def get_database() -> Generator[Session, None, None]:
 #     session.mount('http://', adapter)
 #     session.mount('https://', adapter)
 #     return session
+
+REQUEST_TIMEOUT_ERROR = 120  # 2 minutes in seconds
+
+# Adding a middleware returning a 504 error if the request processing time is above a certain threshold
+@router.middleware("http")
+async def timeout_middleware(request: Request, call_next):
+    try:
+        start_time = time.time()
+        return await asyncio.wait_for(call_next(request), timeout=REQUEST_TIMEOUT_ERROR)
+    except asyncio.TimeoutError:
+        process_time = time.time() - start_time
+        return JSONResponse({'detail': 'Request processing time exceeded limit', 'processing_time': process_time}, status_code=504)
 
 
 
