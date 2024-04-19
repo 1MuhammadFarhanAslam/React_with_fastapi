@@ -195,14 +195,14 @@ async def text_to_music(request: Request):
         }
 
         # Set the timeout value in seconds (e.g., 30 seconds)
-        timeout = 60
+        # timeout = 60
 
         try:
             response = requests.post(
                 f"{nginx_url}/api/ttm_endpoint",
                 headers=headers,
                 json=data,
-                timeout=timeout  # Add the timeout parameter here
+                # timeout=timeout  # Add the timeout parameter here
             )
         except Timeout:
             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
