@@ -380,9 +380,9 @@ async def ttm_endpoint(request : Request):
                 with open(temp_file_path, "wb") as temp_file:
                     temp_file.write(response_data)
 
-                return web.FileResponse(temp_file_path, headers={"Content-Type": "audio/wav"})
+                return FileResponse(temp_file_path, headers={"Content-Type": "audio/wav"})
             else:
-                raise web.HTTPException(status=response.status, text=response_data)
+                raise HTTPException(status_code=response.status, detail=response.text)
 
         except asyncio.TimeoutError:
             raise HTTPException(status_code=504, detail="--------Gateway Timeout: The server timed out waiting for the request----------------")
