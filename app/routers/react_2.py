@@ -162,7 +162,10 @@ async def text_to_music(request: Request):
             print('________header_________', headers)
 
             async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
+                try:
+                    response = await client.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
+                except httpx.ReadTimeout:
+                    raise HTTPException(status_code=504, detail=".......................Request timed out.................")
 
                 if response.status_code == 200:
                     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
