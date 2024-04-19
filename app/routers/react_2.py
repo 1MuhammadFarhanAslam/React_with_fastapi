@@ -171,53 +171,53 @@ def get_database() -> Generator[Session, None, None]:
 
 #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
-# @router.post("/api/ttm_endpoint")
-# async def text_to_music(request: Request):
-#     try:
-#         request_data = await request.json()
-#         print('_______________request_data_____________', request_data)
+@router.post("/api/ttm_endpoint")
+async def text_to_music(request: Request):
+    try:
+        request_data = await request.json()
+        print('_______________request_data_____________', request_data)
 
-#         prompt = request_data.get("prompt")
-#         print('_______________prompt_____________', prompt)
+        prompt = request_data.get("prompt")
+        print('_______________prompt_____________', prompt)
 
-#         duration = request_data.get("duration")
-#         print('_______________duration_____________', duration)
+        duration = request_data.get("duration")
+        print('_______________duration_____________', duration)
 
-#         if prompt is None:
-#             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
+        if prompt is None:
+            raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
 
-#         data = {"prompt": prompt, "duration": duration}
-#         headers = {
-#             "Accept": "audio/wav",
-#             "Authorization": f"Bearer {access_token}",
-#             "Content-Type": "application/json"
-#         }
+        data = {"prompt": prompt, "duration": duration}
+        headers = {
+            "Accept": "audio/wav",
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
 
-#         # Set the timeout value in seconds (e.g., 30 seconds)
-#         timeout = 60
+        # Set the timeout value in seconds (e.g., 30 seconds)
+        timeout = 60
 
-#         try:
-#             response = requests.post(
-#                 f"{nginx_url}/api/ttm_endpoint",
-#                 headers=headers,
-#                 json=data,
-#                 timeout=timeout  # Add the timeout parameter here
-#             )
-#         except Timeout:
-#             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
+        try:
+            response = requests.post(
+                f"{nginx_url}/api/ttm_endpoint",
+                headers=headers,
+                json=data,
+                timeout=timeout  # Add the timeout parameter here
+            )
+        except Timeout:
+            raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
 
-#         if response.status_code == 200:
-#             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-#                 temp_file.write(response.content)
-#                 temp_file_path = temp_file.name
+        if response.status_code == 200:
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                temp_file.write(response.content)
+                temp_file_path = temp_file.name
 
-#             return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
-#         else:
-#             raise HTTPException(status_code=response.status_code, detail=response.text)
+            return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
+        else:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
 
-#     except ValueError:
-#         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
 
 
 
@@ -278,64 +278,64 @@ def get_database() -> Generator[Session, None, None]:
 
 #--------------Working endpoint--------------------- TTM endpoint without auth_token from header, using httpx library and time out functionality------------
 # ----------------This endpoint sends requests (using httpx library in parallel manner) to the TTM endpoint and returns the response to the client.
-@router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request):
-    try:
-        # Extract the request data
-        request_data = await request.json()
-        print('_______________request_data_____________', request_data)
+# @router.post("/api/ttm_endpoint")
+# async def text_to_music(request: Request):
+#     try:
+#         # Extract the request data
+#         request_data = await request.json()
+#         print('_______________request_data_____________', request_data)
 
-        prompt = request_data.get("prompt")
-        print('_______________prompt_____________', prompt)
+#         prompt = request_data.get("prompt")
+#         print('_______________prompt_____________', prompt)
 
-        duration = request_data.get("duration")
-        print('_______________duration_____________', duration)
+#         duration = request_data.get("duration")
+#         print('_______________duration_____________', duration)
 
-        if prompt is None:
-            print('_______________prompt_____________', prompt)
-            raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
+#         if prompt is None:
+#             print('_______________prompt_____________', prompt)
+#             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         
         
-        try:
-            # Log in the user and get the access token and corresponding URL
-            data = {"prompt": prompt, "duration": duration}
+#         try:
+#             # Log in the user and get the access token and corresponding URL
+#             data = {"prompt": prompt, "duration": duration}
             
 
-            # Construct the TTM URL based on successful login URL
-            headers = {
-                "Accept": "audio/wav",
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json"
-            }
+#             # Construct the TTM URL based on successful login URL
+#             headers = {
+#                 "Accept": "audio/wav",
+#                 "Authorization": f"Bearer {access_token}",
+#                 "Content-Type": "application/json"
+#             }
 
-            print('________________data________________', data)
-            print('______________access_token______________', access_token)
-            print('________header_________', headers)
+#             print('________________data________________', data)
+#             print('______________access_token______________', access_token)
+#             print('________header_________', headers)
 
-            # Set a longer timeout value in seconds (e.g., 60 seconds)
-            # timeout = HTTPXTimeout(timeout=6000)
+#             # Set a longer timeout value in seconds (e.g., 60 seconds)
+#             # timeout = HTTPXTimeout(timeout=6000)
 
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    f"{nginx_url}/api/ttm_endpoint",
-                    headers=headers,
-                    json=data,
-                )
+#             async with httpx.AsyncClient() as client:
+#                 response = await client.post(
+#                     f"{nginx_url}/api/ttm_endpoint",
+#                     headers=headers,
+#                     json=data,
+#                 )
 
-            if response.status_code == 200:
-                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                    temp_file.write(response.content)
-                    temp_file_path = temp_file.name
+#             if response.status_code == 200:
+#                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+#                     temp_file.write(response.content)
+#                     temp_file_path = temp_file.name
 
-                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
-            else:
-                raise HTTPException(status_code=response.status_code, detail=response.text)
+#                 return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
+#             else:
+#                 raise HTTPException(status_code=response.status_code, detail=response.text)
             
-        except httpx.TimeoutException:
-            raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
+#         except httpx.TimeoutException:
+#             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
 
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+#     except ValueError:
+#         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
 
 
 
