@@ -18,6 +18,8 @@ from requests.packages.urllib3.util.retry import Retry
 from datetime import datetime, timedelta
 import time
 import asyncio
+from fastapi import Request, HTTPException, FileResponse, APIRouter
+import httpx
 
 
 
@@ -73,7 +75,60 @@ def get_database() -> Generator[Session, None, None]:
 #     session.mount('https://', adapter)
 #     return session
 
-REQUEST_TIMEOUT_ERROR = 120  # 2 minutes in seconds
+
+# @router.post("/api/ttm_endpoint")
+# async def text_to_music(request: Request):
+#     try:
+#         # Extract the request data
+#         request_data = await request.json()
+#         print('_______________request_data_____________', request_data)
+#         prompt = request_data.get("prompt")
+#         print('_______________prompt_____________', prompt)
+#         if prompt is None:
+#             print('_______________prompt_____________', prompt)
+#             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
+#         duration = request_data.get("duration")
+#         print('_______________duration_____________', duration)
+        
+        
+#         try:
+#             # Log in the user and get the access token and corresponding URL
+#             data = {"prompt": prompt, "duration": duration}
+            
+
+#             # Construct the TTS URL based on successful login URL
+#             headers = {
+#                 "Accept": "audio/wav",
+#                 "Authorization": f"Bearer {access_token}",
+#                 "Content-Type": "application/json"
+#             }
+
+#             print('________________data________________', data)
+#             print('______________access_token______________', access_token)
+#             print('________header_________', headers)
+
+#             response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
+#             print('______________response_____________')
+
+#             if response.status_code == 200:
+#                 # Create a temporary file to save the audio data
+#                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+#                     temp_file.write(response.content)
+#                     temp_file_path = temp_file.name
+
+#                 # Return the temporary file using FileResponse
+#                 return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
+#             else:
+#                 print('________________response.text________________')
+#                 raise HTTPException(status_code=response.status_code, detail=response.text)
+
+#         except ExpiredSignatureError:
+#             raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
+
+#     except ValueError:
+#         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+
+
 
 
 @router.post("/api/ttm_endpoint")
@@ -107,20 +162,17 @@ async def text_to_music(request: Request):
             print('______________access_token______________', access_token)
             print('________header_________', headers)
 
-            response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
-            print('______________response_____________')
+            async with httpx.AsyncClient() as client:
+                response = await client.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
 
-            if response.status_code == 200:
-                # Create a temporary file to save the audio data
-                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                    temp_file.write(response.content)
-                    temp_file_path = temp_file.name
+                if response.status_code == 200:
+                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                        temp_file.write(response.content)
+                        temp_file_path = temp_file.name
 
-                # Return the temporary file using FileResponse
-                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
-            else:
-                print('________________response.text________________')
-                raise HTTPException(status_code=response.status_code, detail=response.text)
+                    return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
+                else:
+                    raise HTTPException(status_code=response.status_code, detail=response.text)
 
         except ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="JWT token has expired. Please log in again.")
