@@ -353,7 +353,7 @@ async def ttm_endpoint(request : Request):
         print('_______________duration_____________', duration)
 
         if prompt is None:
-            raise web.HTTPBadRequest(text="Prompt is missing in the request body.")
+            raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         
         try:
             # Construct the TTS URL based on successful login URL
@@ -382,13 +382,13 @@ async def ttm_endpoint(request : Request):
 
                 return web.FileResponse(temp_file_path, headers={"Content-Type": "audio/wav"})
             else:
-                raise web.HTTPInternalServerError(text=response_data.decode())
+                raise web.HTTPException(status=response.status, text=response_data)
 
         except asyncio.TimeoutError:
-            raise web.HTTPGatewayTimeout(text="Gateway Timeout: The server timed out waiting for the request")
+            raise HTTPException(status_code=504, detail="--------Gateway Timeout: The server timed out waiting for the request----------------")
 
     except json.JSONDecodeError:
-        raise web.HTTPBadRequest(text="Invalid JSON format in the request body")
+        raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
 
 
 
