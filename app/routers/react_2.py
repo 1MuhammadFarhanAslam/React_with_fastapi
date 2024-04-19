@@ -118,8 +118,7 @@ def get_database() -> Generator[Session, None, None]:
 #             # Log in the user and get the access token and corresponding URL
 #             data = {"prompt": prompt, "duration": duration}
             
-
-#             # Construct the TTS URL based on successful login URL
+#             # Construct the TTM URL based on successful login URL
 #             headers = {
 #                 "Accept": "audio/wav",
 #                 "Authorization": f"Bearer {access_token}",
@@ -133,7 +132,7 @@ def get_database() -> Generator[Session, None, None]:
 #             # Set the timeout value in seconds (e.g., 30 seconds)
 #             timeout = 30
 #             try:
-#                 # Make a POST request to the TTS endpoint
+#                 # Make a POST request to the TTM endpoint
 #                 response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data, timeout=timeout)
 #                 print('______________response_____________:', response)
 
@@ -282,12 +281,11 @@ async def text_to_music(request: Request):
         print('_______________request_data_____________', request_data)
         prompt = request_data.get("prompt")
         print('_______________prompt_____________', prompt)
-        if prompt is None:
-            print('_______________prompt_____________', prompt)
-            raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         duration = request_data.get("duration")
         print('_______________duration_____________', duration)
-        
+
+        if prompt is None:
+            raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         
         try:
             # Log in the user and get the access token and corresponding URL
