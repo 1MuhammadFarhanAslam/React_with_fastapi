@@ -203,7 +203,8 @@ async def text_to_music(request: Request):
                 headers=headers,
                 json=data,
                 # timeout=timeout  # Add the timeout parameter here
-            )
+                )
+            print('______________response_____________:', response)
 
             if response.status_code == 200:
                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
@@ -212,7 +213,7 @@ async def text_to_music(request: Request):
 
                 return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
             else:
-                raise HTTPException(status_code=response.status_code, detail=response.text)
+                raise HTTPException(status_code=404, detail="No axons available for Text-to-Music. Please try again later.")
             
         except Timeout:
             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
