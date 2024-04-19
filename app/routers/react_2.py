@@ -341,7 +341,7 @@ def get_database() -> Generator[Session, None, None]:
 #---------------Working endpoint-------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using aiohttp library in parallel manner) --------------------- 
 #-----------This endpoint is not same as above instead it has different use case of try block---------------------
-async def ttm_endpoint(request):
+async def ttm_endpoint(request : Request):
     try:
         # Extract the request data
         request_data = await request.json()
