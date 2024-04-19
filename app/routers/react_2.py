@@ -161,7 +161,7 @@ async def text_to_music(request: Request):
             print('______________access_token______________', access_token)
             print('________header_________', headers)
 
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=30) as client:
                 response = await client.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
 
                 if response.status_code == 200:
