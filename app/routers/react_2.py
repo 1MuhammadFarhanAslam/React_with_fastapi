@@ -230,10 +230,14 @@ def get_database() -> Generator[Session, None, None]:
 @router.post("/api/ttm_endpoint")
 async def ttm_endpoint(request: Request):
     try:
-        # Extract the request data
         request_data = await request.json()
+        print('_______________request_data_____________', request_data)
+
         prompt = request_data.get("prompt")
+        print('_______________prompt_____________', prompt)
+
         duration = request_data.get("duration")
+        print('_______________duration_____________', duration)
 
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
