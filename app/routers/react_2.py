@@ -258,7 +258,6 @@ async def ttm_endpoint(request : Request):
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=300)) as session:
                 async with session.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data) as response:
                     print('________response_________', response)
-                    response_data = await response.read()
                     
             if response.status == 200:
                 # Process the response and return the audio file
