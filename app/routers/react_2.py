@@ -241,7 +241,8 @@ async def ttm_endpoint(request: Request):
 
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
-
+        
+        print("----------Music generation is in progress. Please wait for a while.----------")
         try:
             # Construct the TTS URL based on successful login URL
             data = {"prompt": prompt, "duration": duration}
@@ -263,7 +264,7 @@ async def ttm_endpoint(request: Request):
                         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
                             temp_file.write(audio_content)
                             temp_file_path = temp_file.name
-
+                        print("-----------Music generation is completed----------")
                         return FileResponse(temp_file_path, headers={"Content-Type": "audio/wav"})
                     else:
                         raise HTTPException(status_code=response.status, detail=response.text)
