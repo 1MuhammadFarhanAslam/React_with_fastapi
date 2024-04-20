@@ -262,9 +262,9 @@ async def ttm_endpoint(request : Request):
                     
             if response.status == 200:
                 # Process the response and return the audio file
-                temp_file_path = "/path/to/temp_file.wav"  # Replace with actual file path
-                with open(temp_file_path, "wb") as temp_file:
-                    temp_file.write(response_data)
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                    temp_file.write(response.content)
+                    temp_file_path = temp_file.name
 
                 return FileResponse(temp_file_path, headers={"Content-Type": "audio/wav"})
             else:
