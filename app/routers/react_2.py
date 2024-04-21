@@ -186,9 +186,9 @@ async def text_to_music(request: Request):
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
-        print("----------Music generation is in progress. Please wait for a while.----------")
-
         access_token = ACCESS_TOKEN
+        
+        print('_______________access_token_____________', access_token)
         try:
             data = {"prompt": prompt, "duration": duration}
             headers = {
@@ -196,10 +196,12 @@ async def text_to_music(request: Request):
                 "Authorization": f"Bearer {access_token}",
                 "Content-Type": "application/json"
             }
+            print('________header_________', headers)
 
             # Set the timeout value in seconds (e.g., 30 seconds)
             # timeout = 500
 
+            print("----------Music generation is in progress. Please wait for a while.----------")
             response = requests.post(
                 f"{nginx_url}/api/ttm_endpoint",
                 headers=headers,
