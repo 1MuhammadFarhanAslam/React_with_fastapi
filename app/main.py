@@ -35,8 +35,8 @@ origins = [
     "http://localhost:3000",
     "http://89.37.121.214:44107",
     "http://149.11.242.18:14428",
-    "http:v1.bittaudio.ai",
-    "http:v2.bittaudio.ai",
+    "http://v1.bittaudio.ai",
+    "http://v2.bittaudio.ai",
 ]
 
 # Allow CORS for all domains in this example
