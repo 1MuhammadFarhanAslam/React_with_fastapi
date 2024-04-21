@@ -50,7 +50,7 @@ if access_token is None:
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Change to 30 minutes
 
-nginx_url = "http://85.239.241.96"
+nginx_url = "http://144.91.69.154"
     
 
 # Create the SQLAlchemy engine
