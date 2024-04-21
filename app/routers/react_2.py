@@ -44,8 +44,8 @@ GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
 if GOOGLE_EMAIL_LOGIN_SECRET_KEY is None:
     raise Exception("GOOGLE_EMAIL_LOGIN_SECRET_KEY environment variable is not set")
 
-access_token = os.environ.get("ACCESS_TOKEN")
-if access_token is None:
+ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
+if ACCESS_TOKEN is None:
     raise Exception("ACCESS_TOKEN environment variable is not set")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Change to 30 minutes
@@ -187,6 +187,8 @@ async def text_to_music(request: Request):
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
         print("----------Music generation is in progress. Please wait for a while.----------")
+
+        access_token = ACCESS_TOKEN
         try:
             data = {"prompt": prompt, "duration": duration}
             headers = {
