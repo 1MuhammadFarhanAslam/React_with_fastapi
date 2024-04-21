@@ -20,10 +20,10 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Initialize the database
 def initialize_database():
-    print("Database initializing...")
+    print("---------------------Database initializing-------------------")
     from models import Base
     Base.metadata.create_all(bind=engine)
-    print("Database initialized successfully.")
+    print("---------------------Database initialized successfully--------")
 
 # Call the database initialization function
 initialize_database()
