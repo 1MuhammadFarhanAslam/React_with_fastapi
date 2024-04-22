@@ -174,7 +174,7 @@ def get_database() -> Generator[Session, None, None]:
 #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request):
+async def text_to_music(request: Request, authorization = Header(...)):
     try:
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
@@ -188,7 +188,7 @@ async def text_to_music(request: Request):
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
-        access_token = ACCESS_TOKEN
+        access_token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
         
         print('_______________access_token_____________', access_token)
         try:
@@ -205,7 +205,7 @@ async def text_to_music(request: Request):
 
             print("----------Music generation is in progress. Please wait for a while.----------")
             response = requests.post(
-                f"{nginx_url}",
+                f"{nginx_url}/api/ttm_endpoint",
                 headers=headers,
                 json=data,
                 # timeout=timeout  # Add the timeout parameter here
