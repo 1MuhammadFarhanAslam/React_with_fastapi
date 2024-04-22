@@ -174,7 +174,7 @@ def get_database() -> Generator[Session, None, None]:
 #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request, authorization: str = Header(...)):
+async def text_to_music(request: Request):
     try:
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
@@ -185,17 +185,17 @@ async def text_to_music(request: Request, authorization: str = Header(...)):
         duration = request_data.get("duration")
         print('_______________duration_____________', duration)
 
-        authorization = request_data.get("authorization")
-        print('_______________authorization_____________', authorization)
-
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
+        access_token = ACCESS_TOKEN
+        
+        print('_______________access_token_____________', access_token)
         try:
             data = {"prompt": prompt, "duration": duration}
             headers = {
                 "Accept": "audio/wav",
-                "Authorization": f"Bearer {authorization}",
+                "Authorization": f"Bearer {access_token}",
                 "Content-Type": "application/json"
             }
             print('________header_________', headers)
@@ -205,7 +205,7 @@ async def text_to_music(request: Request, authorization: str = Header(...)):
 
             print("----------Music generation is in progress. Please wait for a while.----------")
             response = requests.post(
-                f"{nginx_url}/api/ttm_endpoint",
+                f"{nginx_url}",
                 headers=headers,
                 json=data,
                 # timeout=timeout  # Add the timeout parameter here
