@@ -474,7 +474,7 @@ async def get_data():
     
 
 
-@router.post("/api/ttm_endpoint")
+@router.post("/api/Bhuttotensor")
 async def text_to_music():
     return {"message": "---------------WAR against CORS-------------------------------"}
 
