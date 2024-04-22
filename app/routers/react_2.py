@@ -190,8 +190,12 @@ async def text_to_music(request: Request, authorization = Header(...)):
 
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
+        
+        if authorization is None:
+            raise HTTPException(status_code=400, detail="Authorization is missing in the request body.")
 
         access_token = authorization
+        
         print('_______________User access_token_____________', access_token)
 
 
