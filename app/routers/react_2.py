@@ -287,7 +287,7 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
 
     except ValueError:
-        raise HTTPException(status_code=400, detail="----------------Request not redirected to API no 2 due to invalid routing----------------")
+        raise HTTPException(status_code=400, detail="----------------Request not redirected to API no 1 due to invalid routing----------------")
 
 
 
