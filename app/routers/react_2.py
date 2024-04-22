@@ -52,7 +52,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Change to 30 minutes
 
 # nginx_url = "api.bittaudio.ai"
-nginx_url = "http://144.91.69.154:8000"
+nginx_url = "api.bittaudio.ai"
     
 
 # Create the SQLAlchemy engine
@@ -238,7 +238,7 @@ async def get_data():
 #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
 # @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request, authorization: Optional[str] = Header(None)) -> FileResponse:
+async def text_to_music(request: Request) -> FileResponse:
     try:
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
@@ -249,18 +249,14 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
         duration = request_data.get("duration")
         print('_______________duration_____________', duration)
 
-        authorization = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
-        print('_______________authorization_____________', authorization)
+        access_token = TTM_ACCESS_TOKEN  # Assuming the header format is "Bearer <token>"
+        print('_______________authorization_____________', access_token)
 
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         
-        if authorization is None:
+        if access_token is None:
             raise HTTPException(status_code=400, detail="Authorization is missing in the request body.")
-
-        access_token = authorization
-
-        print('_______________User access_token_____________', access_token)
 
         try:
             data = {"prompt": prompt, "duration": duration}
