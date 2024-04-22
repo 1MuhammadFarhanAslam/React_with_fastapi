@@ -248,8 +248,7 @@ async def text_to_music(request: Request) -> FileResponse:
 
         duration = request_data.get("duration")
         print('_______________duration_____________', duration)
-        
-        access_token = os.environ.get("TTM_ACCESS")
+        access_token = os.environ.get("TTM_ACCESS_TOKEN")
 
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
