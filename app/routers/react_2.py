@@ -237,7 +237,7 @@ async def get_data():
 
 #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
-# @router.post("/api/ttm_endpoint")
+@router.post("/api/ttm_endpoint")
 async def text_to_music(request: Request) -> FileResponse:
     try:
         request_data = await request.json()
