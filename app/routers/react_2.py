@@ -173,8 +173,8 @@ def get_database() -> Generator[Session, None, None]:
 
 #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
-@router.post("/api/ttm_endpoint", authorization = Header(...))
-async def text_to_music(request: Request):
+@router.post("/api/ttm_endpoint")
+async def text_to_music(request: Request, authorization = Header(...)):
     try:
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
