@@ -185,7 +185,7 @@ async def text_to_music(request: Request, authorization = Header(...)):
         duration = request_data.get("duration")
         print('_______________duration_____________', duration)
 
-        authorization = request_data.get("authorization")
+        authorization = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
         print('_______________authorization_____________', authorization)
 
         if prompt is None:
@@ -195,7 +195,7 @@ async def text_to_music(request: Request, authorization = Header(...)):
             raise HTTPException(status_code=400, detail="Authorization is missing in the request body.")
 
         access_token = authorization
-        
+
         print('_______________User access_token_____________', access_token)
 
 
