@@ -40,6 +40,8 @@ origins = [
     "http://v2.bittaudio.ai",
 ]
 
+origins = ['*']
+
 # Allow CORS for all domains in this example
 app.add_middleware(
         CORSMiddleware,
