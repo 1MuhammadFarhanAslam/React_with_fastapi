@@ -3,7 +3,7 @@ import os
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from fastapi.middleware.cors import CORSMiddleware
-from routers import admin, user, login, react, react_1, react_2
+from routers import admin, user, login, react, react_2
 
 app = FastAPI()
 
