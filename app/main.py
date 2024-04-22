@@ -28,7 +28,7 @@ def initialize_database():
 # Call the database initialization function
 initialize_database()
 
-Allow CORS for only the React frontend server
+#Allow CORS for only the React frontend server
 origins = [
     "http://85.239.241.96:3000",  # Your React frontend server's HTTP URL
     "http://api.bittaudio.ai",
