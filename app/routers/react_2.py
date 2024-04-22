@@ -271,10 +271,7 @@ async def text_to_music(request: Request) -> FileResponse:
             # timeout = 500
 
             print("----------Music generation is in progress. Please wait for a while.----------")
-            response = requests.post(
-                f"{nginx_url}/api/ttm_endpoint",
-                headers=headers,
-                json=data,
+            response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data,
                 # timeout=timeout  # Add the timeout parameter here
                 )
             print('______________response_____________:', response)
