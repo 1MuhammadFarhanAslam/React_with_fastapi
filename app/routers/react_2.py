@@ -238,7 +238,7 @@ async def get_data():
 #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request) -> FileResponse:
+async def text_to_music(request: Request, authorization: Optional[str] = Header(TTM_ACCESS_TOKEN)) -> FileResponse:
     try:
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
@@ -249,7 +249,7 @@ async def text_to_music(request: Request) -> FileResponse:
         duration = request_data.get("duration")
         print('_______________duration_____________', duration)
 
-        access_token = TTM_ACCESS_TOKEN  # Assuming the header format is "Bearer <token>"
+        access_token = authorization  # Assuming the header format is "Bearer <token>"
         print('_______________authorization_____________', access_token)
 
         if prompt is None:
