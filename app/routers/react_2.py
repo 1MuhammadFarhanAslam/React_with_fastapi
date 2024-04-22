@@ -188,38 +188,38 @@ async def text_to_music(request: Request):
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
 
-        try:
-            data = {"prompt": prompt, "duration": duration}
-            headers = {
-                "Accept": "audio/wav",
-                "Authorization": f"Bearer {ACCESS_TOKEN}",
-                "Content-Type": "application/json"
-            }
-            print('________header_________', headers)
 
-            # Set the timeout value in seconds (e.g., 30 seconds)
-            # timeout = 500
+        data = {"prompt": prompt, "duration": duration}
+        headers = {
+            "Accept": "audio/wav",
+            "Authorization": f"Bearer {ACCESS_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        print('________header_________', headers)
 
-            print("----------Music generation is in progress. Please wait for a while.----------")
-            response = requests.post(
-                f"{nginx_url}/api/ttm_endpoint",
-                headers=headers,
-                json=data,
-                # timeout=timeout  # Add the timeout parameter here
-                )
-            print('______________response_____________:', response)
+        # Set the timeout value in seconds (e.g., 30 seconds)
+        # timeout = 500
 
-            if response.status_code == 200:
-                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                    temp_file.write(response.content)
-                    temp_file_path = temp_file.name
-                print("-----------Music generation is completed----------")
-                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
-            else:
-                raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
-                
-        except Timeout:
-                raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
+        print("----------Music generation is in progress. Please wait for a while.----------")
+        response = requests.post(
+            f"{nginx_url}/api/ttm_endpoint",
+            headers=headers,
+            json=data,
+            # timeout=timeout  # Add the timeout parameter here
+            )
+        print('______________response_____________:', response)
+
+        if response.status_code == 200:
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                temp_file.write(response.content)
+                temp_file_path = temp_file.name
+            print("-----------Music generation is completed----------")
+            return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
+        else:
+            raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
+            
+    except Timeout:
+            raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
