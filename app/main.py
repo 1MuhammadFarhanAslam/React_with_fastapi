@@ -31,7 +31,7 @@ initialize_database()
 # Allow CORS for only the React frontend server
 origins = [
     "http://85.239.241.96:3000",  # Your React frontend server's HTTP URL
-    "http://api.bittaudio.net",
+    "http://api.bittaudio.ai",
     "http://localhost:3000",
     "http://89.37.121.214:44107",
     "http://149.11.242.18:14428",
