@@ -43,15 +43,15 @@ origins = [
 ]
 
 
-# # Allow CORS only if not handled by Nginx
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,
-#     allow_credentials=True,
-#     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-#     allow_headers=["*"],
-#     expose_headers=["*"],
-# )
+# Allow CORS only if not handled by Nginx
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+)
     
 
 # Include routers
