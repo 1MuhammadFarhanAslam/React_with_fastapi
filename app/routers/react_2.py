@@ -76,7 +76,7 @@ def get_database() -> Generator[Session, None, None]:
 
 @router.get("/api/health_check")
 async def health_check():
-    return {"status": "ok"}
+    return {"status": "Zaid bhai aur rashid bhai ko jori salamt rhy. Aameen"}
 
 
 # def create_session():   #session is usually used to make a request redirect to another server
