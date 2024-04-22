@@ -74,9 +74,11 @@ def get_database() -> Generator[Session, None, None]:
     finally:
         db.close()
 
-@router.get("/api/health_check")
-async def health_check():
-    return {"status": "Zaid bhai aur rashid bhai ko jori salamt rhy. Aameen"}
+@router.get("/api/data")
+async def get_data():
+    # Replace this with your actual data retrieval logic
+    data = {"DUAAAA": "Zaid bhai, Isharab bhai aur rashid bhai ki jori salamt rhy. Aameen"}
+    return JSONResponse(content=data)
 
 
 # def create_session():   #session is usually used to make a request redirect to another server
@@ -177,60 +179,60 @@ async def health_check():
 
 #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
-@router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request) -> FileResponse:
-    try:
-        request_data = await request.json()
-        print('_______________request_data_____________', request_data)
+# @router.post("/api/ttm_endpoint")
+# async def text_to_music(request: Request) -> FileResponse:
+#     try:
+#         request_data = await request.json()
+#         print('_______________request_data_____________', request_data)
 
-        prompt = request_data.get("prompt")
-        print('_______________prompt_____________', prompt)
+#         prompt = request_data.get("prompt")
+#         print('_______________prompt_____________', prompt)
 
-        duration = request_data.get("duration")
-        print('_______________duration_____________', duration)
+#         duration = request_data.get("duration")
+#         print('_______________duration_____________', duration)
 
-        access_token = os.environ.get("TTM_ACCESS_TOKEN")
-        print('_______________access_token_____________', access_token)
+#         access_token = os.environ.get("TTM_ACCESS_TOKEN")
+#         print('_______________access_token_____________', access_token)
 
-        if prompt is None:
-            raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
+#         if prompt is None:
+#             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         
-        if access_token is None:
-            raise HTTPException(status_code=400, detail="TTM_ACCESS_TOKEN is missing in the request body.")
+#         if access_token is None:
+#             raise HTTPException(status_code=400, detail="TTM_ACCESS_TOKEN is missing in the request body.")
 
-        try:
-            data = {"prompt": prompt, "duration": duration}
-            headers = {"Authorization": f"Bearer {access_token}"}
+#         try:
+#             data = {"prompt": prompt, "duration": duration}
+#             headers = {"Authorization": f"Bearer {access_token}"}
 
-            print('_________data________', data)
-            print('________header_________', headers)
+#             print('_________data________', data)
+#             print('________header_________', headers)
 
-            # Set the timeout value in seconds (e.g., 30 seconds)
-            # timeout = 500
+#             # Set the timeout value in seconds (e.g., 30 seconds)
+#             # timeout = 500
 
-            print("----------Music generation is in progress. Please wait for a while.----------")
-            response = requests.post(
-                f"{nginx_url}/api/ttm_endpoint",
-                headers=headers,
-                json=data,
-                # timeout=timeout  # Add the timeout parameter here
-                )
-            print('______________response_____________:', response)
+#             print("----------Music generation is in progress. Please wait for a while.----------")
+#             response = requests.post(
+#                 f"{nginx_url}/api/ttm_endpoint",
+#                 headers=headers,
+#                 json=data,
+#                 # timeout=timeout  # Add the timeout parameter here
+#                 )
+#             print('______________response_____________:', response)
 
-            if response.status_code == 200:
-                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                    temp_file.write(response.content)
-                    temp_file_path = temp_file.name
-                print("-----------Music generation is completed----------")
-                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
-            else:
-                raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
+#             if response.status_code == 200:
+#                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+#                     temp_file.write(response.content)
+#                     temp_file_path = temp_file.name
+#                 print("-----------Music generation is completed----------")
+#                 return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
+#             else:
+#                 raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
             
-        except Timeout:
-            raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
+#         except Timeout:
+#             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
 
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+#     except ValueError:
+#         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
 
 #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
@@ -470,4 +472,9 @@ async def text_to_music(request: Request) -> FileResponse:
 
 #         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
     
+
+
+@router.post("/api/ttm_endpoint")
+async def text_to_music():
+    return {"message": "---------------WAR against CORS-------------------------------"}
 
