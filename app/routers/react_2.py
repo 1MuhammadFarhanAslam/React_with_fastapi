@@ -44,8 +44,8 @@ GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
 if GOOGLE_EMAIL_LOGIN_SECRET_KEY is None:
     raise Exception("GOOGLE_EMAIL_LOGIN_SECRET_KEY environment variable is not set")
 
-ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
-if ACCESS_TOKEN is None:
+TTM_ACCESS_TOKEN = os.environ.get("TTM_ACCESS_TOKEN")
+if TTM_ACCESS_TOKEN is None:
     raise Exception("ACCESS_TOKEN environment variable is not set")
 
 ALGORITHM = "HS256"
@@ -174,7 +174,7 @@ def get_database() -> Generator[Session, None, None]:
 #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request, authorization: Optional[str] = Header(None)) -> FileResponse:
+async def text_to_music(request: Request) -> FileResponse:
     try:
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
@@ -185,26 +185,20 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
         duration = request_data.get("duration")
         print('_______________duration_____________', duration)
 
-        authorization = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
-        print('_______________authorization_____________', authorization)
+        access_token = os.environ.get("TTM_ACCESS_TOKEN")
+        print('_______________access_token_____________', access_token)
 
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         
-        if authorization is None:
-            raise HTTPException(status_code=400, detail="Authorization is missing in the request body.")
-
-        access_token = authorization
-
-        print('_______________User access_token_____________', access_token)
+        if access_token is None:
+            raise HTTPException(status_code=400, detail="TTM_ACCESS_TOKEN is missing in the request body.")
 
         try:
             data = {"prompt": prompt, "duration": duration}
-            headers = {
-                "Accept": "audio/wav",
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json"
-            }
+            headers = {"Authorization": f"Bearer {access_token}"}
+
+            print('_________data________', data)
             print('________header_________', headers)
 
             # Set the timeout value in seconds (e.g., 30 seconds)
@@ -233,6 +227,69 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
+
+#-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
+# ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
+# @router.post("/api/ttm_endpoint")
+# async def text_to_music(request: Request, authorization: Optional[str] = Header(None)) -> FileResponse:
+#     try:
+#         request_data = await request.json()
+#         print('_______________request_data_____________', request_data)
+
+#         prompt = request_data.get("prompt")
+#         print('_______________prompt_____________', prompt)
+
+#         duration = request_data.get("duration")
+#         print('_______________duration_____________', duration)
+
+#         authorization = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
+#         print('_______________authorization_____________', authorization)
+
+#         if prompt is None:
+#             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
+        
+#         if authorization is None:
+#             raise HTTPException(status_code=400, detail="Authorization is missing in the request body.")
+
+#         access_token = authorization
+
+#         print('_______________User access_token_____________', access_token)
+
+#         try:
+#             data = {"prompt": prompt, "duration": duration}
+#             headers = {
+#                 "Accept": "audio/wav",
+#                 "Authorization": f"Bearer {access_token}",
+#                 "Content-Type": "application/json"
+#             }
+#             print('________header_________', headers)
+
+#             # Set the timeout value in seconds (e.g., 30 seconds)
+#             # timeout = 500
+
+#             print("----------Music generation is in progress. Please wait for a while.----------")
+#             response = requests.post(
+#                 f"{nginx_url}/api/ttm_endpoint",
+#                 headers=headers,
+#                 json=data,
+#                 # timeout=timeout  # Add the timeout parameter here
+#                 )
+#             print('______________response_____________:', response)
+
+#             if response.status_code == 200:
+#                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+#                     temp_file.write(response.content)
+#                     temp_file_path = temp_file.name
+#                 print("-----------Music generation is completed----------")
+#                 return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
+#             else:
+#                 raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
+            
+#         except Timeout:
+#             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
+
+#     except ValueError:
+#         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
 
 
 
