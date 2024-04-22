@@ -50,7 +50,7 @@ if ACCESS_TOKEN is None:
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Change to 30 minutes
 
-nginx_url = "api.bittaudio.ai:8000"
+nginx_url = "api.bittaudio.ai"
     
 
 # Create the SQLAlchemy engine
