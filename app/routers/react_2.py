@@ -270,9 +270,8 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
 
             print("----------Music generation is in progress. Please wait for a while.----------")
             try:
-                response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data,
+                response = requests.request('POST', f"{nginx_url}/api/ttm_endpoint", body=data, headers={headers})
                     # timeout=timeout  # Add the timeout parameter here
-                    )
                 print('______________response_____________:', response)
 
                 if response.status_code == 200:
