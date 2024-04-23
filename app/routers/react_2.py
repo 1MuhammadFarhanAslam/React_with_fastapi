@@ -239,54 +239,58 @@ async def get_data():
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
 @router.post("/api/ttm_endpoint")
 async def text_to_music(request: Request, authorization: Optional[str] = Header(TTM_ACCESS_TOKEN)) -> FileResponse:
-    request_data = await request.json()
-    print('_______________request_data_____________', request_data)
-
-    prompt = request_data.get("prompt")
-    print('_______________prompt_____________', prompt)
-
-    duration = request_data.get("duration")
-    print('_______________duration_____________', duration)
-    access_token = authorization
-
-    if prompt is None:
-        raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
-    
-    if access_token is None:
-        raise HTTPException(status_code=400, detail="Authorization is missing in the request body.")
-
     try:
-        data = {"prompt": prompt, "duration": duration}
-        headers = {
-            "Accept": "application/json",
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json"
-        }
-        print('________header_________', headers)
+        request_data = await request.json()
+        print('_______________request_data_____________', request_data)
 
-        # Set the timeout value in seconds (e.g., 30 seconds)
-        # timeout = 500
+        prompt = request_data.get("prompt")
+        print('_______________prompt_____________', prompt)
 
-        print("----------Music generation is in progress. Please wait for a while.----------")
+        duration = request_data.get("duration")
+        print('_______________duration_____________', duration)
+        access_token = authorization
+
+        if prompt is None:
+            raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
+        
+        if access_token is None:
+            raise HTTPException(status_code=400, detail="Authorization is missing in the request body.")
+
         try:
-            response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data,
-                # timeout=timeout  # Add the timeout parameter here
-                )
-            print('______________response_____________:', response)
+            data = {"prompt": prompt, "duration": duration}
+            headers = {
+                "Accept": "application/json",
+                "authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json"
+            }
+            print('________header_________', headers)
 
-            if response.status_code == 200:
-                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                    temp_file.write(response.content)
-                    temp_file_path = temp_file.name
-                print("-----------Music generation is completed----------")
-                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
-            else:
-                raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
+            # Set the timeout value in seconds (e.g., 30 seconds)
+            # timeout = 500
+
+            print("----------Music generation is in progress. Please wait for a while.----------")
+            try:
+                response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data,
+                    # timeout=timeout  # Add the timeout parameter here
+                    )
+                print('______________response_____________:', response)
+
+                if response.status_code == 200:
+                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                        temp_file.write(response.content)
+                        temp_file_path = temp_file.name
+                    print("-----------Music generation is completed----------")
+                    return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
+                else:
+                    raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
+            except Timeout:
+                raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
+            
         except Timeout:
             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
-        
-    except Timeout:
-        raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
+
+    except ValueError:
+        raise HTTPException(status_code=400, detail="----------------Request not redirected to API no 1 due to invalid routing----------------")
 
 
 
