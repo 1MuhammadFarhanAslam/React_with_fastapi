@@ -239,7 +239,7 @@ async def get_data():
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
 
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request, authorization: str = Header(...)) -> FileResponse:
+async def text_to_music(request: Request) -> FileResponse:
     try:
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
@@ -249,7 +249,12 @@ async def text_to_music(request: Request, authorization: str = Header(...)) -> F
 
         duration = request_data.get("duration")
         print('_______________duration_____________', duration)
-        access_token = authorization
+
+        authorization = os.environ.get("TTM_ACCESS_TOKEN")
+        print('_______________authorization_____________', authorization)
+
+        access_token = f"Bearer {authorization}"
+        print('_______________access_token_____________', access_token)
 
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
@@ -261,7 +266,7 @@ async def text_to_music(request: Request, authorization: str = Header(...)) -> F
             data = {"prompt": prompt, "duration": duration}
             headers = {
                 "accept": "application/json",
-                "Authorization": f"Bearer {access_token}",
+                "Authorization": access_token,
                 "Content-Type": "application/json"
             }
             print('________header_________', headers)
@@ -270,22 +275,20 @@ async def text_to_music(request: Request, authorization: str = Header(...)) -> F
             # timeout = 500
 
             print("----------Music generation is in progress. Please wait for a while.----------")
-            try:
-                response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data,
-                    # timeout=timeout  # Add the timeout parameter here
-                    )
-                print('______________response_____________:', response)
+            
+            response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data,
+                # timeout=timeout  # Add the timeout parameter here
+                )
+            print('______________response_____________:', response)
 
-                if response.status_code == 200:
-                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                        temp_file.write(response.content)
-                        temp_file_path = temp_file.name
-                    print("-----------Music generation is completed----------")
-                    return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
-                else:
-                    raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
-            except Timeout:
-                raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
+            if response.status_code == 200:
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+                    temp_file.write(response.content)
+                    temp_file_path = temp_file.name
+                print("-----------Music generation is completed----------")
+                return FileResponse(temp_file_path, media_type="audio/wav", filename="generated_ttm_audio.wav")
+            else:
+                raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
             
         except Timeout:
             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
