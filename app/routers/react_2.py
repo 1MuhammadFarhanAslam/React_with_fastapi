@@ -618,7 +618,7 @@ async def get_data():
 
 # ------------------------Working code ------------------------------
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request) -> FileResponse:
+async def text_to_music(request: Request):
     try:
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
