@@ -67,16 +67,15 @@ origins = [
     "http://v2.bittaudio.ai",
 ]
 
-#Allow CORS for all origins specified in the list
+
+# Allow CORS for all origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    # allow_headers=["*"],
+    allow_headers=["DNT", "User-Agent", "X-Requested-With", "If-Modified-Since", "Cache-Control", "Content-Type", "Range", "Authorization"],
     expose_headers=["*"],
-    allow_headers=["DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"]
-    
 )
     
 

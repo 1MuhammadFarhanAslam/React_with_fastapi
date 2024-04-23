@@ -253,20 +253,17 @@ async def text_to_music(request: Request) -> FileResponse:
         authorization = os.environ.get("TTM_ACCESS_TOKEN")
         print('_______________authorization_____________', authorization)
 
-        access_token = f"Bearer {authorization}"
-        print('_______________access_token_____________', access_token)
-
         if prompt is None:
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         
-        if access_token is None:
+        if authorization is None:
             raise HTTPException(status_code=400, detail="Authorization is missing in the request header.")
 
         try:
             data = {"prompt": prompt, "duration": duration}
             headers = {
                 "accept": "application/json",
-                "Authorization": access_token,
+                "Authorization": f"Bearer {authorization}",
                 "Content-Type": "application/json"
             }
             print('________header_________', headers)
@@ -275,7 +272,7 @@ async def text_to_music(request: Request) -> FileResponse:
             # timeout = 500
 
             print("----------Music generation is in progress. Please wait for a while.----------")
-            
+
             response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data,
                 # timeout=timeout  # Add the timeout parameter here
                 )
