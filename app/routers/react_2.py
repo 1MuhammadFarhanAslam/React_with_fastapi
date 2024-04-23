@@ -237,8 +237,9 @@ async def get_data():
 
 #-------------Working endpoint---------------------- TTM endpoint without auth_token from header, using requests library and time out functionality------------
 # ----------------This endpoint sends requests (using requests library in series manner) to the TTM endpoint and returns the response to the client.
+
 @router.post("/api/ttm_endpoint")
-async def text_to_music(request: Request, authorization: Optional[str] = Header(TTM_ACCESS_TOKEN)) -> FileResponse:
+async def text_to_music(request: Request, authorization: str = Header(...)) -> FileResponse:
     try:
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
@@ -254,13 +255,13 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
             raise HTTPException(status_code=400, detail="Prompt is missing in the request body.")
         
         if access_token is None:
-            raise HTTPException(status_code=400, detail="Authorization is missing in the request body.")
+            raise HTTPException(status_code=400, detail="Authorization is missing in the request header.")
 
         try:
             data = {"prompt": prompt, "duration": duration}
             headers = {
-                "Accept": "application/json",
-                "authorization": f"Bearer {access_token}",
+                "accept": "application/json",
+                "Authorization": f"Bearer {access_token}",
                 "Content-Type": "application/json"
             }
             print('________header_________', headers)
@@ -270,8 +271,9 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
 
             print("----------Music generation is in progress. Please wait for a while.----------")
             try:
-                response = requests.request('POST', f"{nginx_url}/api/ttm_endpoint", body=data, headers={headers})
+                response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data,
                     # timeout=timeout  # Add the timeout parameter here
+                    )
                 print('______________response_____________:', response)
 
                 if response.status_code == 200:
@@ -290,6 +292,7 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
 
     except ValueError:
         raise HTTPException(status_code=400, detail="----------------Request not redirected to API no 1 due to invalid routing----------------")
+
 
 
 
