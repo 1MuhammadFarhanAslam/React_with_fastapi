@@ -259,7 +259,7 @@ async def text_to_music(request: Request, authorization: Optional[str] = Header(
         try:
             data = {"prompt": prompt, "duration": duration}
             headers = {
-                "Accept": "audio/wav",
+                "Accept": "application/json",
                 "Authorization": f"Bearer {access_token}",
                 "Content-Type": "application/json"
             }
