@@ -80,10 +80,10 @@ app.add_middleware(
     
 
 # Include routers
-app.include_router(login.router, prefix="", tags=["Authentication"])
-app.include_router(admin.router, prefix="", tags=["Admin_Management"])
+app.include_router(login.router, prefix="", tags=["Nginx_Authentication"])
+app.include_router(admin.router, prefix="", tags=["Nginx_Admin_Management"])
 # app.include_router(user.router, prefix="", tags=["User"])
-app.include_router(react.router, prefix="", tags=["Signup/Login"])
+app.include_router(react.router, prefix="", tags=["Frontend_Signup/Login"])
 # app.include_router(react_1.router, prefix="", tags=["React_1"])
 app.include_router(react_ttm.router, prefix="", tags=["Text-To-Music"])
 
