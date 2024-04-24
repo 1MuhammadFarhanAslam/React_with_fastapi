@@ -43,7 +43,7 @@ if GOOGLE_EMAIL_LOGIN_SECRET_KEY is None:
 
 TTM_ACCESS_TOKEN = os.environ.get("TTM_ACCESS_TOKEN")
 if TTM_ACCESS_TOKEN is None:
-    raise Exception("ACCESS_TOKEN environment variable is not set")
+    raise Exception("TTM_ACCESS_TOKEN environment variable is not set")
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Change to 30 minutes
