@@ -72,12 +72,6 @@ def get_database() -> Generator[Session, None, None]:
     finally:
         db.close()
 
-@router.get("/api/data")
-async def get_data():
-    # Replace this with your actual data retrieval logic
-    data = {"DUAAAA": "Zaid bhai, Isharab bhai aur rashid bhai ki jori salamt rhy. Aameen"}
-    return JSONResponse(content=data)
-
 
 # def create_session():   #session is usually used to make a request redirect to another server
 #     session = requests.Session()
