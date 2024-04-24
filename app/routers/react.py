@@ -19,9 +19,16 @@ router = APIRouter()
 
 # Get the database URL from the environment variable
 DATABASE_URL = os.environ.get("DATABASE_URL")
-
 if DATABASE_URL is None:
     raise Exception("DATABASE_URL environment variable is not set")
+
+# Get the database URL from the environment variable
+GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
+if GOOGLE_EMAIL_LOGIN_SECRET_KEY is None:
+    raise Exception("GOOGLE_EMAIL_LOGIN_SECRET_KEY environment variable is not set")
+
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 # Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
@@ -43,11 +50,6 @@ def get_database() -> Generator[Session, None, None]:
     finally:
         db.close()
 
-# Get the database URL from the environment variable
-DATABASE_URL = os.environ.get("DATABASE_URL")
-GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
     to_encode = data.copy()
@@ -128,7 +130,7 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
 #         print(e)
 #         raise HTTPException(status_code=500, detail="Server Error")
 
-@router.post("/api/google-signin", tags=["Signup/Login"])
+@router.post("/api/google-signin", tags=["Frontend_Signup/Login"])
 async def google_signin(token: React_user_Token, db: Session = Depends(get_database)):
     try:
         # Verify the Google ID token
@@ -308,7 +310,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 #         raise HTTPException(status_code=400, detail="Error: " + str(e))
     
 
-@router.post("/api/email-signup", tags=["Signup/Login"])
+@router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
@@ -367,7 +369,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         
 
 # Your existing endpoint code for email signin
-@router.post("/api/email-signin", tags=["Signup/Login"])
+@router.post("/api/email-signin", tags=["Frontend_Signup/Login"])
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
@@ -423,7 +425,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
     
 
 
-@router.get("/api/auth/user", response_model=None, tags=["Signup/Login"])
+@router.get("/api/auth/user", response_model=None, tags=["Frontend_Signup/Login"])
 async def combined_user_auth(
     authorization: str = Header(...),  # Get the access token from the Authorization header
     db: Session = Depends(get_database)
