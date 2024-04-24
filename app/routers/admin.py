@@ -18,7 +18,7 @@ from admin_database import get_secret_key, get_database
 router = APIRouter()
 
 
-@router.post("/admin/create", response_model=dict, tags=["Admin"])
+@router.post("/admin/create", response_model=dict, tags=["Admin_Management"])
 async def create_admin_account(
     secret_key: str = Form(...),
     username: str = Form(...), 
@@ -83,7 +83,7 @@ async def create_admin_account(
 
     
 
-@router.get("/admin/read", response_model=None, tags=["Admin"])
+@router.get("/admin/read", response_model=None, tags=["Admin_Management"])
 async def read_all_admins_info(
     current_active_admin: Admin = Depends(get_current_active_admin),
     db: Session = Depends(get_database)
@@ -114,7 +114,7 @@ async def read_all_admins_info(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
     
-@router.get("/admin/read/{username}", response_model=None, tags=["Admin"])
+@router.get("/admin/read/{username}", response_model=None, tags=["Admin_Management"])
 async def read_admin_info(
     username: str, 
     current_active_admin: Admin = Depends(get_current_active_admin),
@@ -146,7 +146,7 @@ async def read_admin_info(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@router.put("/admin/{username}", response_model=dict)
+@router.put("/admin/{username}", response_model=dict, tags=["Admin_Management"])
 async def update_admin(
     username: str,
     current_password: str = Form(...),
@@ -190,7 +190,7 @@ async def update_admin(
         logger.error(f"Error during admin update: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-@router.delete("/admin/delete/{username}", response_model=dict)
+@router.delete("/admin/delete/{username}", response_model=dict, tags=["Admin_Management"])
 async def delete_admin(
     username: str,
     current_password: str = Form(..., min_length=8, max_length=16, regex="^[a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?/~\\-=|\\\\]+$"),
@@ -229,7 +229,7 @@ async def delete_admin(
 
 
 
-@router.post("/admin/create_users", response_model=dict, tags=["Admin"])
+@router.post("/admin/create_users", response_model=dict, tags=["Admin_Management"])
 async def create_user_account(
     username: str = Form(...),
     set_password: str = Form(..., min_length=8, max_length=16, regex="^[a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?/~\\-=|\\\\]+$"),
@@ -266,7 +266,7 @@ async def create_user_account(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
     
-@router.post("/admin/modify_user_roles", tags=["Admin"])
+@router.post("/admin/modify_user_roles", tags=["Admin_Management"])
 async def modify_user_roles(
     username: str = Form(...),
     selected_role: str = Form(...),  # Admin-selected role for the user
@@ -308,7 +308,7 @@ async def modify_user_roles(
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 
-@router.post("/admin/reset_password/{username}", response_model=dict, tags=["Admin"])
+@router.post("/admin/reset_password/{username}", response_model=dict, tags=["Admin_Management"])
 async def reset_user_password(
     username: str,
     new_password: str = Form(...),
