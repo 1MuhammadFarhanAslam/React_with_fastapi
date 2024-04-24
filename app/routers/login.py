@@ -99,7 +99,7 @@ router = APIRouter()
 
 
 #-------------------------------This endpoint is also 200 OK-----------------------------------------------
-@router.post("/login", tags=["Authentication"])
+@router.post("/login", tags=["Admin_Authentication"])
 async def login_for_access_token(
     username: str = Form(...),
     password: str = Form(...),

@@ -189,6 +189,8 @@ async def update_admin(
         # Log the error and return a generic error response
         logger.error(f"Error during admin update: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+    
 
 @router.delete("/admin/delete/{username}", response_model=dict, tags=["Admin_Management"])
 async def delete_admin(
