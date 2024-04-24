@@ -661,8 +661,10 @@ async def text_to_music(request: Request):
             print('______________response.content_____________:', response.content)
 
             if response.status_code == 200:
-                print("-----------Music generation is completed----------")
-                return response
+                # Check if the response content-type is audio/wav
+                if response.headers.get("Content-Type") == "audio/wav":
+                    # Return the response content as a downloadable response
+                    return StreamingResponse(iter([response.content]), media_type="audio/wav", filename="generated_ttm_audio.wav")
             else:
                 raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
             
