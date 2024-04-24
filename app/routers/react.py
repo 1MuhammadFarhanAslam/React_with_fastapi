@@ -310,64 +310,6 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 #         raise HTTPException(status_code=400, detail="Error: " + str(e))
     
 
-# @router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
-# async def email_signup(request: Request, db: Session = Depends(get_database)):
-#     try:
-#         data = await request.json()
-#         email = data.get('email')
-#         print("______________email________________: ", email)
-#         print(type(email))
-#         password = data.get('password')
-#         print("______________password________________: ", password)
-#         print(type(password))
-
-#         # Check if the user already exists in the database
-#         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
-
-#         if existing_user:
-#             # User already exists, return his/her details
-#             print("Ooops..................User already exists. Please sign in instead.")
-#             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ooops..................User already exists. Please sign in instead.")  
-        
-#         else:
-#             hashed_password = hash_password(password)
-#             user = Email_User(email=email, password=hashed_password)
-#             db.add(user)
-#             db.commit()
-#             db.refresh(user)
-
-#             # Create a new access token
-#             access_token = React_JWT_Token(data={"sub": user.email})
-#             print("_______________access_token_______________", access_token)
-#             print(type(access_token))
-
-#             # Set the access token as a cookie in the response
-#             resp = {
-#                 "message": "Signup successful! User created successfully.",
-#                 "user_info": {
-#                     "id": user.id,
-#                     "created_at": user.created_at.isoformat(),  # Convert datetime to string,
-#                     "email": user.email,
-#                     "status": user.status,
-#                     "role": user.role
-#                 },
-
-#                 "access_token": access_token,
-#                 "token_type": "bearer"
-#             }
-
-#             print(resp)
-
-#             # Set the access token as a cookie
-#             response = JSONResponse(content=resp)
-#             response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
-#             return response
-        
-#     except Exception as e:
-#         print(e)
-#         raise HTTPException(status_code=400, detail= str(e))
-
-
 @router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
@@ -498,13 +440,13 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
 
     if not email_user:
         print("OooPS.........User not found.Please sign up first.")
-        return "OooPS..............User not found.Please sign up first."
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OooPS....User not found.Please sign up first.")
     
     else:
         # Verify the password
         if not verify_email_user_password(password, email_user.password):
             print("OooPS..............Incorrect password. Please try again")
-            return "OooPS...Incorrect password. Please try again"
+            return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OooPS....Incorrect password. Please try again")
         else:
             # Generate an access token for the user
             access_token = React_JWT_Token({"sub": email_user.email})
