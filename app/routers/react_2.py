@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
+from requests.exceptions import Timeout
 # from models import React_User, Email_User, AccessToken
 # from jwt.exceptions import ExpiredSignatureError  # Import the ExpiredSignatureError
 # from fastapi import UploadFile, File
@@ -19,7 +20,6 @@ from typing import Generator
 # import asyncio
 # import tempfile
 # import httpx
-# from requests.exceptions import Timeout
 # from httpx import Timeout as HTTPXTimeout
 
 
@@ -466,11 +466,6 @@ async def get_data():
 
 #         raise HTTPException(status_code=400, detail="Invalid JSON format in the request headers")
     
-
-
-# @router.post("/api/Bhuttotensor")
-# async def text_to_music():
-#     return {"message": "---------------WAR against CORS-------------------------------"}
 
 
 
