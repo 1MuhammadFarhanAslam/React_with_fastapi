@@ -365,9 +365,10 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=400, detail= str(e))
+        raise HTTPException(status_code=400, detail="Error: " + str(e))
         
 
+# Your existing endpoint code for email signin
 @router.post("/api/email-signin", tags=["Frontend_Signup/Login"])
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
@@ -383,14 +384,14 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         email_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if not email_user:
-            print("Ooops...User not found. Please sign up first.")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ooops...User not found. Please sign up first.")
+            print("OooPS..............User not found as this email does not exist. Please sign up first.")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OooPS..............User not found as this email does not exist. Please sign up first.")
         
         else:
             # Verify the password
             if not verify_email_user_password(password, email_user.password):
-                print("Ooops...Incorrect password. Please try again")
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ooops...Incorrect password. Please try again")
+                print("OooPS..............Incorrect password. Please try again")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OooPS..............Incorrect password. Please try again")
             else:
                 # Generate an access token for the user
                 access_token = React_JWT_Token({"sub": email_user.email})
