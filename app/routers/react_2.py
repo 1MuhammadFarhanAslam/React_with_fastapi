@@ -21,7 +21,6 @@ import asyncio
 import httpx
 from requests.exceptions import Timeout
 from httpx import Timeout as HTTPXTimeout
-import aiohttp
 from aiohttp import web
 import json
 
