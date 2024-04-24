@@ -128,7 +128,7 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
 #         print(e)
 #         raise HTTPException(status_code=500, detail="Server Error")
 
-@router.post("/api/google-signin", tags=["SignUp/SignIn"])
+@router.post("/api/google-signin", tags=["Signup/Login"])
 async def google_signin(token: React_user_Token, db: Session = Depends(get_database)):
     try:
         # Verify the Google ID token
@@ -308,7 +308,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 #         raise HTTPException(status_code=400, detail="Error: " + str(e))
     
 
-@router.post("/api/email-signup", tags=["SignUp/SignIn"])
+@router.post("/api/email-signup", tags=["Signup/Login"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
@@ -367,7 +367,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         
 
 # Your existing endpoint code for email signin
-@router.post("/api/email-signin", tags=["SignUp/SignIn"])
+@router.post("/api/email-signin", tags=["Signup/Login"])
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
@@ -423,7 +423,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
     
 
 
-@router.get("/api/auth/user", response_model=None, tags=["SignUp/SignIn"])
+@router.get("/api/auth/user", response_model=None, tags=["Signup/Login"])
 async def combined_user_auth(
     authorization: str = Header(...),  # Get the access token from the Authorization header
     db: Session = Depends(get_database)

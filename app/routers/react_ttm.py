@@ -609,7 +609,7 @@ async def get_data():
 
 
 # ------------------------Working code ------------------------------
-@router.post("/api/ttm_endpoint")
+@router.post("/api/ttm_endpoint", tags=["Text-To-Music"])
 async def text_to_music(request: Request):
     try:
         request_data = await request.json()
