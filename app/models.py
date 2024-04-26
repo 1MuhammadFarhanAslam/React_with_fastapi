@@ -81,6 +81,8 @@ class Email_User(Base):
     password = Column(String)
     status = Column(String, default="Active")
     role = Column(String, default="user")  # Default role is "user"
+    password_reset_code = Column(String, default=None)
+    reset_access_token = Column(DateTime, default=None)
 
 class React_User(Base):
     __tablename__ = "react_users"
@@ -115,3 +117,13 @@ class AccessToken(Base):
     email = Column(String, unique=True)
     JWT_Token = Column(String)
 
+
+# Model for password reset request
+class PasswordResetRequest(BaseModel):
+    email: str
+
+# Model for password reset submission
+class PasswordResetSubmit(BaseModel):
+    email: str
+    new_password: str
+    
