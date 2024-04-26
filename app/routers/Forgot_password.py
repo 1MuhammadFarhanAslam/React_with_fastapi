@@ -59,7 +59,7 @@ def Password_Reset_Code_Generator():
 
 def send_reset_email(recipient_email, Password_Reset_Code):
     message = Mail(
-        from_email="farhanmehar422538@gmail.com",  # Replace with your email
+        from_email= "zaidali60gb@gmail.com",  # Replace with your email
         to_emails=recipient_email,
         subject="Password Reset Request",
         html_content=f"Your password reset token is: {Password_Reset_Code}"
@@ -75,7 +75,7 @@ def send_reset_email(recipient_email, Password_Reset_Code):
         print(e)
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/password/reset/request")
+@router.post("/password/reset-request")
 def request_password_reset(request: PasswordResetRequest, db: Session = Depends(get_database)):
     try:
         # Check if user exists in database
@@ -102,7 +102,7 @@ def request_password_reset(request: PasswordResetRequest, db: Session = Depends(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/password/reset/submit")
+@router.post("/password/reset-submit")
 def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(get_database)):
     try:
         # Check if user exists in database
