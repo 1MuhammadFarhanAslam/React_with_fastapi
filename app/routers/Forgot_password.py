@@ -119,6 +119,7 @@ def request_password_reset(email: str = Form(...), db: Session = Depends(get_dat
             user.reset_access_token = reset_access_token
             db.add(user)
             db.commit()
+            db.refresh(user)
             return {"message": "Password reset email sent successfully"}
         else:
             raise HTTPException(status_code=400, detail="Failed to send reset email")
