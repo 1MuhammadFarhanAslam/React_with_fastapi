@@ -108,34 +108,36 @@ def request_password_reset(request: PasswordResetRequest, db: Session = Depends(
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        # if user exists
-        if user:
-            # Generate a strong password reset code for verification
-            password_reset_code = Password_Reset_Code_Generator()
+        # Generate a strong password reset code for verification
+        password_reset_code = Password_Reset_Code_Generator()
 
-            # Generate a password reset access token with expiry
-            reset_access_token = Password_Reset_Access_Token(data={"sub": request.email})
+        # Generate a password reset access token with expiry
+        reset_access_token = Password_Reset_Access_Token(data={"sub": request.email})
 
-            # Convert the expiration time from timestamp to datetime aware of UTC timezone
-            exp_timestamp = reset_access_token["exp"]
-            exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+        # Decode the JWT access token to get the expiration time
+        decoded_token = jwt.decode(reset_access_token, PASSWORD_RESET_SECRET_KEY, algorithms=[ALGORITHM])
+        exp_timestamp = decoded_token["exp"]
 
-            # Check if the access token is valid (not expired)
-            if datetime.now(timezone.utc) >= exp_datetime_utc:
-                raise HTTPException(status_code=400, detail="Password reset token has expired")
+        # Convert the expiration time from timestamp to datetime aware of UTC timezone
+        exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
 
-            # Update the user's database record with the reset token and code
-            user.password_reset_code = password_reset_code
-            user.reset_access_token = reset_access_token
-            db.add(user)
-            db.commit()
-            db.refresh(user)
+        # Check if the access token is valid (not expired)
+        if datetime.now(timezone.utc) >= exp_datetime_utc:
+            raise HTTPException(status_code=400, detail="Password reset token has expired")
 
-            # Send the password reset email with the code
-            if send_reset_email(request.email, password_reset_code):
-                return {"message": "Password reset email sent successfully"}
+        # Update the user's database record with the reset token and code
+        user.password_reset_code = password_reset_code
+        user.reset_access_token = reset_access_token
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        # Send the password reset email with the code
+        if send_reset_email(request.email, password_reset_code):
+            return {"message": "Password reset email sent successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 
 
@@ -155,22 +157,20 @@ def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(ge
         # Decode the JWT access token
         decoded_token = jwt.decode(user.reset_access_token, PASSWORD_RESET_SECRET_KEY, algorithms=[ALGORITHM])
 
-        # Convert the expiration time from timestamp to datetime aware of UTC timezone
+        # Extract expiration time from decoded token
         exp_timestamp = decoded_token["exp"]
+
+        # Convert the expiration time from timestamp to datetime aware of UTC timezone
         exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
-
-        email = decoded_token.get("sub")
-
 
         # Check if the access token is valid (not expired)
         if datetime.now(timezone.utc) >= exp_datetime_utc:
             raise HTTPException(status_code=400, detail="Password reset token has expired")
 
         # Check if access token email matches user email
-        if user.email != email:
+        if user.email != decoded_token["sub"]:
             raise HTTPException(status_code=400, detail="Invalid access token")
         
-
         # Update the user's password with the new password
         new_hashed_password = hash_password(request.new_password)
         user.password = new_hashed_password
@@ -180,5 +180,6 @@ def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(ge
         db.commit()
         return {"message": "Password reset successfully"}
     except Exception as e:
-        raise HTTPException(status_code=400, detail= str(e))
+        raise HTTPException(status_code=400, detail=str(e))
+
 
