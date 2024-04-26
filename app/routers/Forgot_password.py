@@ -81,17 +81,24 @@ def send_reset_email(recipient_email, password_reset_code):
     smtp_username = SMTP_USERNAME
     smtp_password = SMTP_PASSWORD
 
-    # Email content
+    # Email content with HTML formatting
     sender_email = SENDER_EMAIL
     subject = 'Password Reset Email'
-    body = f"The password reset code for your account is {password_reset_code}. This code will expire in 15 minutes."
+    body = f"""\
+    <html>
+        <body>
+            <p style="font-size: larger;"><strong>The password reset code for your account is <span style="font-size: larger;">{password_reset_code}</span>.</strong></p>
+            <p style="font-size: larger;">This code will expire in 15 minutes.</p>
+        </body>
+    </html>
+    """
 
     # Create the email message
     message = MIMEMultipart()
     message['From'] = sender_email
     message['To'] = recipient_email
     message['Subject'] = subject
-    message.attach(MIMEText(body, 'plain'))
+    message.attach(MIMEText(body, 'html'))
 
     # Connect to the SMTP server
     try:
@@ -108,6 +115,7 @@ def send_reset_email(recipient_email, password_reset_code):
         return False  # Email sending failed
     finally:
         server.quit()  # Close the connection
+
 
 
 @router.post("/password/reset_request")
