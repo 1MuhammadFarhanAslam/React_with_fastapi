@@ -89,7 +89,7 @@ def send_reset_email(recipient_email, Password_Reset_Code):
     response = sg.client.mail.send.post(request_body=mail_json)
     print(response.status_code)
     print(response.headers)
-    if response.status_code == 202:
+    if response.status_code == 200:
         return {"message": "Email sent successfully."}
     else:
         raise HTTPException(status_code=400, detail="Email failed to send.")
@@ -113,19 +113,18 @@ def request_password_reset(email: str = Form(...), db: Session = Depends(get_dat
 
     print(f"--------Password reset code------------: {password_reset_code}")
     print(f"--------Password reset access token----------: {reset_access_token}")
-    return {'data': {"password_reset_code :" f"{password_reset_code}", "reset_access_token :" f"{reset_access_token}"}}
 
-    # # Send the password reset email with the code
-    # if send_reset_email(email, password_reset_code):
-    #     # Update the user's database record with the reset token and code
-    #     user.password_reset_code = password_reset_code
-    #     user.reset_access_token = reset_access_token
-    #     db.add(user)
-    #     db.commit()
-    #     db.refresh(user)
-    #     return {"message": "Password reset email sent successfully"}
-    # else:
-    #     raise HTTPException(status_code=400, detail="Failed to send reset email")
+    # Send the password reset email with the code
+    if send_reset_email(email, password_reset_code):
+        # Update the user's database record with the reset token and code
+        user.password_reset_code = password_reset_code
+        user.reset_access_token = reset_access_token
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return {"message": "Password reset email sent successfully"}
+    else:
+        raise HTTPException(status_code=400, detail="Failed to send reset email")
     
 
 @router.post("/password/reset-submit")
