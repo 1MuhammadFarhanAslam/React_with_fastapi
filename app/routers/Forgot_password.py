@@ -87,8 +87,7 @@ def send_reset_email(recipient_email, password_reset_code):
     body = f"""\
     <html>
         <body>
-            <p style="font-size: larger;"><strong>The password reset code for your account is <span style="font-size: larger;">{password_reset_code}</span>.</strong></p>
-            <p style="font-size: larger;">This code will expire in 15 minutes.</p>
+            <p style="font-size: larger;"><strong>The password reset code for your account is <span style="font-size: larger;">{password_reset_code}</span>. This code will expire in 15 minutes.</strong></p>
         </body>
     </html>
     """
@@ -169,7 +168,7 @@ def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(ge
         exp_timestamp = decoded_token["exp"]
         exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
         if datetime.now(timezone.utc) >= exp_datetime_utc:
-            raise HTTPException(status_code=400, detail="Password reset token has expired")
+            raise HTTPException(status_code=400, detail="Password reset token has expired. Generate new token by requesting a reset again.")
 
         # Update the user's password with the new password
         new_hashed_password = hash_password(request.new_password)
