@@ -141,13 +141,14 @@ def request_password_reset(email: str = Form(...), db: Session = Depends(get_dat
     if send_reset_email(email, password_reset_code):
         # Update the user's database record with the reset token and code
         user.password_reset_code = password_reset_code
-        user.reset_access_token = reset_access_token.decode()  # Decode the bytes to string
+        user.reset_access_token = reset_access_token  # No need to decode
         db.add(user)
         db.commit()
         db.refresh(user)
         return {"message": "Password reset email sent successfully"}
     else:
         raise HTTPException(status_code=400, detail="Failed to send reset email")
+
 
 @router.post("/password/reset_submit")
 def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(get_database)):
