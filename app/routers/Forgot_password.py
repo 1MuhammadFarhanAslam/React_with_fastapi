@@ -93,10 +93,10 @@ def send_reset_email(recipient_email, Password_Reset_Code):
         if response.status_code == 202:
             return response
         else:
-            raise HTTPException(status_code=500, detail="Email failed to send.")
+            raise HTTPException(status_code=400, detail="Email failed to send.")
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=500, detail= str(e))
+        raise HTTPException(status_code=400, detail= str(e))
 
 
 # Endpoint for requesting password reset and sending email
@@ -132,7 +132,7 @@ def request_password_reset(request: PasswordResetRequest, db: Session = Depends(
             if send_reset_email(request.email, password_reset_code):
                 return {"message": "Password reset email sent successfully"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 
