@@ -82,7 +82,7 @@ class Email_User(Base):
     status = Column(String, default="Active")
     role = Column(String, default="user")  # Default role is "user"
     password_reset_code = Column(String, default=None)
-    reset_access_token = Column(DateTime, default=None)
+    reset_access_token = Column(String, default=None)
 
 class React_User(Base):
     __tablename__ = "react_users"

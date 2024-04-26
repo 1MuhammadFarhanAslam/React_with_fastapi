@@ -51,28 +51,12 @@ def Password_Reset_Access_Token(data: dict, expires_delta=timedelta(minutes=PASS
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-    to_encode.update({"exp": expire.timestamp()})
+    to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, PASSWORD_RESET_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 def Password_Reset_Code_Generator():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
-
-# def send_reset_email(recipient_email, Password_Reset_Code):
-#     message = Mail(
-#         from_email= "zaiddev60gb@gmail.com",  # Replace with your email
-#         to_emails=recipient_email,
-#         subject="Password Reset Request",
-#         html_content=f"Your password reset token is: {Password_Reset_Code}"
-#     )
-#     sg = SendGridAPIClient(SENDGRID_API_KEY)
-#     response = sg.send(message)
-#     if response.status_code == 200:
-#         return {"message": "Email sent successfully."}
-#     else:
-#         raise HTTPException(status_code=400, detail="Email failed to send.")
-    
-
 
 def send_reset_email(recipient_email, Password_Reset_Code):
     sg = sendgrid.SendGridAPIClient()
@@ -90,12 +74,11 @@ def send_reset_email(recipient_email, Password_Reset_Code):
     print(response.status_code)
     print(response.headers)
     if response.status_code == 200:
-        return {"message": "Email sent successfully."}
+        return {"message": "Email sent successfully"}
     else:
-        raise HTTPException(status_code=400, detail="Email failed to send.")
+        return {"message": "Email failed to send"}
 
-
-@router.post("/password/reset-request")
+@router.post("/password/reset_request")
 def request_password_reset(email: str = Form(...), db: Session = Depends(get_database)):
     # Check if user exists in database
     user = db.query(Email_User).filter(Email_User.email == email).first()
@@ -118,16 +101,15 @@ def request_password_reset(email: str = Form(...), db: Session = Depends(get_dat
     if send_reset_email(email, password_reset_code):
         # Update the user's database record with the reset token and code
         user.password_reset_code = password_reset_code
-        user.reset_access_token = reset_access_token
+        user.reset_access_token = reset_access_token.decode()  # Decode the bytes to string
         db.add(user)
         db.commit()
         db.refresh(user)
         return {"message": "Password reset email sent successfully"}
     else:
         raise HTTPException(status_code=400, detail="Failed to send reset email")
-    
 
-@router.post("/password/reset-submit")
+@router.post("/password/reset_submit")
 def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(get_database)):
     try:
         # Check if user exists in database
