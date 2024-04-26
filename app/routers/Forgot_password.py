@@ -10,7 +10,6 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine
-from sqlalchemy.exc import SQLAlchemyError
 from typing import Generator
 from models import PasswordResetRequest, PasswordResetSubmit, Email_User
 from hashing import hash_password
@@ -121,37 +120,34 @@ def send_reset_email(recipient_email, password_reset_code):
 
 @router.post("/password/reset_request")
 def request_password_reset(email: str = Form(...), db: Session = Depends(get_database)):
-    try:
-        # Check if user exists in database
-        user = db.query(Email_User).filter(Email_User.email == email).first()
-        if not user:
-            print("--------User not found--------")
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        # Generate a strong password reset code for verification
-        password_reset_code = Password_Reset_Code_Generator()
-        print("--------Password reset code generated--------")
+    # Check if user exists in database
+    user = db.query(Email_User).filter(Email_User.email == email).first()
+    if not user:
+        print("--------User not found--------")
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Generate a strong password reset code for verification
+    password_reset_code = Password_Reset_Code_Generator()
+    print("--------Password reset code generated--------")
 
-        # Generate a password reset access token with expiry
-        reset_access_token = Password_Reset_Access_Token(data={"sub": email})
-        print("--------Password reset access token generated--------")
+    # Generate a password reset access token with expiry
+    reset_access_token = Password_Reset_Access_Token(data={"sub": email})
+    print("--------Password reset access token generated--------")
 
-        print(f"--------Password reset code------------: {password_reset_code}")
-        print(f"--------Password reset access token----------: {reset_access_token}")
+    print(f"--------Password reset code------------: {password_reset_code}")
+    print(f"--------Password reset access token----------: {reset_access_token}")
 
-        # Send the password reset email with the code
-        if send_reset_email(email, password_reset_code):
-            # Update the user's database record with the reset token and code
-            user.password_reset_code = password_reset_code
-            user.reset_access_token = reset_access_token  # No need to decode
-            db.commit()  # Commit all changes made within this session
-            return {"message": "Password reset email sent successfully"}
-        else:
-            raise HTTPException(status_code=400, detail="Failed to send reset email")
-    except SQLAlchemyError as e:
-        db.rollback()  # Rollback changes if an error occurs
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
+    # Send the password reset email with the code
+    if send_reset_email(email, password_reset_code):
+        # Update the user's database record with the reset token and code
+        user.password_reset_code = password_reset_code
+        user.reset_access_token = reset_access_token  # No need to decode
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return {"message": "Password reset email sent successfully"}
+    else:
+        raise HTTPException(status_code=400, detail="Failed to send reset email")
 
 
 @router.post("/password/reset_submit")
