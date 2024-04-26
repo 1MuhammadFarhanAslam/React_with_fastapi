@@ -13,6 +13,10 @@ from sqlalchemy import create_engine
 from typing import Generator
 from models import PasswordResetRequest, PasswordResetSubmit, Email_User
 from hashing import hash_password
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 
 router = APIRouter()
 
@@ -26,9 +30,17 @@ PASSWORD_RESET_SECRET_KEY = os.environ.get("PASSWORD_RESET_SECRET_KEY")
 if PASSWORD_RESET_SECRET_KEY is None:
     raise Exception("PASSWORD_RESET_SECRET_KEY environment variable is not set")
 
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-if SENDGRID_API_KEY is None:
-    raise Exception("SENDGRID_API_KEY environment variable is not set")
+SMTP_USERNAME = os.environ.get("SMTP_USERNAME")
+if SMTP_USERNAME is None:
+    raise Exception("SMTP_USERNAME environment variable is not set")
+
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
+if SENDER_EMAIL is None:
+    raise Exception("SENDER_EMAIL environment variable is not set")
+
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
+if SMTP_PASSWORD is None:
+    raise Exception("SMTP_PASSWORD environment variable is not set")
 
 ALGORITHM = "HS256"
 PASSWORD_RESET_TOKEN_EXPIRE_MINUTES = 15  # Change to 30 minutes
@@ -59,24 +71,40 @@ def Password_Reset_Code_Generator():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
 
 def send_reset_email(recipient_email, Password_Reset_Code):
-    sg = sendgrid.SendGridAPIClient(api_key=SENDGRID_API_KEY)
-    from_email = Email("zaiddev60gb@gmail.com")  # Change to your verified sender
-    to_email = To(f"{recipient_email}")  # Change to your recipient
-    subject = "Password Reset Request"
-    content = Content("text/plain", f"Your password reset token is: {Password_Reset_Code}")  # Provide content type and content
-    mail = Mail(from_email, to_email, subject, content)
+    # SMTP server configuration
+    smtp_server = 'mail.privateemail.com'
+    smtp_port = 587  # Adjust as per your SMTP server settings
+    smtp_username = SMTP_USERNAME
+    smtp_password = SMTP_PASSWORD
 
-    # Get a JSON-ready representation of the Mail object
-    mail_json = mail.get()
 
-    # Send an HTTP POST request to /mail/send
-    response = sg.client.mail.send.post(request_body=mail_json)
-    print(response.status_code)
-    print(response.headers)
-    if response.status_code == 200:
-        return {"message": "Email sent successfully"}
-    else:
-        return {"message": "Email failed to send"}
+    # SMTP Server Settings for Namecheap
+    # Email content
+    sender_email = SENDER_EMAIL
+    recipient_email = recipient_email
+    subject = 'Password Reset Email'
+    body = "The password reset code for your account is " , Password_Reset_Code , ". This code will expire in 15 minutes."
+
+    # Create the email message
+    message = MIMEMultipart()
+    message['From'] = sender_email
+    message['To'] = recipient_email
+    message['Subject'] = subject
+    message.attach(MIMEText(body, 'plain'))
+
+    # Connect to the SMTP server
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+
+        # Send email
+        server.sendmail(sender_email, recipient_email, message.as_string())
+        print('--------Email sent successfully----------')
+    except Exception as e:
+        print(f'-------Error sending email: {e}--------')
+    finally:
+        server.quit()  # Close the connection
 
 @router.post("/password/reset_request")
 def request_password_reset(email: str = Form(...), db: Session = Depends(get_database)):
@@ -139,3 +167,11 @@ def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(ge
         return {"message": "Password reset successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+
+
+
+
+
+
