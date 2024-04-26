@@ -71,7 +71,8 @@ def Password_Reset_Access_Token(data: dict, expires_delta=timedelta(minutes=PASS
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
+    # Use a valid timestamp format for exp
+    to_encode.update({"exp": expire.timestamp()})  # Convert to timestamp
     encoded_jwt = jwt.encode(to_encode, PASSWORD_RESET_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
@@ -116,10 +117,13 @@ def request_password_reset(request: PasswordResetRequest, db: Session = Depends(
         reset_access_token = Password_Reset_Access_Token(data={"sub": request.email})
 
         # Update the user's database record with the reset token and code
-        db.execute(update(Email_User)
-            .where(Email_User.id == user.id)
-            .values(password_reset_code=password_reset_code, reset_access_token=reset_access_token)
+        stmt = update(Email_User).where(Email_User.id == user.id).values(
+            password_reset_code=password_reset_code,
+            reset_access_token=reset_access_token,
+            # Add timestamp values in the correct format
+            timestamp_field=datetime.now(timezone.utc)
         )
+        db.execute(stmt)
         db.commit()
 
         # Send the password reset email with the code
@@ -127,8 +131,6 @@ def request_password_reset(request: PasswordResetRequest, db: Session = Depends(
             return {"message": "Password reset email sent successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-
 
 
 
