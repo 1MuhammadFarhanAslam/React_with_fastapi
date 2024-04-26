@@ -153,9 +153,12 @@ def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(ge
         decoded_token = jwt.decode(user.reset_access_token, PASSWORD_RESET_SECRET_KEY, algorithms=[ALGORITHM])
         email = decoded_token.get("sub")
 
-        # checlk if token has expired
-        token_expiry = decoded_token['exp']
-        if datetime.fromtimestamp(token_expiry) <= datetime.now(timezone.utc):
+        # Convert the expiration time from timestamp to datetime aware of UTC timezone
+        exp_timestamp = decoded_token["exp"]
+        exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+
+        # Check if the access token is valid (not expired)
+        if datetime.now(timezone.utc) >= exp_datetime_utc:
             raise HTTPException(status_code=400, detail="Password reset token has expired")
 
         # Check if access token email matches user email
