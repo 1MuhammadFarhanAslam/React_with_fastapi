@@ -116,15 +116,21 @@ def request_password_reset(request: PasswordResetRequest, db: Session = Depends(
         # Generate a password reset access token with expiry
         reset_access_token = Password_Reset_Access_Token(data={"sub": request.email})
 
-        # Update the user's database record with the reset token and code
-        stmt = update(Email_User).where(Email_User.id == user.id).values(
-            password_reset_code=password_reset_code,
-            reset_access_token=reset_access_token,
-            # Add timestamp values in the correct format
-            timestamp_field=datetime.now(timezone.utc)
-        )
-        db.execute(stmt)
+        # Decode the JWT access token to check expiry directly
+        decoded_token = jwt.decode(reset_access_token, PASSWORD_RESET_SECRET_KEY, algorithms=[ALGORITHM])
+
+        # Check if the access token is valid (not expired)
+        exp_timestamp = decoded_token["exp"]
+        exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+        if datetime.now(timezone.utc) >= exp_datetime_utc:
+            raise HTTPException(status_code=400, detail="Password reset token has expired")
+
+        # Update the user's database record with the reset token and code (optional)
+        user.password_reset_code = password_reset_code
+        user.reset_access_token = reset_access_token
+        db.add(user)
         db.commit()
+        db.refresh(user)
 
         # Send the password reset email with the code
         if send_reset_email(request.email, password_reset_code):
