@@ -3,7 +3,7 @@ import os
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from fastapi.middleware.cors import CORSMiddleware
-from routers import admin, user, login, react, react_ttm
+from routers import admin, user, login, react, react_ttm, Forgot_password
 
 app = FastAPI()
 
@@ -85,6 +85,7 @@ app.include_router(admin.router, prefix="", tags=["Admin_Management"])
 # app.include_router(user.router, prefix="", tags=["User"])
 app.include_router(react.router, prefix="", tags=["Frontend_Signup/Login"])
 # app.include_router(react_1.router, prefix="", tags=["React_1"])
+app.include_router(Forgot_password.router, prefix="", tags=["Forgot_Password"])
 app.include_router(react_ttm.router, prefix="", tags=["Text-To-Music"])
 
 
