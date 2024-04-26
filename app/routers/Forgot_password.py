@@ -59,7 +59,7 @@ def Password_Reset_Code_Generator():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
 
 def send_reset_email(recipient_email, Password_Reset_Code):
-    sg = sendgrid.SendGridAPIClient()
+    sg = sendgrid.SendGridAPIClient(api_key=SENDGRID_API_KEY)
     from_email = Email("zaiddev60gb@gmail.com")  # Change to your verified sender
     to_email = To(f"{recipient_email}")  # Change to your recipient
     subject = "Password Reset Request"
