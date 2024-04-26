@@ -96,31 +96,28 @@ def send_reset_email(recipient_email, Password_Reset_Code):
 
 @router.post("/password/reset-request")
 def request_password_reset(email: str = Form(...), db: Session = Depends(get_database)):
-    try:
-        # Check if user exists in database
-        user = db.query(Email_User).filter(Email_User.email == email).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        # Generate a strong password reset code for verification
-        password_reset_code = Password_Reset_Code_Generator()
+    # Check if user exists in database
+    user = db.query(Email_User).filter(Email_User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Generate a strong password reset code for verification
+    password_reset_code = Password_Reset_Code_Generator()
 
-        # Generate a password reset access token with expiry
-        reset_access_token = Password_Reset_Access_Token(data={"sub": email})
+    # Generate a password reset access token with expiry
+    reset_access_token = Password_Reset_Access_Token(data={"sub": email})
 
-        # Send the password reset email with the code
-        if send_reset_email(email, password_reset_code):
-            # Update the user's database record with the reset token and code
-            user.password_reset_code = password_reset_code
-            user.reset_access_token = reset_access_token
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-            return {"message": "Password reset email sent successfully"}
-        else:
-            raise HTTPException(status_code=400, detail="Failed to send reset email")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    # Send the password reset email with the code
+    if send_reset_email(email, password_reset_code):
+        # Update the user's database record with the reset token and code
+        user.password_reset_code = password_reset_code
+        user.reset_access_token = reset_access_token
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return {"message": "Password reset email sent successfully"}
+    else:
+        raise HTTPException(status_code=400, detail="Failed to send reset email")
     
 
 @router.post("/password/reset-submit")
