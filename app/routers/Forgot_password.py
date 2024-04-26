@@ -74,7 +74,7 @@ def Password_Reset_Access_Token(data: dict, expires_delta=timedelta(minutes=PASS
 def Password_Reset_Code_Generator():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
 
-def send_reset_email(recipient_email, Password_Reset_Code):
+def send_reset_email(recipient_email, password_reset_code):
     # SMTP server configuration
     smtp_server = SMTP_SERVER
     smtp_port = 587  # Adjust as per your SMTP server settings
@@ -83,9 +83,8 @@ def send_reset_email(recipient_email, Password_Reset_Code):
 
     # Email content
     sender_email = SENDER_EMAIL
-    recipient_email = recipient_email
     subject = 'Password Reset Email'
-    body = f"The password reset code for your account is {Password_Reset_Code}. This code will expire in 15 minutes."
+    body = f"The password reset code for your account is {password_reset_code}. This code will expire in 15 minutes."
 
     # Create the email message
     message = MIMEMultipart()
@@ -103,8 +102,10 @@ def send_reset_email(recipient_email, Password_Reset_Code):
         # Send email
         server.sendmail(sender_email, recipient_email, message.as_string())
         print('--------Email sent successfully----------')
+        return True  # Email sent successfully
     except Exception as e:
         print(f'-------Error sending email: {e}--------')
+        return False  # Email sending failed
     finally:
         server.quit()  # Close the connection
 
