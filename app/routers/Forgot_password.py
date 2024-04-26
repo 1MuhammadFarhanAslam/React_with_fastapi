@@ -79,7 +79,7 @@ def send_reset_email(recipient_email, Password_Reset_Code):
     from_email = Email("zaiddev60gb@gmail.com")  # Change to your verified sender
     to_email = To(f"{recipient_email}")  # Change to your recipient
     subject = "Password Reset Request"
-    content = Content(f"Your password reset token is: {Password_Reset_Code}")
+    content = Content("text/plain", f"Your password reset token is: {Password_Reset_Code}")  # Provide content type and content
     mail = Mail(from_email, to_email, subject, content)
 
     # Get a JSON-ready representation of the Mail object
