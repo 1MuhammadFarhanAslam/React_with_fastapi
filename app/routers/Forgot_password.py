@@ -18,7 +18,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from datetime import timedelta, datetime, timezone
-from hashing import hash_password, verify_password
+from hashing import hash_password
 
 router = APIRouter()
 
