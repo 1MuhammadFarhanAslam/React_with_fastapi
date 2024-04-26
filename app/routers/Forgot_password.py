@@ -111,7 +111,7 @@ def request_password_reset(email: str = Form(...), db: Session = Depends(get_dat
     reset_access_token = Password_Reset_Access_Token(data={"sub": email})
     print("--------Password reset access token generated--------")
 
-    return {"password_reset_code :", password_reset_code, "reset_access_token :", reset_access_token}
+    return {"password_reset_code :" f"{password_reset_code}", "reset_access_token :" f"{reset_access_token}"}
 
     # # Send the password reset email with the code
     # if send_reset_email(email, password_reset_code):
