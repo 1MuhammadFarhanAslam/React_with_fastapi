@@ -110,10 +110,10 @@ def request_password_reset(email: str = Form(...), db: Session = Depends(get_dat
         password_reset_code = Password_Reset_Code_Generator()
 
         # Generate a password reset access token with expiry
-        reset_access_token = Password_Reset_Access_Token(data={"sub": request.email})
+        reset_access_token = Password_Reset_Access_Token(data={"sub": email})
 
         # Send the password reset email with the code
-        if send_reset_email(request.email, password_reset_code):
+        if send_reset_email(email, password_reset_code):
             # Update the user's database record with the reset token and code
             user.password_reset_code = password_reset_code
             user.reset_access_token = reset_access_token
