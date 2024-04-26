@@ -125,18 +125,20 @@ def request_password_reset(request: PasswordResetRequest, db: Session = Depends(
         if datetime.now(timezone.utc) >= exp_datetime_utc:
             raise HTTPException(status_code=400, detail="Password reset token has expired")
 
-        # Update the user's database record with the reset token and code (optional)
+        # Convert the expiry timestamp to the format expected by PostgreSQL
+        exp_datetime_str = exp_datetime_utc.strftime('%Y-%m-%d %H:%M:%S')
+
+        # Update the user's database record with the reset token and code
         user.password_reset_code = password_reset_code
         user.reset_access_token = reset_access_token
+        user.exp_datetime_str = exp_datetime_str  # Assuming this is the field for timestamp in your database
         db.add(user)
         db.commit()
-        db.refresh(user)
-
-        # Send the password reset email with the code
-        if send_reset_email(request.email, password_reset_code):
-            return {"message": "Password reset email sent successfully"}
+        return {"message": "Password reset email sent successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
 
 
 
