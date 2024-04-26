@@ -68,7 +68,7 @@ def send_reset_email(recipient_email, Password_Reset_Code):
         sg = SendGridAPIClient(SENDGRID_API_KEY)
         response = sg.send(message)
         if response.status_code == 202:
-            return True
+            return {"message": "Email sent successfully."}
         else:
             raise HTTPException(status_code=400, detail="Email failed to send.")
     except Exception as e:
