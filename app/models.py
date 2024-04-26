@@ -124,6 +124,7 @@ class PasswordResetRequest(BaseModel):
 
 # Model for password reset submission
 class PasswordResetSubmit(BaseModel):
+    reset_code: str
     email: str
     new_password: str
     

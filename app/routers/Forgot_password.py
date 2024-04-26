@@ -11,7 +11,7 @@ import jwt
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine
 from typing import Generator
-from models import PasswordResetRequest, PasswordResetSubmit, Email_User
+from models import  PasswordResetSubmit, Email_User
 from hashing import hash_password
 import smtplib
 from email.mime.text import MIMEText
