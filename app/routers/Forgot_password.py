@@ -2,7 +2,6 @@ from fastapi import FastAPI, APIRouter, HTTPException, Depends, Form
 from typing import Optional
 import os
 import sendgrid
-from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Email, To, Content
 import random
 import string
@@ -100,10 +99,10 @@ def send_reset_email(recipient_email, Password_Reset_Code):
 
 
 @router.post("/password/reset-request")
-def request_password_reset(request: PasswordResetRequest, db: Session = Depends(get_database)):
+def request_password_reset(email: str = Form(...), db: Session = Depends(get_database)):
     try:
         # Check if user exists in database
-        user = db.query(Email_User).filter(Email_User.email == request.email).first()
+        user = db.query(Email_User).filter(Email_User.email == email).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -125,6 +124,7 @@ def request_password_reset(request: PasswordResetRequest, db: Session = Depends(
             raise HTTPException(status_code=400, detail="Failed to send reset email")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
 
 @router.post("/password/reset-submit")
 def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(get_database)):
