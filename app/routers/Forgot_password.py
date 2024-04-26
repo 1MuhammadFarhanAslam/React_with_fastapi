@@ -159,6 +159,8 @@ def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(ge
         exp_timestamp = decoded_token["exp"]
         exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
 
+        email = decoded_token.get("sub")
+
 
         # Check if the access token is valid (not expired)
         if datetime.now(timezone.utc) >= exp_datetime_utc:
