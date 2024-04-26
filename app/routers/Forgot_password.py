@@ -1,6 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, Form
 from typing import Optional
 import os
+import sendgrid
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Email, To, Content
 import random
@@ -57,41 +58,41 @@ def Password_Reset_Access_Token(data: dict, expires_delta=timedelta(minutes=PASS
 def Password_Reset_Code_Generator():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
 
-def send_reset_email(recipient_email, Password_Reset_Code):
-    message = Mail(
-        from_email= "zaiddev60gb@gmail.com",  # Replace with your email
-        to_emails=recipient_email,
-        subject="Password Reset Request",
-        html_content=f"Your password reset token is: {Password_Reset_Code}"
-    )
-    sg = SendGridAPIClient(SENDGRID_API_KEY)
-    response = sg.send(message)
-    if response.status_code == 200:
-        return {"message": "Email sent successfully."}
-    else:
-        raise HTTPException(status_code=400, detail="Email failed to send.")
-    
-
-
 # def send_reset_email(recipient_email, Password_Reset_Code):
-#     sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
-#     from_email = Email("zaiddev60gb@gmail.com")  # Change to your verified sender
-#     to_email = To(f"{recipient_email}")  # Change to your recipient
-#     subject = "Password Reset Request"
-#     content = Content(f"Your password reset token is: {Password_Reset_Code}")
-#     mail = Mail(from_email, to_email, subject, content)
-
-#     # Get a JSON-ready representation of the Mail object
-#     mail_json = mail.get()
-
-#     # Send an HTTP POST request to /mail/send
-#     response = sg.client.mail.send.post(request_body=mail_json)
-#     print(response.status_code)
-#     print(response.headers)
-#     if response.status_code == 202:
+#     message = Mail(
+#         from_email= "zaiddev60gb@gmail.com",  # Replace with your email
+#         to_emails=recipient_email,
+#         subject="Password Reset Request",
+#         html_content=f"Your password reset token is: {Password_Reset_Code}"
+#     )
+#     sg = SendGridAPIClient(SENDGRID_API_KEY)
+#     response = sg.send(message)
+#     if response.status_code == 200:
 #         return {"message": "Email sent successfully."}
 #     else:
 #         raise HTTPException(status_code=400, detail="Email failed to send.")
+    
+
+
+def send_reset_email(recipient_email, Password_Reset_Code):
+    sg = sendgrid.SendGridAPIClient()
+    from_email = Email("zaiddev60gb@gmail.com")  # Change to your verified sender
+    to_email = To(f"{recipient_email}")  # Change to your recipient
+    subject = "Password Reset Request"
+    content = Content(f"Your password reset token is: {Password_Reset_Code}")
+    mail = Mail(from_email, to_email, subject, content)
+
+    # Get a JSON-ready representation of the Mail object
+    mail_json = mail.get()
+
+    # Send an HTTP POST request to /mail/send
+    response = sg.client.mail.send.post(request_body=mail_json)
+    print(response.status_code)
+    print(response.headers)
+    if response.status_code == 202:
+        return {"message": "Email sent successfully."}
+    else:
+        raise HTTPException(status_code=400, detail="Email failed to send.")
 
 
 @router.post("/password/reset-request")
@@ -99,25 +100,30 @@ def request_password_reset(email: str = Form(...), db: Session = Depends(get_dat
     # Check if user exists in database
     user = db.query(Email_User).filter(Email_User.email == email).first()
     if not user:
+        print("--------User not found--------")
         raise HTTPException(status_code=404, detail="User not found")
     
     # Generate a strong password reset code for verification
     password_reset_code = Password_Reset_Code_Generator()
+    print("--------Password reset code generated--------")
 
     # Generate a password reset access token with expiry
     reset_access_token = Password_Reset_Access_Token(data={"sub": email})
+    print("--------Password reset access token generated--------")
 
-    # Send the password reset email with the code
-    if send_reset_email(email, password_reset_code):
-        # Update the user's database record with the reset token and code
-        user.password_reset_code = password_reset_code
-        user.reset_access_token = reset_access_token
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        return {"message": "Password reset email sent successfully"}
-    else:
-        raise HTTPException(status_code=400, detail="Failed to send reset email")
+    return {"password_reset_code :", password_reset_code, "reset_access_token :", reset_access_token}
+
+    # # Send the password reset email with the code
+    # if send_reset_email(email, password_reset_code):
+    #     # Update the user's database record with the reset token and code
+    #     user.password_reset_code = password_reset_code
+    #     user.reset_access_token = reset_access_token
+    #     db.add(user)
+    #     db.commit()
+    #     db.refresh(user)
+    #     return {"message": "Password reset email sent successfully"}
+    # else:
+    #     raise HTTPException(status_code=400, detail="Failed to send reset email")
     
 
 @router.post("/password/reset-submit")
