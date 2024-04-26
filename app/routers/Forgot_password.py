@@ -30,6 +30,10 @@ PASSWORD_RESET_SECRET_KEY = os.environ.get("PASSWORD_RESET_SECRET_KEY")
 if PASSWORD_RESET_SECRET_KEY is None:
     raise Exception("PASSWORD_RESET_SECRET_KEY environment variable is not set")
 
+SMTP_SERVER = os.environ.get("SMTP_SERVER")
+if SMTP_SERVER is None:
+    raise Exception("SMTP_SERVER environment variable is not set")
+
 SMTP_USERNAME = os.environ.get("SMTP_USERNAME")
 if SMTP_USERNAME is None:
     raise Exception("SMTP_USERNAME environment variable is not set")
@@ -72,18 +76,16 @@ def Password_Reset_Code_Generator():
 
 def send_reset_email(recipient_email, Password_Reset_Code):
     # SMTP server configuration
-    smtp_server = 'mail.privateemail.com'
+    smtp_server = SMTP_SERVER
     smtp_port = 587  # Adjust as per your SMTP server settings
     smtp_username = SMTP_USERNAME
     smtp_password = SMTP_PASSWORD
 
-
-    # SMTP Server Settings for Namecheap
     # Email content
     sender_email = SENDER_EMAIL
     recipient_email = recipient_email
     subject = 'Password Reset Email'
-    body = "The password reset code for your account is " , Password_Reset_Code , ". This code will expire in 15 minutes."
+    body = f"The password reset code for your account is {Password_Reset_Code}. This code will expire in 15 minutes."
 
     # Create the email message
     message = MIMEMultipart()
@@ -105,6 +107,7 @@ def send_reset_email(recipient_email, Password_Reset_Code):
         print(f'-------Error sending email: {e}--------')
     finally:
         server.quit()  # Close the connection
+
 
 @router.post("/password/reset_request")
 def request_password_reset(email: str = Form(...), db: Session = Depends(get_database)):
