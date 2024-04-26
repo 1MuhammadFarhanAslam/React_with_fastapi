@@ -19,6 +19,7 @@ from sqlalchemy import create_engine
 from typing import Generator
 from datetime import timedelta, datetime, timezone
 from hashing import hash_password
+from sqlalchemy.sql import update  # Add this import
 
 router = APIRouter()
 
@@ -115,17 +116,18 @@ def request_password_reset(request: PasswordResetRequest, db: Session = Depends(
         reset_access_token = Password_Reset_Access_Token(data={"sub": request.email})
 
         # Update the user's database record with the reset token and code
-        user.password_reset_code = password_reset_code
-        user.reset_access_token = reset_access_token  # Do not include directly in SQL query
-        db.add(user)
+        db.execute(update(Email_User)
+            .where(Email_User.id == user.id)
+            .values(password_reset_code=password_reset_code, reset_access_token=reset_access_token)
+        )
         db.commit()
-        db.refresh(user)
 
         # Send the password reset email with the code
         if send_reset_email(request.email, password_reset_code):
             return {"message": "Password reset email sent successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 
 
