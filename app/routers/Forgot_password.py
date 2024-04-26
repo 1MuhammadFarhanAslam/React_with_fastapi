@@ -15,14 +15,12 @@ import os
 import jwt
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, update  # Add 'update' import
 from typing import Generator
 from datetime import timedelta, datetime, timezone
 from hashing import hash_password
-from sqlalchemy.sql import update  # Add this import
 
 router = APIRouter()
-
 
 # Get the database URL from the environment variable
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -41,10 +39,6 @@ if SENDGRID_API_KEY is None:
 
 ALGORITHM = "HS256"
 PASSWORD_RESET_TOKEN_EXPIRE_MINUTES = 15  # Change to 30 minutes
-
-# nginx_url = "api.bittaudio.ai"
-nginx_url = "api.bittaudio.ai"
-    
 
 # Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
@@ -76,7 +70,6 @@ def Password_Reset_Access_Token(data: dict, expires_delta=timedelta(minutes=PASS
     encoded_jwt = jwt.encode(to_encode, PASSWORD_RESET_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-
 # Generate a random 6-digit code for token
 def Password_Reset_Code_Generator():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
@@ -98,8 +91,7 @@ def send_reset_email(recipient_email, Password_Reset_Code):
             raise HTTPException(status_code=400, detail="Email failed to send.")
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=400, detail= str(e))
-
+        raise HTTPException(status_code=400, detail=str(e))
 
 # Endpoint for requesting password reset and sending email
 @router.post("/password/reset/request")
@@ -129,19 +121,19 @@ def request_password_reset(request: PasswordResetRequest, db: Session = Depends(
         exp_datetime_str = exp_datetime_utc.strftime('%Y-%m-%d %H:%M:%S')
 
         # Update the user's database record with the reset token and code
-        user.password_reset_code = password_reset_code
-        user.reset_access_token = reset_access_token
-        user.exp_datetime_str = exp_datetime_str  # Assuming this is the field for timestamp in your database
-        db.add(user)
+        db.execute(
+            update(Email_User)
+            .where(Email_User.email == request.email)
+            .values(
+                password_reset_code=password_reset_code,
+                reset_access_token=reset_access_token,
+                exp_datetime_str=exp_datetime_str
+            )
+        )
         db.commit()
         return {"message": "Password reset email sent successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-
-
-
-
 
 # Endpoint for submitting password reset token and new password
 @router.post("/password/reset/submit")
@@ -175,13 +167,16 @@ def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(ge
         
         # Update the user's password with the new password
         new_hashed_password = hash_password(request.new_password)
-        user.password = new_hashed_password
-        user.password_reset_code = None
-        user.reset_access_token = None
-        db.add(user)
+        db.execute(
+            update(Email_User)
+            .where(Email_User.email == request.email)
+            .values(
+                password=new_hashed_password,
+                password_reset_code=None,
+                reset_access_token=None
+            )
+        )
         db.commit()
         return {"message": "Password reset successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-
