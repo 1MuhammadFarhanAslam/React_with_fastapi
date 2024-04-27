@@ -434,7 +434,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         raise HTTPException(status_code=400, detail="Error: " + str(e))
     
 
-@router.get("/verifyEmail", response_model=None, tags=["Frontend_Signup/Login"])
+@router.post("/verifyEmail", response_model=None, tags=["Frontend_Signup/Login"])
 async def verify_email(token: str, db: Session = Depends(get_database)):
     try:
         # Decode and verify the verification token
