@@ -261,6 +261,7 @@ def Password_Reset_Access_Token(data: dict, expires_delta=timedelta(minutes=PASS
     encoded_jwt = jwt.encode(to_encode, PASSWORD_RESET_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 def send_reset_email(recipient_email, reset_access_token):
     # SMTP server configuration
     smtp_server = SMTP_SERVER
@@ -289,14 +290,11 @@ def send_reset_email(recipient_email, reset_access_token):
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);">
             <h2 style="color: #333333; text-align: center;">Password Reset Email</h2>
             <p style="color: #333333; font-size: 16px; line-height: 1.6;">Dear User,</p>
-            <p style="color: #333333; font-size: 16px; line-height: 1.6;">Your password reset code is: <strong>{reset_access_token}</strong>. This code will expire in 15 minutes.</p>
+#            <p style="color: #333333; font-size: 16px; line-height: 1.6;">In order to reset your password, click on following button:</p>           
             <div style="text-align: center; margin-top: 20px;">
                 <a href="{reset_link}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; display: inline-block;">Reset Password</a>
+                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;"> This code will expire in 15 minutes.</p>
             </div>
-            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">Alternatively, you can copy and paste the following link into your browser:</p>
-            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 10px;">{reset_link}</p>
-            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">If you didn't request a password reset, please ignore this email.</p>
-            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">Thank you,<br>Team YourAppName</p>
         </div>
 
     </body>
