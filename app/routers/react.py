@@ -145,15 +145,55 @@ def Verification_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_
 #         server.quit()  # Close the connection
 
 
-def send_verification_email(recipient_email, verification_token):
+# def send_verification_email(recipient_email, verification_token):
+#     # SMTP server configuration
+#     smtp_server = SMTP_SERVER
+#     smtp_port = 587  # Adjust as per your SMTP server settings
+#     smtp_username = SMTP_USERNAME
+#     smtp_password = SMTP_PASSWORD
+
+#     # Verification link with token
+#     verification_link = f"http://api.bittaudio.ai/verifyEmail?token={verification_token}"
+
+#     # Email content with HTML formatting
+#     sender_email = SENDER_EMAIL
+#     subject = 'Email Verification'
+#     body = f"""\
+#     <html>
+#         <body>
+#             <p>Please click the link to verify your email: <a href="{verification_link}">{verification_link}</a></p>
+#         </body>
+#     </html>
+#     """
+
+#     # Create the email message
+#     message = MIMEMultipart()
+#     message['From'] = sender_email
+#     message['To'] = recipient_email
+#     message['Subject'] = subject
+#     message.attach(MIMEText(body, 'html'))
+
+#     # Connect to the SMTP server
+#     try:
+#         server = smtplib.SMTP(smtp_server, smtp_port)
+#         server.starttls()
+#         server.login(smtp_username, smtp_password)
+
+#         # Send email
+#         server.sendmail(sender_email, recipient_email, message.as_string())
+#         return True  # Email sent successfully
+#     except Exception as e:
+#         print(f'Error sending email: {e}')
+#         return False  # Email sending failed
+#     finally:
+#         server.quit()  # Close the connection
+
+def send_verification_email(recipient_email, verification_link):
     # SMTP server configuration
     smtp_server = SMTP_SERVER
     smtp_port = 587  # Adjust as per your SMTP server settings
     smtp_username = SMTP_USERNAME
     smtp_password = SMTP_PASSWORD
-
-    # Verification link with token
-    verification_link = f"http://api.bittaudio.ai/verifyEmail?token={verification_token}"
 
     # Email content with HTML formatting
     sender_email = SENDER_EMAIL
@@ -181,9 +221,10 @@ def send_verification_email(recipient_email, verification_token):
 
         # Send email
         server.sendmail(sender_email, recipient_email, message.as_string())
+        print('--------Email sent successfully----------')
         return True  # Email sent successfully
     except Exception as e:
-        print(f'Error sending email: {e}')
+        print(f'-------Error sending email: {e}--------')
         return False  # Email sending failed
     finally:
         server.quit()  # Close the connection
