@@ -11,7 +11,7 @@ from typing import Generator
 from hashing import hash_password
 from react_database import verify_email_user_password
 from fastapi.responses import JSONResponse
-from Email_Verification import Verification_Token, send_verification_email
+from .Email_Verification import Verification_Token, send_verification_email
 
 
 router = APIRouter()
