@@ -81,7 +81,7 @@ class Email_User(Base):
     password = Column(String)
     email_status= Column(String, default="Unverified")
     role = Column(String, default="user")  # Default role is "user"
-    password_reset_code = Column(String, default=None)
+    # password_reset_code = Column(String, default=None)
     reset_access_token = Column(String, default=None)
     verification_token = Column(String, default=None)
 
