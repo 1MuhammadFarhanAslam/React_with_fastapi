@@ -87,7 +87,7 @@ def send_reset_email(recipient_email, password_reset_code):
     body = f"""\
     <html>
         <body>
-            <p style="font-size: larger;"><strong>The password reset code for your account is <span style="font-size: larger;">{password_reset_code}</span>. This code will expire in 15 minutes.</strong></p>
+            <p style="font-size: larger;">The password reset code for your account is<strong> <span style="font-size: larger;">{password_reset_code}</span>.</strong>This code will expire in 15 minutes.</p>
         </body>
     </html>
     """
@@ -176,6 +176,7 @@ def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(ge
         user.password_reset_code = None
         user.reset_access_token = None
         db.commit()
+        db.refresh(user)
         return {"message": "Password reset successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
