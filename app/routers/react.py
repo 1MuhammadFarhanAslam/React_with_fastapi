@@ -196,7 +196,7 @@ def send_verification_email(recipient_email, verification_token):
     smtp_password = SMTP_PASSWORD
 
     # Verification link with token
-    verification_link = f"http://api.bittaudio.ai/verifyEmail?token={verification_token}"
+    verification_link = f"http://bittaudio.ai/verifyEmail?token={verification_token}"
 
     # Email content with HTML formatting
     sender_email = SENDER_EMAIL
