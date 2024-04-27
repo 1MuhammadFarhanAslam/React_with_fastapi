@@ -372,7 +372,7 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
         raise HTTPException(status_code=400, detail= str(e))
 
 
-@router.post("/api/rest-password")
+@router.post("/api/reset-password")
 async def submit_password_reset(request: Request, db: Session = Depends(get_database)):
     try:
         request_data = await request.json()
@@ -381,23 +381,32 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
         if not request_data:
             raise HTTPException(status_code=400, detail="No input data provided")
         
-        email = request_data.get("email")
-        print("--------Email------------: ", email)
-        if not email:
-            raise HTTPException(status_code=400, detail="Email not found")
+        token = request_data.get("token")
+        if not token:
+            raise HTTPException(status_code=400, detail="Token not found")
         
-        password = request_data.get("password")
-        print("--------Password------------: ", password)
-        if not password:
+        # Extract email from token
+        decoded_token = jwt.decode(token, PASSWORD_RESET_SECRET_KEY, algorithms=[ALGORITHM])
+        email = decoded_token.get("email")
+        print("--------Email------------: ", email)
+
+        new_password = request_data.get("confirmPassword")
+        print("--------Password------------: ", new_password)
+
+        if not new_password:
             raise HTTPException(status_code=400, detail="Password not found")
 
         # Check if user exists in database
-        user = db.query(Email_User).filter(Email_User.email == request.email).first()
+        user = db.query(Email_User).filter(Email_User.email == email).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
+        # Check if the saved reset token matches the incoming token
+        if user.reset_access_token != token:
+            raise HTTPException(status_code=400, detail="Invalid reset token")
+
         # Decode the JWT access token
-        decoded_token = jwt.decode(user.reset_access_token, PASSWORD_RESET_SECRET_KEY, algorithms=[ALGORITHM])
+        decoded_token = jwt.decode(token, PASSWORD_RESET_SECRET_KEY, algorithms=[ALGORITHM])
 
         # Check if the access token is valid (not expired)
         exp_timestamp = decoded_token["exp"]
@@ -406,15 +415,16 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
             raise HTTPException(status_code=400, detail="Password reset token has expired. Generate new token by requesting a reset again.")
 
         # Update the user's password with the new password
-        new_hashed_password = hash_password(request.new_password)
+        new_hashed_password = hash_password(new_password)
         user.password = new_hashed_password
-        user.password_reset_code = None
         user.reset_access_token = None
         db.commit()
         db.refresh(user)
-        return {"message": "Password reset successfully"}
+        return {"message": "Password reset successfully."}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
 
 
 
