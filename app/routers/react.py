@@ -439,6 +439,7 @@ async def verify_email(token: str, db: Session = Depends(get_database)):
     try:
         # Decode and verify the verification token
         decoded_token = jwt.decode(token, VERIFICATION_SECRET_KEY, algorithms=["HS256"])
+        print("_______________decoded_token_______________", decoded_token)
         email = decoded_token.get("email")
 
         # Find the user by email and mark as verified
