@@ -378,9 +378,6 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
 
-        form_data = request_data.get("formData")
-        print("--------form_data------------: ", form_data)
-
         token = request_data.get("token")
         print("--------Token------------: ", token)
 
