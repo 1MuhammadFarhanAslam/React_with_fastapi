@@ -73,6 +73,15 @@ def get_database() -> Generator[Session, None, None]:
         db.close()
 
 
+@router.post("/")
+async def Welcome_To_Bittaudio_API():
+    return JSONResponse(status_code=200, content={
+            "message": "Welcome to Bittaudio API. This is the first version of the API. Please visit https://api.bittaudio.ai/docs to know more about the API endpoints."
+        }
+    )
+
+
+
 # def create_session():   #session is usually used to make a request redirect to another server
 #     session = requests.Session()
 #     retries = Retry(total=1, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
