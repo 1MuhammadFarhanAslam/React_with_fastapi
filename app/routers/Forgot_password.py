@@ -398,7 +398,7 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
             raise HTTPException(status_code=400, detail="Token not found")
 
         if not new_password:
-            prrint("--------Password not found--------")
+            print("--------Password not found--------")
             raise HTTPException(status_code=400, detail="Password not found")
 
         # Check if user exists in database
@@ -428,6 +428,8 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
         db.commit()
         db.refresh(user)
         return {"message": "Password reset successfully."}
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=400, detail="Token signature has expired. Send Forgot Password request again.")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
