@@ -608,7 +608,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                 print("OooPS...Incorrect password. Please try again")
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OooPS...Incorrect password. Please try again")
             
-            elif email_user.email_verified == "unverified":
+            elif email_user.email_status == "unverified":
                 print("OooPS...You have not verified yet. Please verify your email first...")
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OooPS...You have not verified yet. Please verify your email first...")
             
