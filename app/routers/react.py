@@ -435,12 +435,18 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
     
 
 @router.post("/verifyEmail", response_model=None, tags=["Frontend_Signup/Login"])
-async def verify_email(token: str = Form(...), db: Session = Depends(get_database)):
+async def verify_email(request : Request, db: Session = Depends(get_database)):
     try:
+        request_data = await request.json()
+        print("_______________request_data_______________", request_data)
+
+        token = request_data.get("token")
+        print("_______________token_______________", token)
         # Decode and verify the verification token
         decoded_token = jwt.decode(token, VERIFICATION_SECRET_KEY, algorithms=["HS256"])
         print("_______________decoded_token_______________", decoded_token)
         email = decoded_token.get("email")
+        print("_______________email_______________", email)
 
         # Find the user by email and mark as verified
         user = db.query(Email_User).filter(Email_User.email == email).first()
