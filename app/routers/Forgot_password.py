@@ -378,20 +378,25 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
 
-        if not request_data:
-            raise HTTPException(status_code=400, detail="No input data provided")
-        
+        form_data = request_data.get("formData")
+        print("--------form_data------------: ", form_data)
+
         token = request_data.get("token")
-        if not token:
-            raise HTTPException(status_code=400, detail="Token not found")
-        
+        print("--------Token------------: ", token)
+
         # Extract email from token
         decoded_token = jwt.decode(token, PASSWORD_RESET_SECRET_KEY, algorithms=[ALGORITHM])
         email = decoded_token.get("sub")
-        print("--------Email------------: ", email)
+        print("--------Email------------: ", email)        
 
-        new_password = request_data.get("confirmPassword")
+        new_password = request_data.get("confirmPassword")        
         print("--------Password------------: ", new_password)
+
+        if not request_data:
+            raise HTTPException(status_code=400, detail="No input data provided")
+
+        if not token:
+            raise HTTPException(status_code=400, detail="Token not found")
 
         if not new_password:
             raise HTTPException(status_code=400, detail="Password not found")
