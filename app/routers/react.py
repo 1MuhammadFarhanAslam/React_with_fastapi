@@ -647,8 +647,9 @@ async def verify_email(token: str, db: Session = Depends(get_database)):
         raise HTTPException(status_code=400, detail="Verification token has expired.")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=400, detail="Invalid verification token.")
-    finally:
-        raise HTTPException(status_code=500, detail="Error verifying email.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error verifying email: " + str(e))
+
         
 
 # Your existing endpoint code for email signin
