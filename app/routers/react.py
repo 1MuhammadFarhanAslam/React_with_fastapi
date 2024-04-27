@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Depends, APIRouter, Header, Request, status
+from fastapi import HTTPException, Depends, APIRouter, Header, Request, status, Form
 from datetime import datetime, timedelta, timezone
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -435,7 +435,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
     
 
 @router.post("/verifyEmail", response_model=None, tags=["Frontend_Signup/Login"])
-async def verify_email(token: str, db: Session = Depends(get_database)):
+async def verify_email(token: str = Form(...), db: Session = Depends(get_database)):
     try:
         # Decode and verify the verification token
         decoded_token = jwt.decode(token, VERIFICATION_SECRET_KEY, algorithms=["HS256"])
