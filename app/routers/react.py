@@ -188,22 +188,48 @@ def Verification_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_
 #     finally:
 #         server.quit()  # Close the connection
 
-def send_verification_email(recipient_email, verification_link):
+def send_verification_email(recipient_email, verification_token):
     # SMTP server configuration
     smtp_server = SMTP_SERVER
     smtp_port = 587  # Adjust as per your SMTP server settings
     smtp_username = SMTP_USERNAME
     smtp_password = SMTP_PASSWORD
 
+    # Verification link with token
+    verification_link = f"http://api.bittaudio.ai/verifyEmail?token={verification_token}"
+
     # Email content with HTML formatting
     sender_email = SENDER_EMAIL
     subject = 'Email Verification'
     body = f"""\
-    <html>
-        <body>
-            <p>Please click the link to verify your email: <a href="{verification_link}">{verification_link}</a></p>
-        </body>
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Email Verification</title>
+    </head>
+
+    <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);">
+            <h2 style="color: #333333; text-align: center;">Email Verification</h2>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6;">Dear User,</p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6;">Thank you for signing up with us. To complete your registration and verify your email address, please click the button below:</p>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="{verification_link}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; display: inline-block;">Verify Email</a>
+            </div>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">Alternatively, you can copy and paste the following link into your browser:</p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 10px;">{verification_link}</p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">If you did not sign up for an account, please ignore this email.</p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">Thank you,<br>Team YourAppName</p>
+        </div>
+
+    </body>
+
     </html>
+
     """
 
     # Create the email message
