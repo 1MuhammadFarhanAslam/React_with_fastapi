@@ -383,28 +383,33 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
 
         # Extract email from token
         decoded_token = jwt.decode(token, PASSWORD_RESET_SECRET_KEY, algorithms=[ALGORITHM])
-        email = decoded_token.get("sub")
+        email: str = decoded_token.get("sub")
         print("--------Email------------: ", email)        
 
         new_password = request_data.get("confirmPassword")        
         print("--------Password------------: ", new_password)
 
         if not request_data:
+            print("--------No input data provided--------")
             raise HTTPException(status_code=400, detail="No input data provided")
 
         if not token:
+            print("--------Token not found--------")
             raise HTTPException(status_code=400, detail="Token not found")
 
         if not new_password:
+            prrint("--------Password not found--------")]
             raise HTTPException(status_code=400, detail="Password not found")
 
         # Check if user exists in database
         user = db.query(Email_User).filter(Email_User.email == email).first()
         if not user:
+            print("--------User not found--------")
             raise HTTPException(status_code=404, detail="User not found")
         
         # Check if the saved reset token matches the incoming token
         if user.reset_access_token != token:
+            print("--------Invalid reset token--------")
             raise HTTPException(status_code=400, detail="Invalid reset token")
 
         # Decode the JWT access token
