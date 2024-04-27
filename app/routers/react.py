@@ -546,6 +546,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                     "access_token": access_token,
                     "token_type": "bearer"
                 }
+                print(resp)
 
                 # Set the access token as a cookie
                 response = JSONResponse(content=resp)
