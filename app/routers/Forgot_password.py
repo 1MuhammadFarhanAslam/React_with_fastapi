@@ -398,7 +398,7 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
             raise HTTPException(status_code=400, detail="Token not found")
 
         if not new_password:
-            prrint("--------Password not found--------")]
+            prrint("--------Password not found--------")
             raise HTTPException(status_code=400, detail="Password not found")
 
         # Check if user exists in database
