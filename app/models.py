@@ -79,23 +79,24 @@ class Email_User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     email = Column(String, unique=True, index=True)
     password = Column(String)
-    status = Column(String, default="Active")
+    email_status= Column(String, default="Unverified")
     role = Column(String, default="user")  # Default role is "user"
     password_reset_code = Column(String, default=None)
     reset_access_token = Column(String, default=None)
+    verification_token = Column(String, default=None)
 
-class React_User(Base):
-    __tablename__ = "react_users"
+class Google_User(Base):
+    __tablename__ = "google_users"
 
     id = Column(String, primary_key=True, index=True, default=lambda: ''.join(random.choices(string.ascii_letters + string.digits, k=64)))
     created_at = Column(DateTime, default=datetime.utcnow)
     username = Column(String)
     email = Column(String, unique=True, index=True)
     picture = Column(String)
-    email_verified = Column(Boolean)
+    email_status = Column(Boolean)
     role = Column(String, default="user")  # Default role is "user"
 
-class React_user_Token(BaseModel):
+class Google_user_Token(BaseModel):
     id_token: str
 
 class Token(BaseModel):

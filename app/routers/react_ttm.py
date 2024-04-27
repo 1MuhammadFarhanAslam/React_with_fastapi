@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from requests.exceptions import Timeout
-# from models import React_User, Email_User, AccessToken
+# from models import Google_User, Email_User, AccessToken
 # from jwt.exceptions import ExpiredSignatureError  # Import the ExpiredSignatureError
 # from fastapi import UploadFile, File
 # from typing import Optional
@@ -121,12 +121,12 @@ async def Welcome_To_Bittaudio_API():
 #             decoded_token = jwt.decode(token, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithms=[ALGORITHM])
 #             email = decoded_token.get("sub")
 
-#             # Query the database based on the email to get user data from React_User and Email_User
-#             react_user = db.query(React_User).filter(React_User.email == email).first()
+#             # Query the database based on the email to get user data from Google_User and Email_User
+#             google_user = db.query(Google_User).filter(Google_User.email == email).first()
 #             email_user = db.query(Email_User).filter(Email_User.email == email).first()
 
-#             # If the user is not registered in either React_User or Email_User, raise an exception
-#             if not react_user and not email_user:
+#             # If the user is not registered in either Google_User or Email_User, raise an exception
+#             if not google_user and not email_user:
 #                 raise HTTPException(status_code=401, detail="User is not registered.")
         
         

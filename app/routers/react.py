@@ -1,16 +1,22 @@
-from fastapi import HTTPException, Depends, APIRouter, Header, Request, status
+from fastapi import HTTPException, Depends, APIRouter, Header, Request, status, Form
 from datetime import datetime, timedelta, timezone
 from google.oauth2 import id_token
 from google.auth.transport import requests
 import jwt
 import os
-from models import React_User, React_user_Token, Email_User
+from models import Google_User, Google_user_Token, Email_User
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from hashing import hash_password
 from react_database import verify_email_user_password
 from fastapi.responses import JSONResponse
+import random
+import string
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 
 
 router = APIRouter()
@@ -27,8 +33,31 @@ GOOGLE_EMAIL_LOGIN_SECRET_KEY = os.environ.get("GOOGLE_EMAIL_LOGIN_SECRET_KEY")
 if GOOGLE_EMAIL_LOGIN_SECRET_KEY is None:
     raise Exception("GOOGLE_EMAIL_LOGIN_SECRET_KEY environment variable is not set")
 
+SMTP_SERVER = os.environ.get("SMTP_SERVER")
+if SMTP_SERVER is None:
+    raise Exception("SMTP_SERVER environment variable is not set")
+
+SMTP_USERNAME = os.environ.get("SMTP_USERNAME")
+if SMTP_USERNAME is None:
+    raise Exception("SMTP_USERNAME environment variable is not set")
+
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
+if SENDER_EMAIL is None:
+    raise Exception("SENDER_EMAIL environment variable is not set")
+
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
+if SMTP_PASSWORD is None:
+    raise Exception("SMTP_PASSWORD environment variable is not set")
+
+VERIFICATION_SECRET_KEY = os.environ.get("VERIFICATION_SECRET_KEY")
+if VERIFICATION_SECRET_KEY is None:
+    raise Exception("VERIFICATION_SECRET_KEY environment variable is not set")
+
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+PASSWORD_RESET_TOKEN_EXPIRE_MINUTES = 15  # Change to 30 minutes
+
+ACCESS_TOKEN_EXPIRE_MINUTES = 60  # Change to 30 minutes
+
 
 # Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
@@ -50,7 +79,6 @@ def get_database() -> Generator[Session, None, None]:
     finally:
         db.close()
 
-
 def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
     to_encode = data.copy()
     if expires_delta:
@@ -62,9 +90,113 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
     return encoded_jwt
 
 
+def Email_Verification_Code_Generator():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+
+def Verification_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, VERIFICATION_SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+# def send_verification_email(recipient_email, verification_code):
+#     # SMTP server configuration
+#     smtp_server = SMTP_SERVER
+#     smtp_port = 587  # Adjust as per your SMTP server settings
+#     smtp_username = SMTP_USERNAME
+#     smtp_password = SMTP_PASSWORD
+
+#     # Email content with HTML formatting
+#     sender_email = SENDER_EMAIL
+#     subject = 'Email Verification'
+#     body = f"""\
+#     <html>
+#         <body>
+#             <p>Please verify your email address by using verification code: <strong>{verification_code}</strong></p>
+#         </body>
+#     </html>
+#     """
+
+#     # Create the email message
+#     message = MIMEMultipart()
+#     message['From'] = sender_email
+#     message['To'] = recipient_email
+#     message['Subject'] = subject
+#     message.attach(MIMEText(body, 'html'))
+
+#     # Connect to the SMTP server and send email
+#     try:
+#         server = smtplib.SMTP(smtp_server, smtp_port)
+#         server.starttls()
+#         server.login(smtp_username, smtp_password)
+
+#         # Send email
+#         server.sendmail(sender_email, recipient_email, message.as_string())
+#         return True  # Email sent successfully
+#     except Exception as e:
+#         print(e)
+#         return False  # Email sending failed
+#     finally:
+#         server.quit()  # Close the connection
+
+
+def send_verification_email(recipient_email, verification_token):
+    # SMTP server configuration
+    smtp_server = SMTP_SERVER
+    smtp_port = 587  # Adjust as per your SMTP server settings
+    smtp_username = SMTP_USERNAME
+    smtp_password = SMTP_PASSWORD
+
+    # Verification link with token
+    verification_link = f"http://api.bittaudio.ai/verifyEmail?token={verification_token}"
+
+    # Email content with HTML formatting
+    sender_email = SENDER_EMAIL
+    subject = 'Email Verification'
+    body = f"""\
+    <html>
+        <body>
+            <p>Please click the link to verify your email: <a href="{verification_link}">{verification_link}</a></p>
+        </body>
+    </html>
+    """
+
+    # Create the email message
+    message = MIMEMultipart()
+    message['From'] = sender_email
+    message['To'] = recipient_email
+    message['Subject'] = subject
+    message.attach(MIMEText(body, 'html'))
+
+    # Connect to the SMTP server
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+
+        # Send email
+        server.sendmail(sender_email, recipient_email, message.as_string())
+        return True  # Email sent successfully
+    except Exception as e:
+        print(f'Error sending email: {e}')
+        return False  # Email sending failed
+    finally:
+        server.quit()  # Close the connection
+
+
+
+
+
+
+
 
 # @router.post("/api/google-signin", tags=["React"])
-# async def google_signin(token: React_user_Token, db: Session = Depends(get_database)):
+# async def google_signin(token: Google_user_Token, db: Session = Depends(get_database)):
 #     try:
 #         # Verify the Google ID token
 #         ticket = id_token.verify_oauth2_token(token.id_token, requests.Request(), "274409146209-qp9qp2au3k9bgghu8tb7urf2j7qal8e3.apps.googleusercontent.com")
@@ -78,7 +210,7 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
 #         }
 
 #         # Check if the user already exists in the database
-#         existing_user = db.query(React_User).filter(React_User.email == user_data["email"]).first()
+#         existing_user = db.query(Google_User).filter(Google_User.email == user_data["email"]).first()
 
 #         if existing_user:
 #             # User exists, return an access token
@@ -92,7 +224,7 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
 #                     "username": existing_user.username,
 #                     "email": existing_user.email,
 #                     "picture": existing_user.picture,
-#                     "email_verified": existing_user.email_verified,
+#                     "email_status": existing_user.email_status,
 #                     "role": existing_user.role
 #                 },
 
@@ -102,7 +234,7 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
         
 #         else:
 #             # User does not exist, create a new user and save it to the database
-#             user = React_User(**user_data)
+#             user = Google_User(**user_data)
 #             db.add(user)
 #             db.commit()
 #             db.refresh(user)
@@ -118,7 +250,7 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
 #                     "username": user.username,
 #                     "email": user.email,
 #                     "picture": user.picture,
-#                     "email_verified": user.email_verified,
+#                     "email_status": user.email_status,
 #                     "role": user.role
 #                 },
 
@@ -131,7 +263,7 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
 #         raise HTTPException(status_code=500, detail="Server Error")
 
 @router.post("/api/google-signin", tags=["Frontend_Signup/Login"])
-async def google_signin(token: React_user_Token, db: Session = Depends(get_database)):
+async def google_signin(token: Google_user_Token, db: Session = Depends(get_database)):
     try:
         # Verify the Google ID token
         ticket = id_token.verify_oauth2_token(token.id_token, requests.Request(), "274409146209-qp9qp2au3k9bgghu8tb7urf2j7qal8e3.apps.googleusercontent.com")
@@ -146,7 +278,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 
         print("_________user_data__________:", user_data)
         # Check if the user already exists in the database
-        existing_user = db.query(React_User).filter(React_User.email == user_data["email"]).first()
+        existing_user = db.query(Google_User).filter(Google_User.email == user_data["email"]).first()
 
         if existing_user:
             # User exists, return an access token
@@ -161,7 +293,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
                     "username": existing_user.username,
                     "email": existing_user.email,
                     "picture": existing_user.picture,
-                    "email_verified": existing_user.email_verified,
+                    "email_status": existing_user.email_status,
                     "role": existing_user.role
                 },
                 "access_token": access_token,
@@ -179,7 +311,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
         
         else:
             # User does not exist, create a new user and save it to the database
-            user = React_User(**user_data)
+            user = Google_User(**user_data)
             db.add(user)
             db.commit()
             db.refresh(user)
@@ -196,7 +328,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
                     "username": user.username,
                     "email": user.email,
                     "picture": user.picture,
-                    "email_verified": user.email_verified,
+                    "email_status": user.email_status,
                     "role": user.role
                 },
                 "access_token": access_token,
@@ -252,7 +384,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 #                     "id": user.id,
 #                     "created_at": user.created_at,
 #                     "email": user.email,
-#                     "status": user.status,
+#                     "email_status": user.email_status,
 #                     "role": user.role
 #                 },
 
@@ -297,7 +429,7 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 #                     "id": user.id,
 #                     "created_at": user.created_at,
 #                     "email": user.email,
-#                     "status": user.status,
+#                     "email_status": user.email_status,
 #                     "role": user.role
 #                 },
 
@@ -310,62 +442,145 @@ async def google_signin(token: React_user_Token, db: Session = Depends(get_datab
 #         raise HTTPException(status_code=400, detail="Error: " + str(e))
     
 
+# @router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
+# async def email_signup(request: Request, db: Session = Depends(get_database)):
+#     try:
+#         data = await request.json()
+#         email = data.get('email')
+#         print("______________email________________: ", email)
+#         print(type(email))
+#         password = data.get('password')
+#         print("______________password________________: ", password)
+#         print(type(password))
+
+#         # Check if the user already exists in the database
+#         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
+
+#         if existing_user:
+#             # User already exists, return his/her details
+#             print("Ooops..................User already exists. Please sign in instead.")
+#             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ooops..................User already exists. Please sign in instead.")  
+        
+#         else:
+#             hashed_password = hash_password(password)
+#             user = Email_User(email=email, password=hashed_password)
+#             db.add(user)
+#             db.commit()
+#             db.refresh(user)
+
+#             # Create a new access token
+#             access_token = React_JWT_Token(data={"sub": user.email})
+#             print("_______________access_token_______________", access_token)
+#             print(type(access_token))
+
+#             # Set the access token as a cookie in the response
+#             resp = {
+#                 "message": "Signup successful! User created successfully.",
+#                 "user_info": {
+#                     "id": user.id,
+#                     "created_at": user.created_at.isoformat(),  # Convert datetime to string,
+#                     "email": user.email,
+#                     "email_status": user.email_status,
+#                     "role": user.role
+#                 },
+
+#                 "access_token": access_token,
+#                 "token_type": "bearer"
+#             }
+
+#             print(resp)
+
+#             # Set the access token as a cookie
+#             response = JSONResponse(content=resp)
+#             response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
+#             return response
+        
+#     except Exception as e:
+#         print(e)
+#         raise HTTPException(status_code=400, detail="Error: " + str(e))
+
+# Email sign up  endpoint with email verification functionality (using SMTP server)
 @router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
         data = await request.json()
         email = data.get('email')
-        print("______________email________________: ", email)
-        print(type(email))
         password = data.get('password')
-        print("______________password________________: ", password)
-        print(type(password))
 
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if existing_user:
-            # User already exists, return his/her details
-            print("Ooops..................User already exists. Please sign in instead.")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ooops..................User already exists. Please sign in instead.")  
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists. Please sign in instead.")  
         
         else:
-            hashed_password = hash_password(password)
-            user = Email_User(email=email, password=hashed_password)
-            db.add(user)
-            db.commit()
-            db.refresh(user)
+            # # Generate a verification code
+            # verification_code = str(uuid4())[:8]  # Generate a random code (e.g., 8 characters)
+            # print(f"--------Verification code generated: {verification_code}--------")
 
-            # Create a new access token
-            access_token = React_JWT_Token(data={"sub": user.email})
-            print("_______________access_token_______________", access_token)
-            print(type(access_token))
+            # or
 
-            # Set the access token as a cookie in the response
-            resp = {
-                "message": "Signup successful! User created successfully.",
-                "user_info": {
-                    "id": user.id,
-                    "created_at": user.created_at.isoformat(),  # Convert datetime to string,
-                    "email": user.email,
-                    "status": user.status,
-                    "role": user.role
-                },
+            # Generate a verification code
+            verification_token = Verification_Token({"email": email})
+            print("_______________verification_token_______________", verification_token)
+            
+            # Send verification email
+            if send_verification_email(email, verification_token):
+                hashed_password = hash_password(password)
+                user = Email_User(email=email, password=hashed_password, verification_token=verification_token)
+                db.add(user)
+                db.commit()
+                db.refresh(user)
 
-                "access_token": access_token,
-                "token_type": "bearer"
-            }
+                # Return success response with access token and user info
+                access_token = React_JWT_Token(data={"sub": user.email})
+                resp = {
+                    "message": "Signup successful! Please check your email for verification.",
+                    "user_info": {
+                        "id": user.id,
+                        "created_at": user.created_at.isoformat(),
+                        "email": user.email,
+                        "email_status": user.email_status,
+                        "role": user.role
+                    },
+                    "access_token": access_token,
+                    "token_type": "bearer"
+                }
 
-            print(resp)
-
-            # Set the access token as a cookie
-            response = JSONResponse(content=resp)
-            response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
-            return response
+                # Set the access token as a cookie
+                response = JSONResponse(content=resp)
+                response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")
+                return response
+            else:
+                raise HTTPException(status_code=400, detail="Failed to send verification email")
         
     except Exception as e:
-        print(e)
         raise HTTPException(status_code=400, detail="Error: " + str(e))
+    
+
+@router.get("/verifyEmail", response_model=None, tags=["Frontend_Signup/Login"])
+async def verify_email(token: str, db: Session = Depends(get_database)):
+    try:
+        # Decode and verify the verification token
+        decoded_token = jwt.decode(token, VERIFICATION_SECRET_KEY, algorithms=["HS256"])
+        email = decoded_token.get("email")
+
+        # Find the user by email and mark as verified
+        user = db.query(Email_User).filter(Email_User.email == email).first()
+        if user:
+            user.email_status = "Verified"
+            db.commit()
+            db.refresh(user)
+            return {"message": "Email verified successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=400, detail="Verification token has expired.")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=400, detail="Invalid verification token.")
+    finally:
+        raise HTTPException(status_code=500, detail="Error verifying email.")
         
 
 # Your existing endpoint code for email signin
@@ -392,6 +607,11 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
             if not verify_email_user_password(password, email_user.password):
                 print("OooPS...Incorrect password. Please try again")
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OooPS...Incorrect password. Please try again")
+            
+            elif email_user.email_verified == "unverified":
+                print("OooPS...You have not verified yet. Please verify your email first...")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OooPS...You have not verified yet. Please verify your email first...")
+            
             else:
                 # Generate an access token for the user
                 access_token = React_JWT_Token({"sub": email_user.email})
@@ -405,7 +625,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                         "id": email_user.id,
                         "created_at": email_user.created_at.isoformat(),  # Convert datetime to string,
                         "email": email_user.email,
-                        "status": email_user.status,
+                        "email_status": email_user.email_status,
                         "role": email_user.role
                     },
 
@@ -439,21 +659,21 @@ async def combined_user_auth(
         print("________________decoded_token________________", decoded_token)
         email = decoded_token.get("sub")  # Assuming "sub" contains the email address
         
-        # Query the database based on the email to get user data from React_User and Email_User
-        react_user = db.query(React_User).filter(React_User.email == email).first()
+        # Query the database based on the email to get user data from Google_User and Email_User
+        google_user = db.query(Google_User).filter(Google_User.email == email).first()
         email_user = db.query(Email_User).filter(Email_User.email == email).first()
-        print("_______________user details in jwt token (React_User)___________" , react_user)
+        print("_______________user details in jwt token (Google_User)___________" , google_user)
         print("_______________user details in jwt token (Email_User)___________" , email_user)
         
-        if react_user:
+        if google_user:
             user_data = {
-                "id": str(react_user.id),
-                "created_at": react_user.created_at,
-                "username": react_user.username,
-                "email": react_user.email,
-                "picture": react_user.picture,
-                "email_verified": react_user.email_verified,
-                "role": react_user.role
+                "id": str(google_user.id),
+                "created_at": google_user.created_at,
+                "username": google_user.username,
+                "email": google_user.email,
+                "picture": google_user.picture,
+                "email_status": google_user.email_status,
+                "role": google_user.role
             }
 
             print("_______________user details_______________", user_data)
@@ -463,7 +683,7 @@ async def combined_user_auth(
                 "id": email_user.id,
                 "created_at": email_user.created_at,
                 "email": email_user.email,
-                "status": email_user.status,
+                "email_status": email_user.email_status,
                 "role": email_user.role
             }
 
@@ -481,4 +701,7 @@ async def combined_user_auth(
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception:
         raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+
+
     

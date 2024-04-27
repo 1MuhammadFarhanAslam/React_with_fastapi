@@ -1,9 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Form
-from typing import Optional
+from fastapi import APIRouter, HTTPException, Depends, Form
 import os
-import sendgrid
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Email, To, Content
 import random
 import string
 from datetime import datetime, timedelta, timezone
@@ -74,6 +70,9 @@ def Password_Reset_Access_Token(data: dict, expires_delta=timedelta(minutes=PASS
 def Password_Reset_Code_Generator():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
 
+def Email_Verification_Code_Generator():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+
 def send_reset_email(recipient_email, password_reset_code):
     # SMTP server configuration
     smtp_server = SMTP_SERVER
@@ -87,7 +86,7 @@ def send_reset_email(recipient_email, password_reset_code):
     body = f"""\
     <html>
         <body>
-            <p style="font-size: larger;">The password reset code for your account is<strong> <span style="font-size: larger;">{password_reset_code}</span>.</strong>This code will expire in 15 minutes.</p>
+            <p style="font-size: larger;">The password reset code for your email is<strong> <span style="font-size: larger;">{password_reset_code}</span>.</strong> This code will expire in 15 minutes.</p>
         </body>
     </html>
     """
@@ -114,6 +113,9 @@ def send_reset_email(recipient_email, password_reset_code):
         return False  # Email sending failed
     finally:
         server.quit()  # Close the connection
+
+
+
 
 
 
@@ -187,4 +189,6 @@ def submit_password_reset(request: PasswordResetSubmit, db: Session = Depends(ge
 
 
 
+
+#--------------------------------------------------------------------------------------------------------------------------------------
 
