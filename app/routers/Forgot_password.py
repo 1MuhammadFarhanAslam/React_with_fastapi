@@ -387,7 +387,7 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
         
         # Extract email from token
         decoded_token = jwt.decode(token, PASSWORD_RESET_SECRET_KEY, algorithms=[ALGORITHM])
-        email = decoded_token.get("email")
+        email = decoded_token.get("sub")
         print("--------Email------------: ", email)
 
         new_password = request_data.get("confirmPassword")
