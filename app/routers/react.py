@@ -390,6 +390,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         password = request_data.get('password')
         email_status = request_data.get("email_status")
         roles = request_data.get("roles")
+        print(type(roles))
         status = request_data.get("status")
 
 
