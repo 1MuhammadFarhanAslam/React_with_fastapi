@@ -391,6 +391,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         email_status = request_data.get("email_status")
         roles = request_data.get("roles")
         print(type(roles))
+        print("______________roles________________: ", roles)
         status = request_data.get("status")
 
 
@@ -415,36 +416,36 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             print("_______________verification_token_______________", verification_token)
             
             # Send verification email
-            if send_verification_email(email, verification_token, verification_code):
-                hashed_password = hash_password(password)
-                user = Email_User(email=email, password=hashed_password, email_status=email_status, roles=list(roles), status=status, password_reset_code=verification_code, verification_token=verification_token)
-                db.add(user)
-                db.commit()
-                db.refresh(user)
+            hashed_password = hash_password(password)
+            user = Email_User(email=email, password=hashed_password, email_status=email_status, roles=list(roles), status=status, password_reset_code=verification_code, verification_token=verification_token)
+            db.add(user)
+            db.commit()
+            db.refresh(user)
 
-                # Return success response with access token and user info
-                access_token = React_JWT_Token(data={"sub": user.email})
-                resp = {
-                    "message": "Signup successful! Please check your email for verification.",
-                    "user_info": {
-                        "id": user.id,
-                        "created_at": user.created_at.isoformat(),
-                        "email": user.email,
-                        "email_status": user.email_status,
-                        "roles": list(user.roles),
-                        "status": user.status
-                    },
-                    "access_token": access_token,
-                    "token_type": "bearer"
-                }
-                print(resp)
+            # send email verification
+            send_verification_email(email, verification_token, verification_code)
 
-                # Set the access token as a cookie
-                response = JSONResponse(content=resp)
-                response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")
-                return response
-            else:
-                raise HTTPException(status_code=400, detail="Failed to send verification email")
+            # Return success response with access token and user info
+            access_token = React_JWT_Token(data={"sub": user.email})
+            resp = {
+                "message": "Signup successful! Please check your email for verification.",
+                "user_info": {
+                    "id": user.id,
+                    "created_at": user.created_at.isoformat(),
+                    "email": user.email,
+                    "email_status": user.email_status,
+                    "roles": list(user.roles),
+                    "status": user.status
+                },
+                "access_token": access_token,
+                "token_type": "bearer"
+            }
+            print(resp)
+
+            # Set the access token as a cookie
+            response = JSONResponse(content=resp)
+            response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")
+            return response
         
     except Exception as e:
         raise HTTPException(status_code=400, detail="Error: " + str(e))
