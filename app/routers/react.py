@@ -448,7 +448,7 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
         request_data = await request.json()
         print("_______________request_data_______________", request_data)
 
-        verification_code = request_data.get("verification_code")
+        verification_code = request_data.get("code")
         print("_______________token_______________", verification_code)
 
         token = request_data.get("token")
