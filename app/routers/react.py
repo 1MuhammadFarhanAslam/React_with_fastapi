@@ -225,7 +225,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
     
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=500, detail="Server Error")
+        raise HTTPException(status_code=400, detail= str(e))
     
 
 # @router.post("/api/email-signup", tags=["React"])
@@ -607,11 +607,12 @@ async def combined_user_auth(
             "message": "User details retrieved successfully",
             "userData": user_data
         }
-    
-    except jwt.JWTError:
+    except jwt.exceptions.DecodeError:
         raise HTTPException(status_code=401, detail="Invalid token")
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail= str(e))
     
 
 
