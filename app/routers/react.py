@@ -463,27 +463,30 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
 
         # Find the user by email and mark as verified
         user = db.query(Email_User).filter(Email_User.email == email).first()
-        if user:
-            # Check if the verification code is correct
-            if user.password_reset_code != verification_code:
-                raise HTTPException(status_code=400, detail="Verification code is incorrect")
-            if user.verification_token != token:
-                raise jwt.InvalidTokenError(status_code=400, detail="Verification token is Invalid")
-            
-            # Check if the access token is valid (not expired)
-            exp_timestamp = decoded_token["exp"]
-            exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
-            if datetime.now(timezone.utc) >= exp_datetime_utc:
-                raise jwt.ExpiredSignatureError(status_code=400, detail="Password reset token has expired. Send Forgot Password request again.")
-            
-            user.email_status = "Verified"
-            user.password_reset_code = None
-            user.password_reset_code = None
-            db.commit()
-            db.refresh(user)
-            return {"message": "Email verified successfully"}
-        else:
-            raise HTTPException(status_code=404, detail="User not found")
+        try:
+            if user:
+                # Check if the verification code is correct
+                if user.password_reset_code != verification_code:
+                    raise HTTPException(status_code=400, detail="Verification code is incorrect")
+                if user.verification_token != token:
+                    raise jwt.InvalidTokenError(status_code=400, detail="Verification token is Invalid")
+                
+                # Check if the access token is valid (not expired)
+                exp_timestamp = decoded_token["exp"]
+                exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+                if datetime.now(timezone.utc) >= exp_datetime_utc:
+                    raise jwt.ExpiredSignatureError(status_code=400, detail="Password reset token has expired. Send Forgot Password request again.")
+                
+                user.email_status = "Verified"
+                user.password_reset_code = None
+                user.password_reset_code = None
+                db.commit()
+                db.refresh(user)
+                return {"message": "Email verified successfully"}
+            else:
+                raise HTTPException(status_code=400, detail="User does not exist")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail= str(e))
 
     except Exception as e:
         raise HTTPException(status_code=400, detail= str(e))
