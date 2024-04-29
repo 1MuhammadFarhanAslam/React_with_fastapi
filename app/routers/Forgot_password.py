@@ -293,16 +293,19 @@ def send_reset_email(recipient_email, reset_access_token):
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);">
             <h2 style="color: #333333; text-align: center;">Password Reset Email</h2>
             <p style="color: #333333; font-size: 16px; line-height: 1.6;">Dear User,</p>
-#            <p style="color: #333333; font-size: 16px; line-height: 1.6;">The forgot possword request will expire in 15 minutes. In order to reset your password, click on following button:</p>           
+            <p style="color: #333333; font-size: 16px; line-height: 1.6;">You have requested a password reset for your account. Please note that this request will expire in 15 minutes. To proceed with resetting your password, click the button below:</p>
             <div style="text-align: center; margin-top: 20px;">
                 <a href="{reset_link}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; display: inline-block;">Reset Password</a>
             </div>
-            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">Thank you,<br><strong>Team <a href="{website_link}"> bittaudio.ai</a></strong></p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">If you did not request this password reset or have any concerns about your account's security, please contact our support team immediately.</p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6;">Thank you for choosing <strong><a href="{website_link}" style="color: #333333; text-decoration: none;">bittaudio.ai</a></strong>.</p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6;">Best regards,<br><strong>Team bittaudio.ai</strong></p>
         </div>
 
     </body>
 
     </html>
+
     """
 
     # Create the email message

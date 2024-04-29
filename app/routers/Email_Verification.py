@@ -190,7 +190,9 @@ def send_verification_email(recipient_email, verification_token, verification_co
             <div style="text-align: center; margin-top: 20px;">
                 <a href="{verification_link}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; display: inline-block;">Verify Email</a>
             </div>
-            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">Thank you,<br><strong>Team <a href="{website_link}"> bittaudio.ai</a></strong></p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">If you did not sign up for an account, please disregard this email.</p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6;">Thank you for choosing <strong><a href="{website_link}" style="color: #333333; text-decoration: none;">bittaudio.ai</a></strong>.</p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6;">Best regards,<br><strong>Team bittaudio.ai</strong></p>
         </div>
 
     </body>
