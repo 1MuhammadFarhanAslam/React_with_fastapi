@@ -417,7 +417,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             # Send verification email
             if send_verification_email(email, verification_token, verification_code):
                 hashed_password = hash_password(password)
-                user = Email_User(email=email, password=hashed_password, email_status=email_status, roles=roles, status=status, password_reset_code=verification_code, verification_token=verification_token)
+                user = Email_User(email=email, password=hashed_password, email_status=email_status, roles=list(roles), status=status, password_reset_code=verification_code, verification_token=verification_token)
                 db.add(user)
                 db.commit()
                 db.refresh(user)
