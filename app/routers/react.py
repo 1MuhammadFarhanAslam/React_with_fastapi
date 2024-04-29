@@ -469,7 +469,7 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
                 if user.password_reset_code != verification_code:
                     raise HTTPException(status_code=400, detail="Verification code is incorrect")
                 if user.verification_token != token:
-                    raise jwt.InvalidTokenError(status_code=400, detail="Verification token is Invalid")
+                    raise HTTPException(status_code=400, detail="Verification token is Invalid")
                 
                 # Check if the access token is valid (not expired)
                 exp_timestamp = decoded_token["exp"]
