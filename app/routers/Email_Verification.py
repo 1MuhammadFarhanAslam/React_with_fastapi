@@ -195,7 +195,8 @@ def send_verification_email(recipient_email, verification_token, verification_co
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); text-align: center;">
             <h2 style="color: #333333;">Email Verification</h2>
             <p style="color: #333333; font-size: 16px; line-height: 1.6;">Dear User,</p>
-            <p style="color: #333333; font-size: 16px; line-height: 1.6;">Thank you for signing up with us. Your email verification code is: <strong>{verification_code}</strong>. To complete your registration and verify your email address, please click the button below and enter your email verification code:</p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6;">Thank you for signing up with us. Your email verification code is: <strong>{verification_code}</strong></p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6;">Please enter the verification code in the verification page to verify your email address.</p>
             <div style="margin-top: 20px;">
                 <a href="{verification_link}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; display: inline-block;">Verify Email</a>
             </div>
