@@ -386,6 +386,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
         request_data = await request.json()
+        print(request_data)
         email = request_data.get('email')
         password = request_data.get('password')
         email_status = request_data.get("email_status")
