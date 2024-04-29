@@ -269,6 +269,9 @@ def send_reset_email(recipient_email, reset_access_token):
     smtp_username = SMTP_USERNAME
     smtp_password = SMTP_PASSWORD
 
+    # Website link
+    website_link = "http://bittaudio.ai"
+
     # Password reset link with token (assuming this is a frontend endpoint for reset)
     reset_link = f"http://localhost:3000/auth/rest-password?token={reset_access_token}"
 
@@ -290,11 +293,11 @@ def send_reset_email(recipient_email, reset_access_token):
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);">
             <h2 style="color: #333333; text-align: center;">Password Reset Email</h2>
             <p style="color: #333333; font-size: 16px; line-height: 1.6;">Dear User,</p>
-#            <p style="color: #333333; font-size: 16px; line-height: 1.6;">In order to reset your password, click on following button:</p>           
+#            <p style="color: #333333; font-size: 16px; line-height: 1.6;">The forgot possword request will expire in 15 minutes. In order to reset your password, click on following button:</p>           
             <div style="text-align: center; margin-top: 20px;">
                 <a href="{reset_link}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; display: inline-block;">Reset Password</a>
-                <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;"> This code will expire in 15 minutes.</p>
             </div>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">Thank you,<br><strong>Team <a href="{website_link}"> bittaudio.ai</a></strong></p>
         </div>
 
     </body>

@@ -48,9 +48,7 @@ if VERIFICATION_SECRET_KEY is None:
     raise Exception("VERIFICATION_SECRET_KEY environment variable is not set")
 
 ALGORITHM = "HS256"
-PASSWORD_RESET_TOKEN_EXPIRE_MINUTES = 15  # Change to 30 minutes
-
-ACCESS_TOKEN_EXPIRE_MINUTES = 60  # Change to 30 minutes
+VERIFICATION_ACCESS_TOKEN_EXPIRE_DAYS = 36500  # Change to 30 minutes
 
 
 # Create the SQLAlchemy engine
@@ -73,26 +71,16 @@ def get_database() -> Generator[Session, None, None]:
     finally:
         db.close()
 
-def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, GOOGLE_EMAIL_LOGIN_SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
 
 def Email_Verification_Code_Generator():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
 
-def Verification_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
+def Verification_Token(data: dict, expires_delta=timedelta(days=VERIFICATION_ACCESS_TOKEN_EXPIRE_DAYS)):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc) + timedelta(days=36500)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, VERIFICATION_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -178,7 +166,7 @@ def send_verification_email(recipient_email, verification_token, verification_co
     website_link = "http://bittaudio.ai"
 
     # Verification link with token
-    verification_link = f"http://bittaudio.ai/verifyEmail?token={verification_token}"
+    verification_link = f"http://localhost:3000/auth/verification?token={verification_token}"
 
     # Email content with HTML formatting
     sender_email = SENDER_EMAIL
