@@ -79,8 +79,8 @@ class Email_User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     email = Column(String, unique=True, index=True)
     password = Column(String)
-    email_status= Column(String, default="Unverified")
-    role = Column(String, default="user")  # Default role is "user"
+    email_status= Column(String)
+    role = Column(String)  # Default role is "user"
     password_reset_code = Column(String, default=None)
     reset_access_token = Column(String, default=None)
     verification_token = Column(String, default=None)
