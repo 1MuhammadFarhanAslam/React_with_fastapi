@@ -478,6 +478,7 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
             
             user.email_status = "Verified"
             user.password_reset_code = None
+            user.password_reset_code = None
             db.commit()
             db.refresh(user)
             return {"message": "Email verified successfully"}
