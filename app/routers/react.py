@@ -485,7 +485,7 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
             raise HTTPException(status_code=404, detail="User not found")
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail= str(e))
+        raise HTTPException(status_code=400, detail= str(e))
 
         
 
