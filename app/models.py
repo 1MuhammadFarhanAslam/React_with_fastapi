@@ -7,6 +7,7 @@ import os
 from sqlalchemy import create_engine
 import random
 import string
+from sqlalchemy import ARRAY
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -80,7 +81,7 @@ class Email_User(Base):
     email = Column(String, unique=True, index=True)
     password = Column(String)
     email_status= Column(String)
-    roles = Column(list) # Default role is "user"
+    roles = Column(ARRAY(String))
     status = Column(String)
     password_reset_code = Column(String, default=None)
     reset_access_token = Column(String, default=None)
