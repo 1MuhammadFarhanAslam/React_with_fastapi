@@ -174,7 +174,8 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
                     "email": existing_user.email,
                     "picture": existing_user.picture,
                     "email_status": existing_user.email_status,
-                    "role": existing_user.role
+                    "roles": existing_user.roles,
+                    "status": existing_user.status
                 },
                 "access_token": access_token,
                 "token_type": "bearer"
@@ -209,7 +210,8 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
                     "email": user.email,
                     "picture": user.picture,
                     "email_status": user.email_status,
-                    "role": user.role
+                    "roles": user.roles,
+                    "status": user.status
                 },
                 "access_token": access_token,
                 "token_type": "bearer"
@@ -383,9 +385,13 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
 @router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
-        data = await request.json()
-        email = data.get('email')
-        password = data.get('password')
+        request_data = await request.json()
+        email = request_data.get('email')
+        password = request_data.get('password')
+        email_status = request_data.get("email_status")
+        roles = list(request_data.get("roles"))
+        status = request_data.get("status")
+
 
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
@@ -410,7 +416,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             # Send verification email
             if send_verification_email(email, verification_token, verification_code):
                 hashed_password = hash_password(password)
-                user = Email_User(email=email, password=hashed_password, password_reset_code=verification_code, verification_token=verification_token)
+                user = Email_User(email=email, password=hashed_password, email_status=email_status, roles=roles, status=status, password_reset_code=verification_code, verification_token=verification_token)
                 db.add(user)
                 db.commit()
                 db.refresh(user)
@@ -424,7 +430,8 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                         "created_at": user.created_at.isoformat(),
                         "email": user.email,
                         "email_status": user.email_status,
-                        "role": user.role
+                        "roles": user.roles,
+                        "status": user.status
                     },
                     "access_token": access_token,
                     "token_type": "bearer"
@@ -537,7 +544,8 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                         "created_at": email_user.created_at.isoformat(),  # Convert datetime to string,
                         "email": email_user.email,
                         "email_status": email_user.email_status,
-                        "role": email_user.role
+                        "roles": email_user.roles,
+                        "status": email_user.status
                     },
 
                     "access_token": access_token,
@@ -584,7 +592,8 @@ async def combined_user_auth(
                 "email": google_user.email,
                 "picture": google_user.picture,
                 "email_status": google_user.email_status,
-                "role": google_user.role
+                "roles": google_user.roles,
+                "status": google_user.status
             }
 
             print("_______________user details_______________", user_data)
@@ -595,7 +604,8 @@ async def combined_user_auth(
                 "created_at": email_user.created_at,
                 "email": email_user.email,
                 "email_status": email_user.email_status,
-                "role": email_user.role
+                "roles": email_user.roles,
+                "status": email_user.status,
             }
 
             print("_______________user details_______________", user_data)

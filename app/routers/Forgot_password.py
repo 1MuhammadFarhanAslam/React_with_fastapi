@@ -368,6 +368,7 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
             db.add(user)
             db.commit()
             db.refresh(user)
+            db.close()
             return {"message": "Password reset email sent successfully"}
         else:
             raise HTTPException(status_code=400, detail="Failed to send reset email")
@@ -431,6 +432,7 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
             user.reset_access_token = None
             db.commit()
             db.refresh(user)
+            db.close()
             return {"message": "Password reset successfully"}
         except Exception as e:
             print(f"{e}")
