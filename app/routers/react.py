@@ -12,6 +12,8 @@ from hashing import hash_password
 from react_database import verify_email_user_password
 from fastapi.responses import JSONResponse
 from .Email_Verification import Verification_Token, send_verification_email
+import random
+import string
 
 
 router = APIRouter()
@@ -57,6 +59,9 @@ def get_database() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
+def Email_Verification_Code_Generator():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=8))
 
 def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
     to_encode = data.copy()
@@ -394,13 +399,16 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             # print(f"--------Verification code generated: {verification_code}--------")
 
             # or
+            
+            verification_code = Email_Verification_Code_Generator()
+            print(f"--------Verification code generated: {verification_code}--------")
 
             # Generate a verification code
             verification_token = Verification_Token({"email": email})
             print("_______________verification_token_______________", verification_token)
             
             # Send verification email
-            if send_verification_email(email, verification_token):
+            if send_verification_email(email, verification_token, verification_code):
                 hashed_password = hash_password(password)
                 user = Email_User(email=email, password=hashed_password, verification_token=verification_token)
                 db.add(user)
@@ -434,23 +442,40 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         raise HTTPException(status_code=400, detail="Error: " + str(e))
     
 
-@router.post("/verifyEmail", response_model=None, tags=["Frontend_Signup/Login"])
+@router.post("/api/verification", response_model=None, tags=["Frontend_Signup/Login"])
 async def verify_email(request : Request, db: Session = Depends(get_database)):
     try:
         request_data = await request.json()
         print("_______________request_data_______________", request_data)
 
+        verification_code = request_data.get("verification_code")
+        print("_______________token_______________", verification_code)
+
         token = request_data.get("token")
         print("_______________token_______________", token)
+
         # Decode and verify the verification token
         decoded_token = jwt.decode(token, VERIFICATION_SECRET_KEY, algorithms=["HS256"])
         print("_______________decoded_token_______________", decoded_token)
+
         email = decoded_token.get("email")
         print("_______________email_______________", email)
 
         # Find the user by email and mark as verified
         user = db.query(Email_User).filter(Email_User.email == email).first()
         if user:
+            # Check if the verification code is correct
+            if user.password_reset_code != verification_code:
+                raise HTTPException(status_code=400, detail="Verification code is incorrect")
+            if user.verification_token != token:
+                raise jwt.InvalidTokenError(status_code=400, detail="Verification token is Invalid")
+            
+            # Check if the access token is valid (not expired)
+            exp_timestamp = decoded_token["exp"]
+            exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+            if datetime.now(timezone.utc) >= exp_datetime_utc:
+                raise jwt.ExpiredSignatureError(status_code=400, detail="Password reset token has expired. Send Forgot Password request again.")
+            
             user.email_status = "Verified"
             db.commit()
             db.refresh(user)
@@ -458,12 +483,8 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
         else:
             raise HTTPException(status_code=404, detail="User not found")
 
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=400, detail="Verification token has expired.")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=400, detail="Invalid verification token.")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Error verifying email: " + str(e))
+        raise HTTPException(status_code=500, detail= str(e))
 
         
 
