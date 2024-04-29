@@ -431,7 +431,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                         "created_at": user.created_at.isoformat(),
                         "email": user.email,
                         "email_status": user.email_status,
-                        "roles": user.roles,
+                        "roles": list(user.roles),
                         "status": user.status
                     },
                     "access_token": access_token,
