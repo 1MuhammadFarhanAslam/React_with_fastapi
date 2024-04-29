@@ -485,7 +485,7 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
         else:
             raise HTTPException(status_code=400, detail="User does not exist")
         
-    except jwt.JWTError:
+    except jwt.exceptions.DecodeError:
         raise HTTPException(status_code=400, detail="Invalid token")
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=400, detail="Token has expired")
