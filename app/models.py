@@ -81,7 +81,7 @@ class Google_User(Base):
     username = Column(String)
     email = Column(String, unique=True, index=True)
     picture = Column(String)
-    email_status = Column(Boolean)
+    email_status = Column(String)
     roles = Column(ARRAY(String), default=['customer'])
 
 
