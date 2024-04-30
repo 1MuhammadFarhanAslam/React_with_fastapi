@@ -96,7 +96,7 @@ class Google_User(Base):
     email = Column(String, unique=True, index=True)
     picture = Column(String)
     email_status = Column(Boolean)
-    role = Column(String, default="user")  # Default role is "user"
+    role = Column(String)  # Default role is "user"
 
 class Google_user_Token(BaseModel):
     id_token: str
