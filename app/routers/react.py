@@ -615,8 +615,7 @@ async def combined_user_auth(
                 "email": google_user.email,
                 "picture": google_user.picture,
                 "email_status": google_user.email_status,
-                "roles": google_user.roles,
-                "status": google_user.status
+                "role": google_user.role
             }
 
             print("_______________user details_______________", user_data)
