@@ -174,7 +174,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
                     "email": existing_user.email,
                     "picture": existing_user.picture,
                     "email_status": existing_user.email_status,
-                    "roles": existing_user.roles,
+                    "role": existing_user.role,
                     "status": existing_user.status
                 },
                 "access_token": access_token,
@@ -210,7 +210,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
                     "email": user.email,
                     "picture": user.picture,
                     "email_status": user.email_status,
-                    "roles": user.roles,
+                    "role": user.role,
                     "status": user.status
                 },
                 "access_token": access_token,
