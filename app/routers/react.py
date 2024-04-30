@@ -153,7 +153,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
             "username": ticket.get("name"),
             "email": ticket.get("email"),
             "picture": ticket.get("picture"),
-            "email_verified": ticket.get("email_verified"),
+            "email_status": ticket.get("email_verified"),
         }
 
         print("_________user_data__________:", user_data)
