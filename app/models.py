@@ -73,6 +73,18 @@ class User(Base):
 Role.user = relationship("User", back_populates="roles")
 
 
+class Google_User(Base):
+    __tablename__ = "google_users"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: ''.join(random.choices(string.ascii_letters + string.digits, k=64)))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    username = Column(String)
+    email = Column(String, unique=True, index=True)
+    picture = Column(String)
+    email_status = Column(Boolean)
+    roles = Column(ARRAY(String, default=['customer']))
+
+
 class Email_User(Base):
     __tablename__ = "email_users"
 
@@ -87,16 +99,6 @@ class Email_User(Base):
     reset_access_token = Column(String, default=None)
     verification_token = Column(String, default=None)
 
-class Google_User(Base):
-    __tablename__ = "google_users"
-
-    id = Column(String, primary_key=True, index=True, default=lambda: ''.join(random.choices(string.ascii_letters + string.digits, k=64)))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    username = Column(String)
-    email = Column(String, unique=True, index=True)
-    picture = Column(String)
-    email_status = Column(Boolean)
-    role = Column(String)  # Default role is "user"
 
 class Google_user_Token(BaseModel):
     id_token: str
