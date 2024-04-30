@@ -273,7 +273,7 @@ def send_reset_email(recipient_email, reset_access_token):
     website_link = "http://bittaudio.ai"
 
     # Password reset link with token (assuming this is a frontend endpoint for reset)
-    reset_link = f"http://localhost:3000/auth/rest-password?token={reset_access_token}"
+    reset_link = f"http://bittaudio/auth/rest-password?token={reset_access_token}"
 
     # Email content with HTML formatting including a button
     sender_email = SENDER_EMAIL
