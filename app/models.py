@@ -80,8 +80,8 @@ class Google_User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     username = Column(String)
     email = Column(String, unique=True, index=True)
-    picture = Column(String)
     email_status = Column(String)
+    picture = Column(String)
     roles = Column(ARRAY(String), default=['customer'])
 
 
