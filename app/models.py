@@ -80,7 +80,7 @@ class Email_User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     email = Column(String, unique=True, index=True)
     password = Column(String)
-    email_status= Column(String)
+    email_status = Column(String)
     roles = Column(ARRAY(String))
     status = Column(String)
     password_reset_code = Column(String, default=None)
