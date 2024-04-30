@@ -490,7 +490,17 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
             user.password_reset_code = None
             db.commit()
             db.refresh(user)
-            return {"message": "Email verified successfully"}
+            print("-----------Email verified successfully-----------")
+            return {"message": "Email verified successfully",
+                    "user_info": {
+                        "id": user.id,
+                        "created_at": user.created_at.isoformat(),
+                        "email": user.email,
+                        "email_status": user.email_status,
+                        "roles": user.roles,
+                        "status": user.status
+                    }
+            }
         else:
             raise HTTPException(status_code=400, detail="User does not exist")
         
