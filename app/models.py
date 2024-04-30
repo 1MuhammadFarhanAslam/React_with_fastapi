@@ -82,7 +82,7 @@ class Google_User(Base):
     email = Column(String, unique=True, index=True)
     picture = Column(String)
     email_status = Column(Boolean)
-    roles = Column(ARRAY(String, default=['customer']))
+    roles = Column(ARRAY(String), default=['customer'])
 
 
 class Email_User(Base):
