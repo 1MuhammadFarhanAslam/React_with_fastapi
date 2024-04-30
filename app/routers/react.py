@@ -174,7 +174,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
                     "email": existing_user.email,
                     "picture": existing_user.picture,
                     "email_status": existing_user.email_status,
-                    "role": existing_user.role
+                    "roles": existing_user.roles
                 },
                 "access_token": access_token,
                 "token_type": "bearer"
@@ -209,7 +209,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
                     "email": user.email,
                     "picture": user.picture,
                     "email_status": user.email_status,
-                    "role": user.role
+                    "roles": user.roles
                 },
                 "access_token": access_token,
                 "token_type": "bearer"
@@ -615,7 +615,7 @@ async def combined_user_auth(
                 "email": google_user.email,
                 "picture": google_user.picture,
                 "email_status": google_user.email_status,
-                "role": google_user.role
+                "roles": google_user.roles
             }
 
             print("_______________user details_______________", user_data)
