@@ -493,7 +493,7 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
             user.password_reset_code = None
             db.commit()
             db.refresh(user)
-            
+
             print("-----------Email verified successfully-----------")
 
             resp = {"message": "Email verified successfully",
@@ -512,6 +512,7 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
             # Set the access token as a cookie
             response = JSONResponse(content=resp)
             response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")
+            print("--------------response--------------", response)
             return response
         else:
             raise HTTPException(status_code=400, detail="User does not exist")
