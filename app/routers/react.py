@@ -485,13 +485,18 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
             if datetime.now(timezone.utc) >= exp_datetime_utc:
                 raise HTTPException(status_code=400, detail="Password reset token has expired. Send Forgot Password request again.")
             
+            # Return success response with access token and user info
+            access_token = React_JWT_Token(data={"sub": user.email})
+
             user.email_status = "Verified"
             user.password_reset_code = None
             user.password_reset_code = None
             db.commit()
             db.refresh(user)
+            
             print("-----------Email verified successfully-----------")
-            return {"message": "Email verified successfully",
+
+            resp = {"message": "Email verified successfully",
                     "user_info": {
                         "id": user.id,
                         "created_at": user.created_at.isoformat(),
@@ -499,8 +504,15 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
                         "email_status": user.email_status,
                         "roles": user.roles,
                         "status": user.status
-                    }
+                    },
+                "access_token": access_token,
+                "token_type": "bearer"
             }
+
+            # Set the access token as a cookie
+            response = JSONResponse(content=resp)
+            response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")
+            return response
         else:
             raise HTTPException(status_code=400, detail="User does not exist")
         
