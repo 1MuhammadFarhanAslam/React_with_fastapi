@@ -269,9 +269,6 @@ def send_reset_email(recipient_email, reset_access_token):
     smtp_username = SMTP_USERNAME
     smtp_password = SMTP_PASSWORD
 
-    # Website link
-    website_link = "http://bittaudio.ai"
-
     # Password reset link with token (assuming this is a frontend endpoint for reset)
     reset_link = f"http://bittaudio.ai/auth/rest-password?token={reset_access_token}"
 
