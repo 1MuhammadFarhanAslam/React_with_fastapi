@@ -324,7 +324,7 @@ def send_reset_email(recipient_email, reset_access_token):
         return True  # Email sent successfully
     except Exception as e:
         print(f'-------Error sending email: {e}--------')
-        return False  # Email sending failed
+        raise HTTPException(status_code=400, detail="Failed to send reset email. Please try again later.")
     finally:
         server.quit()  # Close the connection
 
@@ -370,8 +370,8 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
         else:
             raise HTTPException(status_code=400, detail="Failed to send reset email")
     except Exception as e:
-        print(f"-------{e}--------")
-        raise HTTPException(status_code=400, detail= str(e))
+        print(e)
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/api/reset-password")
