@@ -299,7 +299,6 @@ def send_reset_email(recipient_email, reset_access_token):
                 <a href="{reset_link}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; display: inline-block;">Reset Password</a>
             </div>
             <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">If you did not request this password reset or have any concerns about your account's security, please contact our support team immediately.</p>
-            <p style="color: #333333; font-size: 16px; line-height: 1.6;">Thank you for choosing <strong><a href="{website_link}" style="color: #333333; text-decoration: none;">bittaudio.ai</a></strong>.</p>
             <p style="color: #333333; font-size: 16px; line-height: 1.6;">Best regards,<br><strong>Team bittaudio.ai</strong></p>
         </div>
 
