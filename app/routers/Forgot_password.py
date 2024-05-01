@@ -276,6 +276,7 @@ def send_reset_email(recipient_email, reset_access_token):
     reset_link = f"http://bittaudio.ai/auth/rest-password?token={reset_access_token}"
 
     # Email content with HTML formatting including a button
+    sender_name = "bittaudio.ai"  # Update sender name
     sender_email = SENDER_EMAIL
     subject = 'Password Reset Email'
     body = f"""\
@@ -310,7 +311,7 @@ def send_reset_email(recipient_email, reset_access_token):
 
     # Create the email message
     message = MIMEMultipart()
-    message['From'] = sender_email
+    message['From'] = f"{sender_name} <{sender_email}>"
     message['To'] = recipient_email
     message['Subject'] = subject
     message.attach(MIMEText(body, 'html'))
