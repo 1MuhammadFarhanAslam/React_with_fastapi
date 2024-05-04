@@ -832,7 +832,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
 
     except UserNotFoundError_1 as e:
         print(e)
-        raise HTTPException(status_code=400, detail= "User not found. Please sign up first.")
+        raise HTTPException(status_code=400, detail= "Please sign up first.")
     except IncorrectPasswordError as e:
         print(e)
         raise HTTPException(status_code=400, detail= "Incorrect password. Please try again")   
