@@ -75,6 +75,39 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
     return encoded_jwt
 
 
+# Custom exception classes
+class InvalidVerificationCode(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Verification code is incorrect")
+
+class InvalidVerificationToken(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Verification token is invalid")
+
+class TokenExpired(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Token has expired. Send Forgot Password request again.")
+
+class UserNotFoundError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="User does not exist")
+
+class EmailExistsError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="User already exists. Please sign in instead.")
+
+class VerificationEmailError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Failed to send verification email. Please sign up later.")
+
+class UserNotFoundError_1(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="User not found. Please sign up first.")
+
+class IncorrectPasswordError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Incorrect password. Please try again")
+
 
 # @router.post("/api/google-signin", tags=["React"])
 # async def google_signin(token: Google_user_Token, db: Session = Depends(get_database)):
@@ -226,7 +259,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
     
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=400, detail= str(e))
+        raise HTTPException(status_code=400, detail= "Unable to Signup/login. Please try again later.")
     
 
 # @router.post("/api/email-signup", tags=["React"])
@@ -450,17 +483,6 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
 #         raise HTTPException(status_code=400, detail="Error: " + str(e))
 
 
-
-# Custom exception classes
-class EmailExistsError(HTTPException):
-    def __init__(self):
-        super().__init__(status_code=400, detail="User already exists. Please sign in instead.")
-
-class VerificationEmailError(HTTPException):
-    def __init__(self):
-        super().__init__(status_code=400, detail="Failed to send verification email. Please sign up later.")
-
-# Your endpoint using custom exceptions
 @router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
@@ -614,22 +636,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 
 
 
-# Custom exception classes
-class InvalidVerificationCode(HTTPException):
-    def __init__(self):
-        super().__init__(status_code=400, detail="Verification code is incorrect")
 
-class InvalidVerificationToken(HTTPException):
-    def __init__(self):
-        super().__init__(status_code=400, detail="Verification token is invalid")
-
-class TokenExpired(HTTPException):
-    def __init__(self):
-        super().__init__(status_code=400, detail="Token has expired. Send Forgot Password request again.")
-
-class UserNotFoundError(HTTPException):
-    def __init__(self):
-        super().__init__(status_code=400, detail="User does not exist")
 
 # Your endpoint using custom exceptions
 @router.post("/api/verification", response_model=None, tags=["Frontend_Signup/Login"])
@@ -703,7 +710,8 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
     except ExpiredSignatureError:
         raise HTTPException(status_code=400, detail="Token has expired")
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        print(e)
+        raise HTTPException(status_code=500, detail= "Internal server error")
 
         
 
@@ -768,15 +776,6 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
 #     except Exception as e:
 #         raise HTTPException(status_code=400, detail= str(e))
 
-
-# Custom exception classes
-class UserNotFoundError_1(HTTPException):
-    def __init__(self):
-        super().__init__(status_code=400, detail="User not found. Please sign up first.")
-
-class IncorrectPasswordError(HTTPException):
-    def __init__(self):
-        super().__init__(status_code=400, detail="Incorrect password. Please try again")
 
 # Your endpoint using custom exceptions
 @router.post("/api/email-signin", tags=["Frontend_Signup/Login"])
@@ -889,18 +888,22 @@ async def combined_user_auth(
             print("_______________user details_______________", user_data)
 
         else:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise UserNotFoundError()
         
         return {
             "message": "User details retrieved successfully",
             "userData": user_data
         }
+
+    except UserNotFoundError:
+        raise HTTPException(status_code=404, detail= "User not found")
     except jwt.exceptions.DecodeError:
         raise HTTPException(status_code=401, detail="Invalid token")
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
     except Exception as e:
-        raise HTTPException(status_code=400, detail= str(e))
+        print(e)
+        raise HTTPException(status_code=500, detail= "Internal Server Error")
     
 
 
