@@ -450,6 +450,16 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
 
 
 
+# Custom exception classes
+class EmailExistsError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="User already exists. Please sign in instead.")
+
+class VerificationEmailError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Failed to send verification email. Please sign up later.")
+
+# Your endpoint using custom exceptions
 @router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
@@ -466,7 +476,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if existing_user:
-            raise HTTPException(status_code=400, detail="User already exists. Please sign in instead.")  
+            raise EmailExistsError()  # Raise custom exception for existing user
         
         else:
             # Generate a verification code
@@ -486,7 +496,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                 send_verification_email(email, verification_token, verification_code)
             except Exception as e:
                 print(e)
-                raise HTTPException(status_code=400, detail="Failed to send verification email. Please sign up later.")
+                raise VerificationEmailError()  # Raise custom exception for verification email failure
 
             # Save user data in the database
             db.add(user)
@@ -515,9 +525,12 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")
             return response
         
+    except EmailExistsError as e:
+        raise HTTPException(status_code=400, detail="User already exists. Please sign in instead.")  # Catch-all exception for existing user
+    except VerificationEmailError as e:
+        raise HTTPException(status_code=400, detail="Failed to send verification email. Please sign up later.")  # Catch-all exception for verification email failure
     except Exception as e:
-        print(e)
-        raise HTTPException(status_code=400, detail= str(e))
+        raise HTTPException(status_code=500, detail="Internal Server Error")  # Catch-all exception for other errors
 
     
 
