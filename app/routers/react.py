@@ -466,7 +466,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
         if existing_user:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists. Please sign in instead.")  
+            raise HTTPException(status_code=400, detail="User already exists. Please sign in instead.")  
         
         else:
             # Generate a verification code
@@ -612,7 +612,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
 
         if not email_user:
             print("OooPS...User not found. Please sign up first.")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OooPS...User not found. Please sign up first.")
+            raise HTTPException(status_code=400, detail="OooPS...User not found. Please sign up first.")
         
         else:
             # Verify the password
