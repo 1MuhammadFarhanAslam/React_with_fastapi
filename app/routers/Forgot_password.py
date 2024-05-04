@@ -329,10 +329,24 @@ def send_reset_email(recipient_email, reset_access_token):
         server.quit()  # Close the connection
 
 
+# Custom exception classes
+class NoInputDataError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="No input data provided")
 
+class EmailNotFoundError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Email not found")
 
+class UserNotFoundError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=404, detail="User not found")
 
+class FailedToSendResetEmailError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Failed to send reset email. Please try again later.")
 
+# Your endpoint using custom exceptions
 @router.post("/api/forgot-password")
 async def request_password_reset(request: Request, db: Session = Depends(get_database)):
     try:
@@ -340,18 +354,18 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
         print('_______________request_data_____________', request_data)
 
         if not request_data:
-            raise HTTPException(status_code=400, detail="No input data provided")
+            raise NoInputDataError()
         
         email = request_data.get("email")
         print("--------Email------------: ", email)
         if not email:
-            raise HTTPException(status_code=400, detail="Email not found")
+            raise EmailNotFoundError()
         
         # Check if user exists in database
         user = db.query(Email_User).filter(Email_User.email == email).first()
         if not user:
             print("--------User not found--------")
-            raise HTTPException(status_code=404, detail="User not found")
+            raise UserNotFoundError()
 
         # Generate a password reset access token with expiry
         reset_access_token = Password_Reset_Access_Token(data={"sub": email})
@@ -363,7 +377,7 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
             print("--------Email sent successfully--------")
         except Exception as e:
             print(f"--------Error sending email: {e}--------")
-            raise HTTPException(status_code=400, detail="Failed to send reset email. Please try again later.")
+            raise FailedToSendResetEmailError()
 
         # Update the user's database record with the reset token and code
         user.reset_access_token = reset_access_token  # No need to decode
@@ -374,7 +388,7 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
         return {"message": "Password reset email sent successfully"}
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/api/reset-password")
