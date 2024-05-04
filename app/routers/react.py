@@ -527,7 +527,7 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
         print("_______________request_data_______________", request_data)
 
         verification_code = request_data.get("verification_code")
-        print("_______________token_______________", verification_code)
+        print("_______________verification_code_______________", verification_code)
 
         token = request_data.get("token")
         print("_______________token_______________", token)
