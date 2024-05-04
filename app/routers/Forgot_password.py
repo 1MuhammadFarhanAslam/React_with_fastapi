@@ -346,6 +346,27 @@ class FailedToSendResetEmailError(HTTPException):
     def __init__(self):
         super().__init__(status_code=400, detail="Failed to send reset email. Please try again later.")
 
+class TokenNotFoundError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Token not found")
+
+class PasswordNotFoundError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Password not found")
+
+class InvalidResetTokenError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Invalid reset token")
+
+class TokenExpiredError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Token has expired. Send Forgot Password request again.")
+
+class UpdatePasswordError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Failed to update password")
+
+
 # Your endpoint using custom exceptions
 @router.post("/api/forgot-password")
 async def request_password_reset(request: Request, db: Session = Depends(get_database)):
@@ -404,6 +425,7 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
+# Your endpoint using custom exceptions
 @router.post("/api/reset-password")
 async def submit_password_reset(request: Request, db: Session = Depends(get_database)):
     try:
@@ -422,27 +444,22 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
         print("Password: ", new_password)
 
         if not request_data:
-            print("No input data provided")
-            raise HTTPException(status_code=400, detail="No input data provided")
+            raise NoInputDataError()
 
         if not token:
-            print("Token not found")
-            raise HTTPException(status_code=400, detail="Token not found")
+            raise TokenNotFoundError()
 
         if not new_password:
-            print("Password not found")
-            raise HTTPException(status_code=400, detail="Password not found")
+            raise PasswordNotFoundError()
 
         # Check if user exists in database
         user = db.query(Email_User).filter(Email_User.email == email).first()
         if not user:
-            print("User not found")
-            raise HTTPException(status_code=404, detail="User not found")
+            raise UserNotFoundError()
         
         # Check if the saved reset token matches the incoming token
         if user.reset_access_token != token:
-            print("Invalid reset token")
-            raise HTTPException(status_code=400, detail="Invalid reset token")
+            raise InvalidResetTokenError()
 
         # Decode the JWT access token
         decoded_token = jwt.decode(token, PASSWORD_RESET_SECRET_KEY, algorithms=[ALGORITHM])
@@ -451,7 +468,8 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
         exp_timestamp = decoded_token["exp"]
         exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
         if datetime.now(timezone.utc) >= exp_datetime_utc:
-            raise HTTPException(status_code=400, detail="Password reset token has expired. Send Forgot Password request again.")
+            raise TokenExpiredError()
+        
         try:  
             # Update the user's password with the new password
             new_hashed_password = hash_password(new_password)
@@ -463,11 +481,32 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
             return {"message": "Password reset successfully"}
         except Exception as e:
             print(f"{e}")
-            raise HTTPException(status_code=400, detail=str(e))
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=400, detail="Token signature has expired. Send Forgot Password request again.")
+            raise UpdatePasswordError()
+
+    except NoInputDataError as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="No input data provided")
+    except TokenNotFoundError as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Token not found")
+    except PasswordNotFoundError as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Password not found")
+    except UserNotFoundError as e:
+        print(e)
+        raise HTTPException(status_code=404, detail="User not found")
+    except InvalidResetTokenError as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Invalid reset token")
+    except TokenExpiredError as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Token has expired. Send Forgot Password request again.")
+    except UpdatePasswordError as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Failed to update password")
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        print(e)
+        raise HTTPException(status_code=500, detail= "Internal server error")
 
 
 
