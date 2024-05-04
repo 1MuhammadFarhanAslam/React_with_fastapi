@@ -386,6 +386,19 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
         db.refresh(user)
         db.close()
         return {"message": "Password reset email sent successfully"}
+
+    except NoInputDataError as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="No input data provided")
+    except EmailNotFoundError as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Email not found")
+    except UserNotFoundError as e:
+        print(e)
+        raise HTTPException(status_code=404, detail="User not found")
+    except FailedToSendResetEmailError as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Failed to send reset email. Please try again later.")
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Internal server error")
