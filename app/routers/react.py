@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Depends, APIRouter, Header, Request, status, Form
+from fastapi import HTTPException, Depends, APIRouter, Header, Request, status, Form, JsonResponse
 from datetime import datetime, timedelta, timezone
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -516,7 +516,8 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             return response
         
     except Exception as e:
-        raise HTTPException(status_code=400, detail="Error: " + str(e))
+        print(e)
+        raise HTTPException(status_code=400, detail= "Failed to complete signup process. Please try again later.")
 
     
 
