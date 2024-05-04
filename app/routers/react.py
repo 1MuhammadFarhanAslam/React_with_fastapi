@@ -379,7 +379,77 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
 #         print(e)
 #         raise HTTPException(status_code=400, detail="Error: " + str(e))
 
-# Email sign up  endpoint with email verification functionality (using SMTP server)
+# # Email sign up  endpoint with email verification functionality (using SMTP server)
+# @router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
+# async def email_signup(request: Request, db: Session = Depends(get_database)):
+#     try:
+#         request_data = await request.json()
+#         print(request_data)
+#         email = request_data.get('email')
+#         password = request_data.get('password')
+#         email_status = request_data.get("email_status")
+#         roles = request_data.get("roles")
+#         print("______________roles________________: ", roles)
+#         status = request_data.get("status")
+
+
+#         # Check if the user already exists in the database
+#         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
+
+#         if existing_user:
+#             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists. Please sign in instead.")  
+        
+#         else:
+#             # # Generate a verification code
+#             # verification_code = str(uuid4())[:8]  # Generate a random code (e.g., 8 characters)
+#             # print(f"--------Verification code generated: {verification_code}--------")
+
+#             # or
+            
+#             verification_code = Email_Verification_Code_Generator()
+#             print(f"--------Verification code generated: {verification_code}--------")
+
+#             # Generate a verification code
+#             verification_token = Verification_Token({"email": email})
+#             print("_______________verification_token_______________", verification_token)
+            
+#             # Send verification email
+#             hashed_password = hash_password(password)
+#             user = Email_User(email=email, password=hashed_password, email_status=email_status, roles=roles, status=status, password_reset_code=verification_code, verification_token=verification_token)
+#             db.add(user)
+#             db.commit()
+#             db.refresh(user)
+
+#             # send email verification
+#             send_verification_email(email, verification_token, verification_code)
+
+#             # Return success response with access token and user info
+#             access_token = React_JWT_Token(data={"sub": user.email})
+#             resp = {
+#                 "message": "Signup successful! Please check your email for verification.",
+#                 "user_info": {
+#                     "id": user.id,
+#                     "created_at": user.created_at.isoformat(),
+#                     "email": user.email,
+#                     "email_status": user.email_status,
+#                     "roles": user.roles,
+#                     "status": user.status
+#                 },
+#                 "access_token": access_token,
+#                 "token_type": "bearer"
+#             }
+#             print(resp)
+
+#             # Set the access token as a cookie
+#             response = JSONResponse(content=resp)
+#             response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")
+#             return response
+        
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail="Error: " + str(e))
+
+
+
 @router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
@@ -392,7 +462,6 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         print("______________roles________________: ", roles)
         status = request_data.get("status")
 
-
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
 
@@ -400,28 +469,29 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists. Please sign in instead.")  
         
         else:
-            # # Generate a verification code
-            # verification_code = str(uuid4())[:8]  # Generate a random code (e.g., 8 characters)
-            # print(f"--------Verification code generated: {verification_code}--------")
-
-            # or
-            
+            # Generate a verification code
             verification_code = Email_Verification_Code_Generator()
             print(f"--------Verification code generated: {verification_code}--------")
 
-            # Generate a verification code
+            # Generate a verification token
             verification_token = Verification_Token({"email": email})
             print("_______________verification_token_______________", verification_token)
             
             # Send verification email
             hashed_password = hash_password(password)
             user = Email_User(email=email, password=hashed_password, email_status=email_status, roles=roles, status=status, password_reset_code=verification_code, verification_token=verification_token)
+            
+            # Attempt to send verification email
+            try:
+                send_verification_email(email, verification_token, verification_code)
+            except Exception as e:
+                print(e)
+                raise HTTPException(status_code=400, detail="Failed to send verification email. Please try again later.")
+
+            # Save user data in the database
             db.add(user)
             db.commit()
             db.refresh(user)
-
-            # send email verification
-            send_verification_email(email, verification_token, verification_code)
 
             # Return success response with access token and user info
             access_token = React_JWT_Token(data={"sub": user.email})
@@ -447,6 +517,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         
     except Exception as e:
         raise HTTPException(status_code=400, detail="Error: " + str(e))
+
     
 
 @router.post("/api/verification", response_model=None, tags=["Frontend_Signup/Login"])

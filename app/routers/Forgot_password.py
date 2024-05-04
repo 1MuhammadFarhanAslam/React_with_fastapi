@@ -358,17 +358,20 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
         print("--------Password reset access token generated--------")
         print(f"--------Password reset access token----------: {reset_access_token}")
 
-        # Send the password reset email with the code
-        if send_reset_email(email, reset_access_token):
-            # Update the user's database record with the reset token and code
-            user.reset_access_token = reset_access_token  # No need to decode
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-            db.close()
-            return {"message": "Password reset email sent successfully"}
-        else:
-            raise HTTPException(status_code=400, detail="Failed to send reset email")
+        try:
+            send_reset_email(email, reset_access_token)
+            print("--------Email sent successfully--------")
+        except Exception as e:
+            print(f"--------Error sending email: {e}--------")
+            raise HTTPException(status_code=400, detail="Failed to send reset email. Please try again later.")
+
+        # Update the user's database record with the reset token and code
+        user.reset_access_token = reset_access_token  # No need to decode
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        db.close()
+        return {"message": "Password reset email sent successfully"}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail=str(e))
