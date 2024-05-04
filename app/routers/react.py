@@ -1,8 +1,9 @@
-from fastapi import HTTPException, Depends, APIRouter, Header, Request, status, Form
+from fastapi import HTTPException, Depends, APIRouter, Header, Request, status
 from datetime import datetime, timedelta, timezone
 from google.oauth2 import id_token
 from google.auth.transport import requests
 import jwt
+from jwt.exceptions import DecodeError, ExpiredSignatureError
 import os
 from models import Google_User, Google_user_Token, Email_User
 from sqlalchemy.orm import sessionmaker, Session, declarative_base
@@ -526,16 +527,113 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             return response
         
     except EmailExistsError as e:
+        print(e)
         raise HTTPException(status_code=400, detail="User already exists. Please sign in instead.")  # Catch-all exception for existing user
     except VerificationEmailError as e:
+        print(e)
         raise HTTPException(status_code=400, detail="Failed to send verification email. Please sign up later.")  # Catch-all exception for verification email failure
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Internal Server Error")  # Catch-all exception for other errors
 
     
 
+# @router.post("/api/verification", response_model=None, tags=["Frontend_Signup/Login"])
+# async def verify_email(request : Request, db: Session = Depends(get_database)):
+#     try:
+#         request_data = await request.json()
+#         print("_______________request_data_______________", request_data)
+
+#         verification_code = request_data.get("verification_code")
+#         print("_______________verification_code_______________", verification_code)
+
+#         token = request_data.get("token")
+#         print("_______________token_______________", token)
+
+#         # Decode and verify the verification token
+#         decoded_token = jwt.decode(token, VERIFICATION_SECRET_KEY, algorithms=["HS256"])
+#         print("_______________decoded_token_______________", decoded_token)
+
+#         email = decoded_token.get("email")
+#         print("_______________email_______________", email)
+
+#         # Find the user by email and mark as verified
+#         user = db.query(Email_User).filter(Email_User.email == email).first()
+#         if user:
+#             # Check if the verification code is correct
+#             if user.password_reset_code != verification_code:
+#                 raise HTTPException(status_code=400, detail="Verification code is incorrect")
+#             if user.verification_token != token:
+#                 raise HTTPException(status_code=400, detail="Verification token is Invalid")
+            
+#             # Check if the access token is valid (not expired)
+#             exp_timestamp = decoded_token["exp"]
+#             exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+#             if datetime.now(timezone.utc) >= exp_datetime_utc:
+#                 raise HTTPException(status_code=400, detail="Password reset token has expired. Send Forgot Password request again.")
+            
+#             # Return success response with access token and user info
+#             access_token = React_JWT_Token(data={"sub": user.email})
+
+#             user.email_status = "Verified"
+#             user.password_reset_code = None
+#             user.password_reset_code = None
+#             db.commit()
+#             db.refresh(user)
+
+#             print("-----------Email verified successfully-----------")
+
+#             resp = {"message": "Email verified successfully",
+#                     "user_info": {
+#                         "id": user.id,
+#                         "created_at": user.created_at.isoformat(),
+#                         "email": user.email,
+#                         "email_status": user.email_status,
+#                         "roles": user.roles,
+#                         "status": user.status
+#                     },
+#                 "access_token": access_token,
+#                 "token_type": "bearer"
+#             }
+
+#             # Set the access token as a cookie
+#             response = JSONResponse(content=resp)
+#             response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")
+#             print("--------------response--------------", response)
+#             return response
+#         else:
+#             raise HTTPException(status_code=400, detail="User does not exist")
+        
+#     except jwt.exceptions.DecodeError:
+#         raise HTTPException(status_code=400, detail="Invalid token")
+#     except jwt.ExpiredSignatureError:
+#         raise HTTPException(status_code=400, detail="Token has expired")
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail= str(e))
+
+
+
+
+# Custom exception classes
+class InvalidVerificationCode(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Verification code is incorrect")
+
+class InvalidVerificationToken(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Verification token is invalid")
+
+class TokenExpired(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Token has expired. Send Forgot Password request again.")
+
+class UserNotFoundError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="User does not exist")
+
+# Your endpoint using custom exceptions
 @router.post("/api/verification", response_model=None, tags=["Frontend_Signup/Login"])
-async def verify_email(request : Request, db: Session = Depends(get_database)):
+async def verify_email(request: Request, db: Session = Depends(get_database)):
     try:
         request_data = await request.json()
         print("_______________request_data_______________", request_data)
@@ -558,15 +656,15 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
         if user:
             # Check if the verification code is correct
             if user.password_reset_code != verification_code:
-                raise HTTPException(status_code=400, detail="Verification code is incorrect")
+                raise InvalidVerificationCode()
             if user.verification_token != token:
-                raise HTTPException(status_code=400, detail="Verification token is Invalid")
+                raise InvalidVerificationToken()
             
             # Check if the access token is valid (not expired)
             exp_timestamp = decoded_token["exp"]
             exp_datetime_utc = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
             if datetime.now(timezone.utc) >= exp_datetime_utc:
-                raise HTTPException(status_code=400, detail="Password reset token has expired. Send Forgot Password request again.")
+                raise TokenExpired()
             
             # Return success response with access token and user info
             access_token = React_JWT_Token(data={"sub": user.email})
@@ -588,9 +686,9 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
                         "roles": user.roles,
                         "status": user.status
                     },
-                "access_token": access_token,
-                "token_type": "bearer"
-            }
+                    "access_token": access_token,
+                    "token_type": "bearer"
+                }
 
             # Set the access token as a cookie
             response = JSONResponse(content=resp)
@@ -598,18 +696,89 @@ async def verify_email(request : Request, db: Session = Depends(get_database)):
             print("--------------response--------------", response)
             return response
         else:
-            raise HTTPException(status_code=400, detail="User does not exist")
+            raise UserNotFoundError()
         
-    except jwt.exceptions.DecodeError:
+    except DecodeError:
         raise HTTPException(status_code=400, detail="Invalid token")
-    except jwt.ExpiredSignatureError:
+    except ExpiredSignatureError:
         raise HTTPException(status_code=400, detail="Token has expired")
     except Exception as e:
-        raise HTTPException(status_code=400, detail= str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
         
 
-# Your existing endpoint code for email signin
+# # Your existing endpoint code for email signin
+# @router.post("/api/email-signin", tags=["Frontend_Signup/Login"])
+# async def email_signin(request: Request, db: Session = Depends(get_database)):
+#     try:
+#         data = await request.json()
+#         email = data.get('email')
+#         print("______________email________________: ", email)
+#         print(type(email))
+#         password = data.get('password')
+#         print("______________password________________: ", password)
+#         print(type(password))
+
+#         # Check if the email exists in the database
+#         email_user = db.query(Email_User).filter(Email_User.email == email).first()
+
+#         if not email_user:
+#             print("OooPS...User not found. Please sign up first.")
+#             raise HTTPException(status_code=400, detail="OooPS...User not found. Please sign up first.")
+        
+#         else:
+#             # Verify the password
+#             if not verify_email_user_password(password, email_user.password):
+#                 print("OooPS...Incorrect password. Please try again")
+#                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OooPS...Incorrect password. Please try again")
+            
+#             # elif email_user.email_status == "unverified":
+#             #     print("OooPS...You have not verified yet. Please verify your email first...")
+#             #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You have not verified yet.Please verify your email first.")
+            
+#             else:
+#                 # Generate an access token for the user
+#                 access_token = React_JWT_Token({"sub": email_user.email})
+#                 print("_______________access_token_______________", access_token)
+#                 print(type(access_token))
+
+#                 # Set the access token as a cookie in the response
+#                 resp = {
+#                     "message": "Login successful! User already exists.",
+#                     "user_info": {
+#                         "id": email_user.id,
+#                         "created_at": email_user.created_at.isoformat(),  # Convert datetime to string,
+#                         "email": email_user.email,
+#                         "email_status": email_user.email_status,
+#                         "roles": email_user.roles,
+#                         "status": email_user.status
+#                     },
+
+#                     "access_token": access_token,
+#                     "token_type": "bearer"
+#                 }
+
+#                 print(resp)
+
+#                 # Set the access token as a cookie
+#                 response = JSONResponse(content=resp)
+#                 response.set_cookie(key="access_token", value=str(access_token),max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
+#                 return response
+            
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail= str(e))
+
+
+# Custom exception classes
+class UserNotFoundError_1(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="User not found. Please sign up first.")
+
+class IncorrectPasswordError(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=400, detail="Incorrect password. Please try again")
+
+# Your endpoint using custom exceptions
 @router.post("/api/email-signin", tags=["Frontend_Signup/Login"])
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
@@ -626,17 +795,13 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
 
         if not email_user:
             print("OooPS...User not found. Please sign up first.")
-            raise HTTPException(status_code=400, detail="OooPS...User not found. Please sign up first.")
+            raise UserNotFoundError_1()
         
         else:
             # Verify the password
             if not verify_email_user_password(password, email_user.password):
                 print("OooPS...Incorrect password. Please try again")
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OooPS...Incorrect password. Please try again")
-            
-            # elif email_user.email_status == "unverified":
-            #     print("OooPS...You have not verified yet. Please verify your email first...")
-            #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You have not verified yet.Please verify your email first.")
+                raise IncorrectPasswordError()
             
             else:
                 # Generate an access token for the user
@@ -655,7 +820,6 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                         "roles": email_user.roles,
                         "status": email_user.status
                     },
-
                     "access_token": access_token,
                     "token_type": "bearer"
                 }
@@ -664,11 +828,15 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
 
                 # Set the access token as a cookie
                 response = JSONResponse(content=resp)
-                response.set_cookie(key="access_token", value=str(access_token),max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
+                response.set_cookie(key="access_token", value=str(access_token), max_age=1800, secure=False, httponly=True, samesite="none")  # Set cookie for 30 minutes
                 return response
-            
+
+    except UserNotFoundError_1 as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except IncorrectPasswordError as e:
+        raise HTTPException(status_code=400, detail=str(e))   
     except Exception as e:
-        raise HTTPException(status_code=400, detail= str(e))
+        raise HTTPException(status_code=400, detail=str(e))
     
 
 
