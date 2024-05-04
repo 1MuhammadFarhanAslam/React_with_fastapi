@@ -486,7 +486,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                 send_verification_email(email, verification_token, verification_code)
             except Exception as e:
                 print(e)
-                raise HTTPException(status_code=400, detail="Failed to send verification email. Please try again later.")
+                raise HTTPException(status_code=400, detail="Failed to send verification email. Please sign up later.")
 
             # Save user data in the database
             db.add(user)
