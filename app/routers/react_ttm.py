@@ -729,4 +729,7 @@ async def text_to_music(request: Request):
 
     except ValueError:
         raise HTTPException(status_code=404, detail="----------------Request not redirected to API no 1 due to invalid routing----------------")
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=503, detail = "Service temporarily unavailable")
 

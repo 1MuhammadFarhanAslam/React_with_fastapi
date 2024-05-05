@@ -260,6 +260,9 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail= "Unable to Signup/login. Please try again later.")
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")  # Catch-all exception for other errors
     
 
 # @router.post("/api/email-signup", tags=["React"])
@@ -556,7 +559,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         raise HTTPException(status_code=400, detail="Failed to send verification email. Please sign up later.")  # Catch-all exception for verification email failure
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=500, detail="Internal Server Error")  # Catch-all exception for other errors
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")  # Catch-all exception for other errors
 
     
 
@@ -711,7 +714,7 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
         raise HTTPException(status_code=400, detail="Token has expired")
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=500, detail= "Internal server error")
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")
 
         
 
@@ -838,7 +841,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         raise HTTPException(status_code=400, detail= "Incorrect password. Please try again")   
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=500, detail= "Internal Server Error")
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")
     
 
 
@@ -897,13 +900,11 @@ async def combined_user_auth(
 
     except UserNotFoundError:
         raise HTTPException(status_code=404, detail= "User not found")
-    except jwt.exceptions.DecodeError:
-        raise HTTPException(status_code=401, detail="Invalid token")
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired")
+        raise HTTPException(status_code=401, detail="Session expired. Please login again.")
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=500, detail= "Internal Server Error")
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")
     
 
 
