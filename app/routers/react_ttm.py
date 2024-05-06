@@ -8,7 +8,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from requests.exceptions import Timeout
-from tqdm import tqdm
 # from models import Google_User, Email_User, AccessToken
 # from jwt.exceptions import ExpiredSignatureError  # Import the ExpiredSignatureError
 # from fastapi import UploadFile, File
@@ -612,84 +611,26 @@ async def Welcome_To_Bittaudio_API():
 #         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
+class ServiceUnavailable(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=503, detail= "Service temporarily unavailable")
+
+
 # ------------------------Working code ------------------------------
-# @router.post("/api/ttm_endpoint", tags=["Text-To-Music"])
-# async def text_to_music(request: Request):
-#     try:
-#         request_data = await request.json()
-#         print('_______________request_data_____________', request_data)
-
-#         prompt = request_data.get("prompt")
-#         print('_______________prompt_____________', prompt)
-
-#         duration = request_data.get("duration")
-#         print('_______________duration_____________', duration)
-
-#         authorization = os.environ.get("TTM_ACCESS_TOKEN")
-#         print('_______________authorization_____________', authorization)
-
-#         if prompt is None:
-#             raise HTTPException(status_code=404, detail="Prompt is missing in the request body.")
-        
-#         if authorization is None:
-#             raise HTTPException(status_code=404, detail="Authorization is missing in the request header.")
-
-#         try:
-#             data = {"prompt": prompt, "duration": duration}
-#             headers = {
-#                 "accept": "application/json",
-#                 "Authorization": f"Bearer {authorization}",
-#                 "Content-Type": "application/json"
-#             }
-#             print('________header_________', headers)
-
-#             # Set the timeout value in seconds (e.g., 30 seconds)
-#             # timeout = 500
-
-#             print("----------Music generation is in progress. Please wait for a while.----------")
-
-#             response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data,
-#                 # timeout=timeout  # Add the timeout parameter here
-#                 )
-            
-#             print('______________response_____________:', response)
-#             print('______________response.status_code_____________:', response.status_code)
-#             print('______________response.content_____________:', response.content)
-
-#             if response.status_code == 200:
-#                 # Check if the response content-type is audio/wav
-#                 if response.headers.get("Content-Type") == "audio/wav":
-#                     # Return the response content as a downloadable response
-#                     return StreamingResponse(iter([response.content]), media_type="audio/wav", filename="generated_ttm_audio.wav")
-#             else:
-#                 raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
-            
-#         except Timeout:
-#             raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
-
-#     except ValueError:
-#         raise HTTPException(status_code=404, detail="----------------Request not redirected to API no 1 due to invalid routing----------------")
-
-
-
 @router.post("/api/ttm_endpoint", tags=["Text-To-Music"])
 async def text_to_music(request: Request):
     try:
         request_data = await request.json()
-        tqdm.write('_______________request_data_____________')
-        tqdm.write(request_data)
+        print('_______________request_data_____________', request_data)
 
         prompt = request_data.get("prompt")
-        tqdm.write('_______________prompt_____________')
-        tqdm.write(prompt)
+        print('_______________prompt_____________', prompt)
 
         duration = request_data.get("duration")
-        tqdm.write('_______________duration_____________')
-        tqdm.write(duration)
+        print('_______________duration_____________', duration)
 
         authorization = os.environ.get("TTM_ACCESS_TOKEN")
-        tqdm.write('_______________authorization_____________')
-        tqdm.write(authorization)
+        print('_______________authorization_____________', authorization)
 
         if prompt is None:
             raise HTTPException(status_code=404, detail="Prompt is missing in the request body.")
@@ -704,32 +645,34 @@ async def text_to_music(request: Request):
                 "Authorization": f"Bearer {authorization}",
                 "Content-Type": "application/json"
             }
-            tqdm.write('________header_________')
-            tqdm.write(headers)
+            print('________header_________', headers)
 
-            tqdm.write("----------Music generation is in progress. Please wait for a while.----------")
+            # Set the timeout value in seconds (e.g., 30 seconds)
+            # timeout = 500
 
-            response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data)
+            print("----------Music generation is in progress. Please wait for a while.----------")
+
+            response = requests.post(f"{nginx_url}/api/ttm_endpoint", headers=headers, json=data,
+                # timeout=timeout  # Add the timeout parameter here
+                )
             
-            tqdm.write('______________response_____________:')
-            tqdm.write(response)
-            tqdm.write('______________response.status_code_____________:')
-            tqdm.write(response.status_code)
-            tqdm.write('______________response.content_____________:')
-            tqdm.write(response.content)
+            print('______________response_____________:', response)
+            print('______________response.status_code_____________:', response.status_code)
+            print('______________response.content_____________:', response.content)
 
             if response.status_code == 200:
+                # Check if the response content-type is audio/wav
                 if response.headers.get("Content-Type") == "audio/wav":
+                    # Return the response content as a downloadable response
                     return StreamingResponse(iter([response.content]), media_type="audio/wav", filename="generated_ttm_audio.wav")
             else:
-                raise HTTPException(status_code=404, detail="--------------Audio file not found---------------")
+                raise HTTPException(status_code=404, detail="Audio file not found.")
             
         except Timeout:
-            raise HTTPException(status_code=504, detail="-------------Gateway Timeout: The server timed out waiting for the request----------")
+            raise HTTPException(status_code=504, detail="Gateway Timeout: The server timed out waiting for the request.")
 
-    except ValueError:
-        raise HTTPException(status_code=404, detail="----------------Request not redirected to API no 1 due to invalid routing----------------")
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=503, detail = "Service temporarily unavailable")
+    except ServiceUnavailable:
+        raise HTTPException(status_code=503, detail="Service temporarily unavailable.")
+
+
 

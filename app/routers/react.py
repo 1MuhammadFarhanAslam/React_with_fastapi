@@ -108,6 +108,10 @@ class IncorrectPasswordError(HTTPException):
     def __init__(self):
         super().__init__(status_code=400, detail="Incorrect password. Please try again")
 
+class ServiceUnavailable(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=503, detail= "Service temporarily unavailable")
+
 
 # @router.post("/api/google-signin", tags=["React"])
 # async def google_signin(token: Google_user_Token, db: Session = Depends(get_database)):
@@ -260,9 +264,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail= "Unable to Signup/login. Please try again later.")
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")  # Catch-all exception for other errors
+
     
 
 # @router.post("/api/email-signup", tags=["React"])
@@ -554,11 +556,12 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
     except EmailExistsError as e:
         print(e)
         raise HTTPException(status_code=400, detail="User already exists. Please sign in instead.")  # Catch-all exception for existing user
+
     except VerificationEmailError as e:
         print(e)
         raise HTTPException(status_code=400, detail="Failed to send verification email. Please sign up later.")  # Catch-all exception for verification email failure
-    except Exception as e:
-        print(e)
+
+    except ServiceUnavailable:
         raise HTTPException(status_code=503, detail= "Service temporarily unavailable")  # Catch-all exception for other errors
 
     
@@ -710,11 +713,12 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
         
     except DecodeError:
         raise HTTPException(status_code=400, detail="Invalid token")
+
     except ExpiredSignatureError:
         raise HTTPException(status_code=400, detail="Token has expired")
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")
+
+    except ServiceUnavailable:
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")  # Catch-all exception for other errors
 
         
 
@@ -836,12 +840,13 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
     except UserNotFoundError_1 as e:
         print(e)
         raise HTTPException(status_code=400, detail= "User not found. Please sign up first.")
+
     except IncorrectPasswordError as e:
         print(e)
         raise HTTPException(status_code=400, detail= "Incorrect password. Please try again")   
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")
+
+    except ServiceUnavailable:
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")  # Catch-all exception for other errors
     
 
 
@@ -900,11 +905,12 @@ async def combined_user_auth(
 
     except UserNotFoundError:
         raise HTTPException(status_code=404, detail= "User not found")
+    
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Session expired. Please login again.")
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")
+
+    except ServiceUnavailable:
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")  # Catch-all exception for other errors
     
 
 
