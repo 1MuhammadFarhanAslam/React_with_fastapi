@@ -817,7 +817,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
 
                 # Set the access token as a cookie in the response
                 resp = {
-                    "message": "Login successful! User already exists.",
+                    "message": "Login successful!",
                     "user_info": {
                         "id": email_user.id,
                         "created_at": email_user.created_at.isoformat(),  # Convert datetime to string,
