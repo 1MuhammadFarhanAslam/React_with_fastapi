@@ -499,7 +499,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
         # Check if the server is available before proceeding
-        if not is_server_available():
+        if not is_server_available(f"{nginx_url}"):
             raise ServiceUnavailable()
 
         request_data = await request.json()
@@ -660,7 +660,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 async def verify_email(request: Request, db: Session = Depends(get_database)):
     try:
         # Check if the server is available before proceeding
-        if not is_server_available():
+        if not is_server_available(f"{nginx_url}"):
             raise ServiceUnavailable()
 
         request_data = await request.json()
@@ -804,7 +804,7 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
         # Check if the server is available before proceeding
-        if not is_server_available():
+        if not is_server_available(f"{nginx_url}"):
             raise ServiceUnavailable()
 
         data = await request.json()
@@ -876,7 +876,7 @@ async def combined_user_auth(
 ):
     try:
         # Check if the server is available before proceeding
-        if not is_server_available():
+        if not is_server_available(f"{nginx_url}"):
             raise ServiceUnavailable()
 
         # Extract the token from the Authorization header
