@@ -875,7 +875,8 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         print(e)
         raise HTTPException(status_code=400, detail= "Incorrect password. Please try again")   
 
-    except ServiceUnavailable:
+    except ServiceUnavailable as e:
+        print(e)
         raise HTTPException(status_code=503, detail= "Service temporarily unavailable. Please try again later.")  # Catch-all exception for other errors
     
 
