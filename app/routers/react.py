@@ -78,6 +78,9 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
 
 nginx_url = "api.bittaudio.ai"
 
+# Call the function outside of the endpoint
+server_available = is_server_available(nginx_url)
+
 
 # Custom exception classes
 class InvalidVerificationCode(HTTPException):
@@ -496,7 +499,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
         # Check if the server is available before proceeding
-        if not is_server_available(f"{nginx_url}"):
+        if not is_server_available():
             raise ServiceUnavailable()
 
         request_data = await request.json()
@@ -657,7 +660,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 async def verify_email(request: Request, db: Session = Depends(get_database)):
     try:
         # Check if the server is available before proceeding
-        if not is_server_available(f"{nginx_url}"):
+        if not is_server_available():
             raise ServiceUnavailable()
 
         request_data = await request.json()
@@ -801,7 +804,7 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
         # Check if the server is available before proceeding
-        if not is_server_available(f"{nginx_url}"):
+        if not is_server_available():
             raise ServiceUnavailable()
 
         data = await request.json()
@@ -873,7 +876,7 @@ async def combined_user_auth(
 ):
     try:
         # Check if the server is available before proceeding
-        if not is_server_available(f"{nginx_url}"):
+        if not is_server_available():
             raise ServiceUnavailable()
 
         # Extract the token from the Authorization header

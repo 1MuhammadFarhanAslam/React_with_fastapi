@@ -61,7 +61,7 @@ def verify_email_user(email: str, password: str):
     finally:
         db.close()
 
-def is_server_available(url: str) -> bool:
+def is_server_available(url: str):
     try:
         response = requests.get(url)
         if response.status_code == 200:
@@ -70,6 +70,8 @@ def is_server_available(url: str) -> bool:
     except requests.RequestException:
         print("Server is not available")
         return False
+
+
 
 
 
