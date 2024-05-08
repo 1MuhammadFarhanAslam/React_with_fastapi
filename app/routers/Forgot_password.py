@@ -379,7 +379,7 @@ class ServiceUnavailable(HTTPException):
 async def request_password_reset(request: Request, db: Session = Depends(get_database)):
     try:
         # Check if the server is available before proceeding
-        if not is_server_available(f"{nginx_url}"):
+        if not is_server_available:
             raise ServiceUnavailable()
 
         request_data = await request.json()
@@ -441,9 +441,9 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
 async def submit_password_reset(request: Request, db: Session = Depends(get_database)):
     try:
         # Check if the server is available before proceeding
-        if not is_server_available(f"{nginx_url}"):
+        if not is_server_available:
             raise ServiceUnavailable()
-            
+
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
 
