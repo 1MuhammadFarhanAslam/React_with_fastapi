@@ -204,6 +204,8 @@ from hashing import hash_password
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import requests
+from react_database import is_server_available
 
 
 router = APIRouter()
@@ -327,6 +329,8 @@ def send_reset_email(recipient_email, reset_access_token):
     finally:
         server.quit()  # Close the connection
 
+nginx_url = "api.bittaudio.ai"
+
 
 # Custom exception classes
 class NoInputDataError(HTTPException):
@@ -365,11 +369,19 @@ class UpdatePasswordError(HTTPException):
     def __init__(self):
         super().__init__(status_code=400, detail="Failed to update password")
 
+class ServiceUnavailable(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=503, detail="Service temporarily unavailable. Please try again later.")
+
 
 # Your endpoint using custom exceptions
 @router.post("/api/forgot-password")
 async def request_password_reset(request: Request, db: Session = Depends(get_database)):
     try:
+        # Check if the server is available before proceeding
+        if not is_server_available(f"{nginx_url}"):
+            raise ServiceUnavailable()
+
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
 
@@ -428,6 +440,10 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
 @router.post("/api/reset-password")
 async def submit_password_reset(request: Request, db: Session = Depends(get_database)):
     try:
+        # Check if the server is available before proceeding
+        if not is_server_available(f"{nginx_url}"):
+            raise ServiceUnavailable()
+            
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
 

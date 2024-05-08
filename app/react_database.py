@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from typing import Generator
 from models import Email_User
+import requests
 
 
 # Get the database URL from the environment variable
@@ -60,6 +61,15 @@ def verify_email_user(email: str, password: str):
     finally:
         db.close()
 
+def is_server_available(url: str) -> bool:
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            print("Server is available")
+            return True
+    except requests.RequestException:
+        print("Server is not available")
+        return False
 
 
 

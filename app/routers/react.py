@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 from .Email_Verification import Verification_Token, send_verification_email
 import random
 import string
+from react_database import is_server_available
 
 
 router = APIRouter()
@@ -75,6 +76,9 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
     return encoded_jwt
 
 
+nginx_url = "api.bittaudio.ai"
+
+
 # Custom exception classes
 class InvalidVerificationCode(HTTPException):
     def __init__(self):
@@ -110,7 +114,7 @@ class IncorrectPasswordError(HTTPException):
 
 class ServiceUnavailable(HTTPException):
     def __init__(self):
-        super().__init__(status_code=503, detail= "Service temporarily unavailable")
+        super().__init__(status_code=503, detail="Service temporarily unavailable. Please try again later.")
 
 
 # @router.post("/api/google-signin", tags=["React"])
@@ -439,7 +443,7 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
 #             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists. Please sign in instead.")  
         
 #         else:
-#             # # Generate a verification code
+#         # # Generate a verification code
 #             # verification_code = str(uuid4())[:8]  # Generate a random code (e.g., 8 characters)
 #             # print(f"--------Verification code generated: {verification_code}--------")
 
@@ -491,6 +495,10 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
 @router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
+        # Check if the server is available before proceeding
+        if not is_server_available(f"{nginx_url}"):
+            raise ServiceUnavailable()
+
         request_data = await request.json()
         print(request_data)
         email = request_data.get('email')
@@ -562,7 +570,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         raise HTTPException(status_code=400, detail="Failed to send verification email. Please sign up later.")  # Catch-all exception for verification email failure
 
     except ServiceUnavailable:
-        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")  # Catch-all exception for other errors
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable. Please try again later.")  # Catch-all exception for other errors
 
     
 
@@ -648,6 +656,10 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
 @router.post("/api/verification", response_model=None, tags=["Frontend_Signup/Login"])
 async def verify_email(request: Request, db: Session = Depends(get_database)):
     try:
+        # Check if the server is available before proceeding
+        if not is_server_available(f"{nginx_url}"):
+            raise ServiceUnavailable()
+
         request_data = await request.json()
         print("_______________request_data_______________", request_data)
 
@@ -718,7 +730,7 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
         raise HTTPException(status_code=400, detail="Token has expired")
 
     except ServiceUnavailable:
-        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")  # Catch-all exception for other errors
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable. Please try again later.")  # Catch-all exception for other errors
 
         
 
@@ -788,6 +800,10 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
 @router.post("/api/email-signin", tags=["Frontend_Signup/Login"])
 async def email_signin(request: Request, db: Session = Depends(get_database)):
     try:
+        # Check if the server is available before proceeding
+        if not is_server_available(f"{nginx_url}"):
+            raise ServiceUnavailable()
+
         data = await request.json()
         email = data.get('email')
         print("______________email________________: ", email)
@@ -846,7 +862,7 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         raise HTTPException(status_code=400, detail= "Incorrect password. Please try again")   
 
     except ServiceUnavailable:
-        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")  # Catch-all exception for other errors
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable. Please try again later.")  # Catch-all exception for other errors
     
 
 
@@ -856,6 +872,10 @@ async def combined_user_auth(
     db: Session = Depends(get_database)
 ):
     try:
+        # Check if the server is available before proceeding
+        if not is_server_available(f"{nginx_url}"):
+            raise ServiceUnavailable()
+
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
         
@@ -910,7 +930,7 @@ async def combined_user_auth(
         raise HTTPException(status_code=401, detail="Session expired. Please login again.")
 
     except ServiceUnavailable:
-        raise HTTPException(status_code=503, detail= "Service temporarily unavailable")  # Catch-all exception for other errors
+        raise HTTPException(status_code=503, detail= "Service temporarily unavailable. Please try again later.")  # Catch-all exception for other errors
     
 
 
