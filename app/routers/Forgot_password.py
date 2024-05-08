@@ -382,6 +382,10 @@ async def request_password_reset(request: Request, db: Session = Depends(get_dat
         if not is_server_available:
             raise ServiceUnavailable()
 
+        # Check if the server is available before proceeding
+        if is_server_available:
+            print("-------------Server is available------------")
+
         request_data = await request.json()
         print('_______________request_data_____________', request_data)
 
@@ -443,6 +447,10 @@ async def submit_password_reset(request: Request, db: Session = Depends(get_data
         # Check if the server is available before proceeding
         if not is_server_available:
             raise ServiceUnavailable()
+
+        # Check if the server is available before proceeding
+        if is_server_available:
+            print("-------------Server is available------------")
 
         request_data = await request.json()
         print('_______________request_data_____________', request_data)

@@ -66,10 +66,10 @@ def is_server_available(url: str):
         response = requests.get(url)
         if response.status_code == 200:
             print("Server is available")
-            return True
+            return {"status": "Available", "detail": "Server is available."}
     except requests.RequestException:
         print("Server is not available")
-        return False
+        return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
 
 
 

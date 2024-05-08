@@ -498,9 +498,12 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
 @router.post("/api/email-signup", tags=["Frontend_Signup/Login"])
 async def email_signup(request: Request, db: Session = Depends(get_database)):
     try:
-        # Check if the server is available before proceeding
         if not is_server_available:
             raise ServiceUnavailable()
+
+        # Check if the server is available before proceeding
+        if is_server_available:
+            print("-------------Server is available------------")
 
         request_data = await request.json()
         print(request_data)
@@ -663,6 +666,10 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
         if not is_server_available:
             raise ServiceUnavailable()
 
+        # Check if the server is available before proceeding
+        if is_server_available:
+            print("-------------Server is available------------")
+
         request_data = await request.json()
         print("_______________request_data_______________", request_data)
 
@@ -807,6 +814,10 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
         if not is_server_available:
             raise ServiceUnavailable()
 
+        # Check if the server is available before proceeding
+        if is_server_available:
+            print("-------------Server is available------------")
+
         data = await request.json()
         email = data.get('email')
         print("______________email________________: ", email)
@@ -878,6 +889,10 @@ async def combined_user_auth(
         # Check if the server is available before proceeding
         if not is_server_available:
             raise ServiceUnavailable()
+
+        # Check if the server is available before proceeding
+        if is_server_available:
+            print("-------------Server is available------------")
 
         # Extract the token from the Authorization header
         token = authorization.split(" ")[1]  # Assuming the header format is "Bearer <token>"
