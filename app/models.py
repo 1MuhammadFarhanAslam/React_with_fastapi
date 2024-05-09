@@ -83,6 +83,7 @@ class Google_User(Base):
     email_status = Column(String)
     picture = Column(String)
     roles = Column(ARRAY(String), default=['customer'])
+    checkbox = Column(Boolean, default=True)
 
 
 class Email_User(Base):

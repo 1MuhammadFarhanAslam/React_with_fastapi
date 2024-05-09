@@ -219,7 +219,8 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
                     "email": existing_user.email,
                     "picture": existing_user.picture,
                     "email_status": existing_user.email_status,
-                    "roles": existing_user.roles
+                    "roles": existing_user.roles,
+                    "checkbox": existing_user.checkbox
                 },
                 "access_token": access_token,
                 "token_type": "bearer"
@@ -254,7 +255,8 @@ async def google_signin(token: Google_user_Token, db: Session = Depends(get_data
                     "email": user.email,
                     "picture": user.picture,
                     "email_status": user.email_status,
-                    "roles": user.roles
+                    "roles": user.roles,
+                    "checkbox": user.checkbox
                 },
                 "access_token": access_token,
                 "token_type": "bearer"
@@ -555,7 +557,8 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
                     "email": user.email,
                     "email_status": user.email_status,
                     "roles": user.roles,
-                    "status": user.status
+                    "status": user.status,
+                    "checkbox": user.checkbox
                 },
                 "access_token": access_token,
                 "token_type": "bearer"
@@ -719,7 +722,8 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
                         "email": user.email,
                         "email_status": user.email_status,
                         "roles": user.roles,
-                        "status": user.status
+                        "status": user.status,
+                        "checkbox": user.checkbox
                     },
                     "access_token": access_token,
                     "token_type": "bearer"
@@ -854,7 +858,8 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
                         "email": email_user.email,
                         "email_status": email_user.email_status,
                         "roles": email_user.roles,
-                        "status": email_user.status
+                        "status": email_user.status,
+                        "checkbox": email_user.checkbox
                     },
                     "access_token": access_token,
                     "token_type": "bearer"
@@ -917,7 +922,8 @@ async def combined_user_auth(
                 "email": google_user.email,
                 "picture": google_user.picture,
                 "email_status": google_user.email_status,
-                "roles": google_user.roles
+                "roles": google_user.roles,
+                "checkbox": google_user.checkbox,
             }
 
             print("_______________user details_______________", user_data)
@@ -930,6 +936,7 @@ async def combined_user_auth(
                 "email_status": email_user.email_status,
                 "roles": email_user.roles,
                 "status": email_user.status,
+                "checkbox": email_user.checkbox
             }
 
             print("_______________user details_______________", user_data)
