@@ -1,11 +1,9 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 import os
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from fastapi.middleware.cors import CORSMiddleware
-from routers import admin, login, react, react_ttm, Forgot_password
-from slowapi.errors import RateLimitExceeded
-from fastapi.responses import JSONResponse
+from routers import admin, user, login, react, react_ttm, Forgot_password
 
 app = FastAPI()
 
@@ -69,22 +67,6 @@ origins = [
     "http://v2.bittaudio.ai",
     "http://93.114.160.254:40321"
 ]
-
-@app.exception_handler(RateLimitExceeded)
-async def rate_limit_exception_handler(request: Request, exc: RateLimitExceeded):
-    """
-    Handle RateLimitExceeded exceptions globally and return a JSON response with a custom error message.
-
-    Args:
-        request (Request): The incoming request causing the rate limit exception.
-        exc (RateLimitExceeded): The RateLimitExceeded exception object.
-
-    Returns:
-        JSONResponse: JSON response with status code 429 (Too Many Requests) and a custom error message.
-    """
-    return JSONResponse(
-        status_code=429,
-        content={"message": "Oops! ☠️💀☠️💀 You have exceeded the rate limit: 5/minute. Please try again later......."})
 
 
 # Allow CORS for all origins
