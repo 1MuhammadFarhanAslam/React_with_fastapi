@@ -8,6 +8,12 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
 from typing import Generator
 from requests.exceptions import Timeout
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
+
 # from models import Google_User, Email_User, AccessToken
 # from jwt.exceptions import ExpiredSignatureError  # Import the ExpiredSignatureError
 # from fastapi import UploadFile, File
@@ -618,6 +624,7 @@ class ServiceUnavailable(HTTPException):
 
 # ------------------------Working code ------------------------------
 @router.post("/api/ttm_endpoint", tags=["Text-To-Music"])
+@limiter.limit("1/5 minutes")  # Limit to one request per minute per user
 async def text_to_music(request: Request):
     try:
         request_data = await request.json()
@@ -673,6 +680,14 @@ async def text_to_music(request: Request):
 
     except ServiceUnavailable:
         raise HTTPException(status_code=503, detail="Service temporarily unavailable.")
+
+    except RateLimitExceeded as e:
+    # Handle the RateLimitExceeded exception
+        print(f"Rate limit exceeded: {e}")
+        raise HTTPException(
+            status_code=429,
+            content="Too many requests. Please try again later. You have exceeded the rate limit. 5 request is allowed per minute.",
+        )
 
 
 
