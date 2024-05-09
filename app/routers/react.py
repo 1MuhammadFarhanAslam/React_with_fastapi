@@ -515,6 +515,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
         roles = request_data.get("roles")
         print("______________roles________________: ", roles)
         status = request_data.get("status")
+        checkbox = request_data.get("checkbox")
 
         # Check if the user already exists in the database
         existing_user = db.query(Email_User).filter(Email_User.email == email).first()
@@ -533,7 +534,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             
             # Send verification email
             hashed_password = hash_password(password)
-            user = Email_User(email=email, password=hashed_password, email_status=email_status, roles=roles, status=status, password_reset_code=verification_code, verification_token=verification_token)
+            user = Email_User(email=email, password=hashed_password, email_status=email_status, roles=roles, status=status, checkbox=checkbox, password_reset_code=verification_code, verification_token=verification_token)
             
             # Attempt to send verification email
             try:
