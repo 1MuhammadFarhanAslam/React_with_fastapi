@@ -64,6 +64,7 @@ origins = [
     "http://149.11.242.18:14428",
     # "http://bittaudio.ai",
     "https://bittaudio.ai",
+    "https://api.bittaudio.ai",
     "http://v1.bittaudio.ai",
     "http://v2.bittaudio.ai",
     "http://93.114.160.254:40321"
