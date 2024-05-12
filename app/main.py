@@ -3,7 +3,7 @@ import os
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from fastapi.middleware.cors import CORSMiddleware
-from routers import admin, user, login, logout, react, react_ttm, Forgot_password
+from routers import admin, user, login, react, react_ttm, Forgot_password
 
 app = FastAPI()
 
@@ -62,7 +62,9 @@ origins = [
     "http://127.0.0.1:3000",
     "http://89.37.121.214:44107",
     "http://149.11.242.18:14428",
-    "http://bittaudio.ai",
+    # "http://bittaudio.ai",
+    "https://bittaudio.ai",
+    "https://api.bittaudio.ai",
     "http://v1.bittaudio.ai",
     "http://v2.bittaudio.ai",
     "http://93.114.160.254:40321"
@@ -81,7 +83,6 @@ app.add_middleware(
 
 # Include routers
 app.include_router(login.router, prefix="", tags=["Admin_Authentication"])
-app.include_router(logout.router, prefix="", tags=["Logout"])
 app.include_router(admin.router, prefix="", tags=["Admin_Management"])
 # app.include_router(user.router, prefix="", tags=["User"])
 app.include_router(react.router, prefix="", tags=["Frontend_Signup/Login"])

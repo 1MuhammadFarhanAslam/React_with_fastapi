@@ -43,7 +43,6 @@ pycparser
 pydantic
 pydantic-core
 Pygments
-jwt
 PyJWT
 pyngrok
 PySocks

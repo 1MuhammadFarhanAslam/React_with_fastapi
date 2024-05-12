@@ -534,7 +534,7 @@ async def email_signup(request: Request, db: Session = Depends(get_database)):
             
             # Send verification email
             hashed_password = hash_password(password)
-            user = Email_User(email=email, password=hashed_password, email_status=email_status, roles=roles, status=status, checkbox=checkbox, verification_code=verification_code, verification_token=verification_token)
+            user = Email_User(email=email, password=hashed_password, email_status=email_status, roles=roles, status=status, checkbox=checkbox, password_reset_code=verification_code, verification_token=verification_token)
             
             # Attempt to send verification email
             try:
@@ -694,7 +694,7 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
         user = db.query(Email_User).filter(Email_User.email == email).first()
         if user:
             # Check if the verification code is correct
-            if user.verification_code != verification_code:
+            if user.password_reset_code != verification_code:
                 raise InvalidVerificationCode()
             if user.verification_token != token:
                 raise InvalidVerificationToken()
@@ -709,8 +709,8 @@ async def verify_email(request: Request, db: Session = Depends(get_database)):
             access_token = React_JWT_Token(data={"sub": user.email})
 
             user.email_status = "Verified"
-            user.verification_code = None
-            user.verification_token = None
+            user.password_reset_code = None
+            user.password_reset_code = None
             db.commit()
             db.refresh(user)
 
