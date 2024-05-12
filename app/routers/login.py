@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Form
+from fastapi import APIRouter, Depends, HTTPException, status, Form, Request, Response
 # from fastapi.security import OAuth2PasswordRequestForm
 from models import Token
 from admin_database import authenticate_admin
@@ -100,7 +100,7 @@ router = APIRouter()
 
 #-------------------------------This endpoint is also 200 OK-----------------------------------------------
 @router.post("/login", tags=["Admin_Authentication"])
-async def login_for_access_token(
+async def login_for_access_token(response: Response,
     username: str = Form(...),
     password: str = Form(...),
     db: Session = Depends(get_database)
@@ -112,9 +112,11 @@ async def login_for_access_token(
     if admin:
         admin_access_token = create_admin_access_token(data={"sub": admin.username})
         token_type = "Bearer"
+        response.set_cookie(key="access_token", value=admin_access_token)
     elif user:
         user_access_token = create_user_access_token(data={"sub": user.username})
         token_type = "Bearer"
+        response.set_cookie(key="access_token", value=user_access_token)
     else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
