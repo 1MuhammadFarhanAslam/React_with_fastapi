@@ -97,8 +97,8 @@ class Email_User(Base):
     roles = Column(ARRAY(String))
     status = Column(String)
     checkbox = Column(Boolean)
-    password_reset_code = Column(String, default=None)
     reset_access_token = Column(String, default=None)
+    verification_code = Column(String, default=None)
     verification_token = Column(String, default=None)
 
 
