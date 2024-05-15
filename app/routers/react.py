@@ -11,7 +11,7 @@ from sqlalchemy import create_engine
 from typing import Generator
 from hashing import hash_password
 from react_database import verify_email_user_password
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from .Email_Verification import Verification_Token, send_verification_email
 import random
 import string
@@ -186,6 +186,40 @@ class ServiceUnavailable(HTTPException):
 #     except Exception as e:
 #         print(e)
 #         raise HTTPException(status_code=500, detail="Server Error")
+
+
+@router.get("/", tags=["Authentication"], response_class=HTMLResponse)
+async def read_root():
+    html_content = """
+    <html>
+    <head>
+    <style>
+    body {
+        text-align: center; /* Center align text within the body */
+    }
+    h1 {
+        font-size: 36px; /* Increased font size */
+        color: red; /* Red color */
+        font-family: 'Arial', sans-serif; /* Font family */
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Text shadow for a stylish look */
+    }
+    p {
+        font-size: 18px; /* Font size for paragraph */
+        color: green; /* Green color for paragraph text */
+    }
+    a {
+        text-decoration: underline; /* Underline for links */
+        font-weight: bold; /* Bold font weight for links */
+    }
+    </style>
+    </head>
+    <body>
+    <h1>Welcome to the <span style="color: blue;">api.bittaudio.ai</span></h1>
+    <p>This is the first version of the API. Please visit <a href="http://127.0.0.1:8000/docs">http://127.0.0.1:8000/docs</a> to view the API documentation.</p>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 @router.post("/api/google-signin", tags=["Frontend_Signup/Login"])
 async def google_signin(token: Google_user_Token, db: Session = Depends(get_database)):

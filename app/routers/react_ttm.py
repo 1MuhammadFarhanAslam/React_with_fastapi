@@ -73,12 +73,12 @@ def get_database() -> Generator[Session, None, None]:
         db.close()
 
 
-@router.get("/")
-async def Welcome_To_Bittaudio_API():
-    return JSONResponse(status_code=200, content={
-            "message": "Welcome to Bittaudio API. This is the first version of the API. Please visit http://api.bittaudio.ai/docs to know more about the API endpoints."
-        }
-    )
+# @router.get("/")
+# async def Welcome_To_Bittaudio_API():
+#     return JSONResponse(status_code=200, content={
+#             "message": "Welcome to Bittaudio API. This is the first version of the API. Please visit http://api.bittaudio.ai/docs to know more about the API endpoints."
+#         }
+#     )
 
 
 
