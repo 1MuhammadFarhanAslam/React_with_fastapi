@@ -74,6 +74,6 @@ fastapi
 sqlalchemy
 passlib
 psycopg2-binary
-python-jose
+python-jose[cryptography]
 pycryptodom
 google-auth
