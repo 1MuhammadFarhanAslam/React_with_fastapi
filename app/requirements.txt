@@ -1,79 +1,79 @@
-# aiosqlite
-# alembic
-# annotated-types
-# anyio
-# bcrypt==3.2.0
-# certifi
-# cffi
-# charset-normalizer
-# click
-# colorama
-# cryptography
-# databases
-# defusedxml
-# dnspython
-# ecdsa
-# email-validator
-# fastapi==0.110.0
-# filelock
-# fsspec
-# greenlet
-# h11
-# httpcore
-# httpie
-# httptools
-# httpx
-# idna
-# itsdangerous
-# jose==1.0.0
-# Jinja2
-# Mako
-# markdown-it-py
-# MarkupSafe
-# mdurl
-# mpmath
-# multidict
-# networkx
-# orjson
-# passlib==1.7.4
-# pip
-# psycopg2-binary
-# pyasn1
-# pycparser
-# pydantic
-# pydantic-core
-# Pygments
-# PyJWT
-# pyngrok
-# PySocks
-# python-multipart
-# requests
-# requests-toolbelt
-# rich
-# rsa
-# setuptools
-# six
-# sniffio
-# sqlalchemy==2.0.29
-# starlette
-# sympy
-# torch
-# typing-extensions
-# ujson
-# urllib3
-# uvicorn
-# watchfiles
-# websockets
-# typing
-# google-auth
-# fastapi_mail
-# python-jose[cryptography]
-
-
-fastapi
-sqlalchemy
-passlib
+aiosqlite
+alembic
+annotated-types
+anyio
+bcrypt==3.2.0
+certifi
+cffi
+charset-normalizer
+click
+colorama
+cryptography
+databases
+defusedxml
+dnspython
+ecdsa
+email-validator
+fastapi==0.110.0
+filelock
+fsspec
+greenlet
+h11
+httpcore
+httpie
+httptools
+httpx
+idna
+itsdangerous
+jose==1.0.0
+Jinja2
+Mako
+markdown-it-py
+MarkupSafe
+mdurl
+mpmath
+multidict
+networkx
+orjson
+passlib==1.7.4
+pip
 psycopg2-binary
-python-jose[cryptography]
-pycryptodom
+pyasn1
+pycparser
+pydantic
+pydantic-core
+Pygments
+PyJWT
+pyngrok
+PySocks
+python-multipart
+requests
+requests-toolbelt
+rich
+rsa
+setuptools
+six
+sniffio
+sqlalchemy==2.0.29
+starlette
+sympy
+torch
+typing-extensions
+ujson
+urllib3
+uvicorn
+watchfiles
+websockets
+typing
 google-auth
+fastapi_mail
+python-jose[cryptography]
+
+
+# fastapi
+# sqlalchemy
+# passlib
+# psycopg2-binary
+# python-jose[cryptography]
+# pycryptodom
+# google-auth
