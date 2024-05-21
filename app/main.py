@@ -56,16 +56,14 @@ initialize_database()
 # Define the list of allowed origins
 origins = [
     "http://85.239.241.96:3000",  # Your React frontend server's HTTP URL
-    "http://144.91.69.154:8000",
+    "http://193.29.187.81:8000",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://89.37.121.214:44107",
-    "http://149.11.242.18:14428",
     "http://bittaudio.ai",
     "http://api.bittaudio.ai",
     "http://v1.bittaudio.ai",
     "http://v2.bittaudio.ai",
-    "http://93.114.160.254:40321"
+    "http://149.36.1.168:41981",
 ]
 
 
