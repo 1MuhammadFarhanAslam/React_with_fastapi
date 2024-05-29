@@ -79,6 +79,9 @@ def is_server_available(url: str):
         if response.status_code == 200:
             # print("Server is available")
             return {"status": "Available", "detail": "Server is available."} 
+        else:
+            # print("Server is temporarily Unavailable")
+            return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
     except requests.exceptions.RequestException as e:
         print(e)
         return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."} 
