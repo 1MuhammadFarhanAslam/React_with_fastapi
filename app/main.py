@@ -55,14 +55,14 @@ initialize_database()
 
 # Define the list of allowed origins
 origins = [
-    "http://127.0.0.1:3000",
-    "http://193.29.187.81:8000",
+    # "http://127.0.0.1:3000",
+    # "http://193.29.187.81:8000",
     # "http://bittaudio.ai",
     # "http://api.bittaudio.ai",
     "https://bittaudio.ai",
     "https://api.bittaudio.ai",
-    "http://v1.bittaudio.ai",
-    "http://v2.bittaudio.ai",
+    "http://v1.api.bittaudio.ai",
+    "https://v1.api.bittaudio.ai",
     "http://149.36.1.168:41981",
 ]
 
