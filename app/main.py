@@ -39,27 +39,13 @@ def initialize_database_and_check_server_availability():
         print("---------------------------------------------------------------")
         print("---------------------Server is available-------------------")
         print("---------------------------------------------------------------")
-    else:
+    if not server_available:
         print("---------------------------------------------------------------")
         print("---------------------Server is not available-------------------")
-        print("---------------------------------------------------------------")
+        print("---------------------------------------------------------------")  
 
 # Call the database initialization function
 initialize_database_and_check_server_availability()
-
-#Allow CORS for only the React frontend server
-# origins = [
-#     "http://85.239.241.96:3000",  # Your React frontend server's HTTP URL
-#     "http://api.bittaudio.ai",
-#     "http://144.91.69.154:8000",
-#     "http://localhost:3000",
-#     "http:127.0.0.1:3000",
-#     "http://89.37.121.214:44107",
-#     "http://149.11.242.18:14428",
-#     "http://bittaudio.ai",
-#     "http://v1.bittaudio.ai",
-#     "http://v2.bittaudio.ai",
-# ]
 
 
 # # Allow CORS only if not handled by Nginx
@@ -102,7 +88,7 @@ app.include_router(admin.router, prefix="", tags=["Admin_Management"])
 # app.include_router(user.router, prefix="", tags=["User"])
 app.include_router(react.router, prefix="", tags=["Frontend_Signup/Login"])
 # app.include_router(react_1.router, prefix="", tags=["React_1"])
-app.include_router(Forgot_password.router, prefix="", tags=["Forgot_Password"])
+app.include_router(Forgot_password.router, prefix="", tags=["Forgot_Password"])  
 app.include_router(react_ttm.router, prefix="", tags=["Text-To-Music"])
 
 

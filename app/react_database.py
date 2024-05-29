@@ -61,23 +61,27 @@ def verify_email_user(email: str, password: str):
     finally:
         db.close()
 
+# def is_server_available(url: str):
+#     try:
+#         response = requests.get(url)
+#         if response.status_code == 200:
+#             return {"status": "Available", "detail": "Server is available."}
+#         else:
+#             return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
+#     except requests.exceptions.RequestException as e:
+#         print(e)
+#         return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
+
+
 def is_server_available(url: str):
     try:
-        response = requests.get(url)
+        response = requests.get(url, verify=False)  # Disable SSL verification
         if response.status_code == 200:
-            return {"status": "Available", "detail": "Server is available."}
-    except requests.RequestException:
-        return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
-
-
-# def is_server_available(url: str):
-#     response = requests.get(url, verify=False)  # Disable SSL verification
-#     if response.status_code == 200:
-#         print("Server is available")
-#         return {"status": "Available", "detail": "Server is available."}
-#     else:
-#         print("Server is not available")
-#         return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
+            # print("Server is available")
+            return {"status": "Available", "detail": "Server is available."} 
+    except requests.exceptions.RequestException as e:
+        print(e)
+        return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."} 
 
 
 
