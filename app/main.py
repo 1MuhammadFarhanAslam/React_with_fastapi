@@ -39,7 +39,7 @@ def initialize_database_and_check_server_availability():
         print("---------------------------------------------------------------")
         print("---------------------Server is available-------------------")
         print("---------------------------------------------------------------")
-    if not server_available:
+    else:
         print("---------------------------------------------------------------")
         print("---------------------Server is not available-------------------")
         print("---------------------------------------------------------------")  
@@ -52,7 +52,7 @@ initialize_database_and_check_server_availability()
 # app.add_middleware(
 #     CORSMiddleware,
 #     allow_origins=origins,
-#     allow_credentials=True,
+#     allow_credentials=True, 
 #     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 #     allow_headers=["*"],
 #     expose_headers=["*"],
