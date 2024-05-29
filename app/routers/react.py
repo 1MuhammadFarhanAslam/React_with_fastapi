@@ -215,7 +215,7 @@ async def read_root():
     </head>
     <body>
     <h1>Welcome to the <span style="color: blue;">api.bittaudio.ai</span></h1>
-    <p>This is the first version of the API. Please visit <a href="http://193.29.187.81:8000/docs">http://api.bittaudio.ai/docs</a> to view the API documentation.</p>
+    <p>This is the first version of the API. Please visit <a href="http://193.29.187.81:8000/docs">https://api.bittaudio.ai/docs</a> to view the API documentation.</p>
     </body>
     </html>
     """
