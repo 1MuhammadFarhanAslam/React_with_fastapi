@@ -76,7 +76,7 @@ def React_JWT_Token(data: dict, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXP
     return encoded_jwt
 
 
-nginx_url = "api.bittaudio.ai"
+nginx_url = "https://api.bittaudio.ai"
 
 # Call the function outside of the endpoint
 server_available = is_server_available(nginx_url)
