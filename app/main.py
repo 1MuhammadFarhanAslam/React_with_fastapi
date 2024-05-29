@@ -20,12 +20,15 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Initialize the database
-def initialize_database():
+def initialize_database_and_check_server_availability():
     print("---------------------Database initializing-------------------")
     from models import Base
     Base.metadata.create_all(bind=engine)
     print("---------------------Database initialized successfully--------")
+    print("---------------------------------------------------------------")
+    print("---------------------Checking if the server is available--------")
 
+    # Define the URL of the Nginx server to check if it is available
     nginx_url = "https://api.bittaudio.ai/" 
 
     # Call the function outside of the endpoint
@@ -36,7 +39,7 @@ def initialize_database():
         print("---------------------Server is not available-------------------")
 
 # Call the database initialization function
-initialize_database()
+initialize_database_and_check_server_availability()
 
 #Allow CORS for only the React frontend server
 # origins = [
