@@ -31,9 +31,9 @@ def initialize_database():
     # Call the function outside of the endpoint
     server_available = is_server_available(nginx_url)
     if server_available:
-        print("-------------------Server is available-------------------")
+        print("---------------------Server is available-------------------")
     else:
-        print("-------------------Server is not available-------------------")
+        print("---------------------Server is not available-------------------")
 
 # Call the database initialization function
 initialize_database()
