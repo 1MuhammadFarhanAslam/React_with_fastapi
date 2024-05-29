@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from fastapi.middleware.cors import CORSMiddleware
 from routers import admin, user, login, react, react_ttm, Forgot_password
+from react_database import is_server_available
 
 app = FastAPI()
 
@@ -24,6 +25,15 @@ def initialize_database():
     from models import Base
     Base.metadata.create_all(bind=engine)
     print("---------------------Database initialized successfully--------")
+
+    nginx_url = "https://api.bittaudio.ai/" 
+
+    # Call the function outside of the endpoint
+    server_available = is_server_available(nginx_url)
+    if server_available:
+        print("Nginx server is available")
+    else:
+        print("Nginx server is not available")
 
 # Call the database initialization function
 initialize_database()

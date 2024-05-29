@@ -855,7 +855,8 @@ async def email_signin(request: Request, db: Session = Depends(get_database)):
 
         # Check if the server is available before proceeding
         if is_server_available:
-            print("-------------Server is available------------")
+            if request:
+                print("-------------Server is available------------")
 
         data = await request.json()
         email = data.get('email')
