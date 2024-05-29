@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from typing import Generator
 from models import Email_User
 import requests
-from requests.exceptions import RequestException
 
 
 # Get the database URL from the environment variable
@@ -73,24 +72,14 @@ def verify_email_user(email: str, password: str):
 #         return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
 
 
-def is_server_available(url: str, ca_bundle: str = None):
-    try:
-        if ca_bundle:
-            response = requests.get(url, verify=ca_bundle)
-        else:
-            response = requests.get(url, verify=True)
-        response.raise_for_status()  # Raise an exception for HTTP errors
-        if response.status_code == 200:
-            print("Server is available")
-            return {"status": "Available", "detail": "Server is available."}
-    except RequestException as e:
-        print(f"Server is not available. Error: {e}")
-        return {"status": "Unavailable", "detail": f"Server is temporarily unavailable. Error: {e}"}
-
-# Usage example
-nginx_url = "https://api.bittaudio.ai/"
-custom_ca_bundle_path = "//etc/nginx/ssl/__bittaudio_ai.ca-bundle"
-server_available = is_server_available(nginx_url, custom_ca_bundle_path)
+def is_server_available(url: str):
+    response = requests.get(url, verify=False)  # Disable SSL verification
+    if response.status_code == 200:
+        print("Server is available")
+        return {"status": "Available", "detail": "Server is available."}
+    else:
+        print("Server is not available")
+        return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
 
 
 
