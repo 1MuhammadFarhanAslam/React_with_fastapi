@@ -21,7 +21,9 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Initialize the database
 def initialize_database_and_check_server_availability():
+    print("---------------------------------------------------------------")
     print("---------------------Database initializing-------------------")
+    print("---------------------------------------------------------------")
     from models import Base
     Base.metadata.create_all(bind=engine)
     print("---------------------Database initialized successfully--------")
