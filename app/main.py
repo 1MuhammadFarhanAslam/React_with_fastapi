@@ -152,6 +152,7 @@ initialize_database_and_check_server_availability()
 origins = [
     "https://bittaudio.ai",
     "https://api.bittaudio.ai",
+    "https://api.bittaudio.ai/api/ttm_endpoint",
     "http://v1.api.bittaudio.ai",
     "https://v1.api.bittaudio.ai",
     "http://149.36.1.168:41981",
