@@ -1,21 +1,32 @@
-from fastapi import APIRouter, Depends, HTTPException, Form, status
+import re
+import datetime
 from admin_database import (
     get_admin,
     update_admin_password,
     delete_admin_by_username)
 
-from user_database import create_user , get_user, get_role_details, assign_user_roles, update_user_password
+from user_database import create_user , get_user, assign_user_roles, update_user_password, UserRole
 from hashing import hash_password, verify_hash
-from models import Admin , User
-
-from fastapi.logger import logger
+from models import Admin , User, Role
 from admin_auth import get_current_active_admin
-import re
-from sqlalchemy.orm import Session
 from admin_database import get_secret_key, get_database
+from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Form, status
+from fastapi.logger import logger
+
 
 
 router = APIRouter()
+
+class RoleAlreadyExists(HTTPException):
+    def __init__(self, status_code: int = 400, detail: str = "Role Already exists."):
+        self.status_code = status_code
+        self.detail = detail
+
+class UserNotFound(HTTPException):
+    def __init__(self, status_code: int = 400, detail: str = "User not found."):
+        self.status_code = status_code
+        self.detail = detail
 
 
 @router.post("/admin/create", response_model=dict, tags=["Admin_Management"])
@@ -172,6 +183,10 @@ async def update_admin(
         # Ensure that the retyped password and new password match
         if new_password != confirm_new_password:
             raise HTTPException(status_code=400, detail="New_Password and confirm_new_password do not match")
+        
+        # Additional validation: Check if the password meets the specified conditions
+        if not re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$", confirm_new_password):
+            raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character.")
 
         # Hash the new password consistently
         hashed_password = hash_password(confirm_new_password)
@@ -231,22 +246,61 @@ async def delete_admin(
 
 
 
+# @router.post("/admin/create_users", response_model=dict, tags=["Admin_Management"])
+# async def create_user_account(
+#     username: str = Form(...),
+#     set_password: str = Form(..., min_length=8, max_length=16, regex="^[a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?/~\\-=|\\\\]+$"),
+#     selected_role: str = Form(...),  # Admin-selected role for the user
+#     subscription_duration_in_days: int = Form(...),  # Subscription duration in days or minutes
+#     current_active_admin: Admin = Depends(get_current_active_admin),
+#     db: Session = Depends(get_database)
+# ):
+#     try:
+#         if not username or not set_password:
+#             raise HTTPException(status_code=400, detail="Both username and password are required.")
+
+#         if subscription_duration_in_days <= 0:
+#             raise HTTPException(status_code=400, detail="Subscription duration must be greater than 0.")
+
+#         # Additional validation: Check if the password meets the specified conditions
+#         if not re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$", set_password):
+#             raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character.")
+
+#         # Create the user and get user info
+#         user_info = create_user(username=username, password=set_password, role_assign=selected_role,
+#                                 subscription_duration_in_days=subscription_duration_in_days)
+
+#         if user_info is None:
+#             raise HTTPException(status_code=400, detail="Username already exists. Please choose a different username.")
+
+#         return {"message": "User created successfully", "user_info": user_info}
+
+#     except HTTPException as e:
+#         print(f"Error during user creation: {e}")
+#         raise e
+#     except Exception as e:
+#         print(f"Error during user creation: {e}")
+#         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+
 @router.post("/admin/create_users", response_model=dict, tags=["Admin_Management"])
 async def create_user_account(
+    selected_role: UserRole,  # Use UserRole Enum for selected_role
     username: str = Form(...),
-    set_password: str = Form(..., min_length=8, max_length=16, regex="^[a-zA-Z0-9!@#$%^&*()_+{}\[\]:;<>,.?/~\\-=|\\\\]+$"),
-    selected_role: str = Form(...),  # Admin-selected role for the user
-    subscription_duration_in_days: int = Form(...),  # Subscription duration in days or minutes
+    set_password: str =  Form(...),
+    subscription_duration_in_days: int = Form(...),
     current_active_admin: Admin = Depends(get_current_active_admin),
     db: Session = Depends(get_database)
 ):
     try:
+
         if not username or not set_password:
             raise HTTPException(status_code=400, detail="Both username and password are required.")
 
         if subscription_duration_in_days <= 0:
             raise HTTPException(status_code=400, detail="Subscription duration must be greater than 0.")
-
+        
         # Additional validation: Check if the password meets the specified conditions
         if not re.match("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$", set_password):
             raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character.")
@@ -256,22 +310,19 @@ async def create_user_account(
                                 subscription_duration_in_days=subscription_duration_in_days)
 
         if user_info is None:
-            raise HTTPException(status_code=400, detail="Username already exists. Please choose a different username.")
+            raise HTTPException(status_code=400, detail="Username already exists.")
 
         return {"message": "User created successfully", "user_info": user_info}
-
+    
     except HTTPException as e:
         print(f"Error during user creation: {e}")
         raise e
-    except Exception as e:
-        print(f"Error during user creation: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
 
     
 @router.post("/admin/modify_user_roles", tags=["Admin_Management"])
 async def modify_user_roles(
+    selected_role: UserRole,  # Admin-selected role for the user
     username: str = Form(...),
-    selected_role: str = Form(...),  # Admin-selected role for the user
     subscription_duration: int = Form(...),  # Subscription duration in days or minutes
     current_active_admin: Admin = Depends(get_current_active_admin),
     db: Session = Depends(get_database)
@@ -284,30 +335,37 @@ async def modify_user_roles(
         user = db.query(User).filter(User.username == username).first()
 
         if user is None:
-            raise HTTPException(status_code=404, detail=f"User '{username}' not found.")
+            raise UserNotFound()
 
-        # Validate the role syntax before proceeding
-        role_details = get_role_details(selected_role)
-        if role_details is None:
-            raise HTTPException(status_code=400, detail=f"Invalid role syntax: {selected_role}")
+        # # Validate the role syntax before proceeding
+        # role_details = get_role_details(selected_role)
+        # if role_details is None:
+        #     raise HTTPException(status_code=400, detail=f"Invalid role syntax: {selected_role}")
+        
+        # check if selected_role already exists and subscription_end_time for that selected_role has not expired
+        existing_role = db.query(Role).filter(Role.username == username, Role.role_name == selected_role).first()
+        if existing_role and existing_role.subscription_end_time > datetime.datetime.now():
+            raise RoleAlreadyExists()
 
         # Assign the modified role to the user with the specified subscription duration
         assign_user_roles(username, selected_role, subscription_duration)
 
         # Fetch the updated user details after role modification
         updated_user = db.query(User).filter(User.username == username).first()
+        updated_user_roles = db.query(Role).filter(Role.username == username).all()
 
         if updated_user is None:
-            raise HTTPException(status_code=500, detail="Error retrieving updated user details.")
+            raise HTTPException(status_code=400, detail="Error retrieving updated user details.")
+        if updated_user_roles is None:
+            raise HTTPException(status_code=400, detail="Error retrieving updated user roles.")
 
-        return {"message": f"Role for user '{username}' modified successfully", "user_info": updated_user}
-
-    except HTTPException as e:
-        print(f"Error during role modification: {e}")
-        raise e
-    except Exception as e:
-        print(f"Error during role modification: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        return {"message": f"Role for user '{username}' modified successfully", "user_info": updated_user, "roles": updated_user_roles}
+    
+    except UserNotFound:
+        raise HTTPException(status_code=404, detail=f"User '{username}' not found.")
+    
+    except RoleAlreadyExists:
+        raise HTTPException(status_code=400, detail=f"User '{username}' already has the selected role '{selected_role}'. Please wait until the subscription period expires for this role. Try update other roles.")
     
 
 @router.post("/admin/reset_password/{username}", response_model=dict, tags=["Admin_Management"])

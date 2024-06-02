@@ -150,7 +150,7 @@ initialize_database_and_check_server_availability()
 
 # Define the list of allowed origins
 origins = [
-    "http://localhost:3000",
+    "http://localhost:3000",    # Allow this origin to access the API just for development/testing
     "http://127.0.0.1:3000",
     "https://bittaudio.ai",
     "https://api.bittaudio.ai",
