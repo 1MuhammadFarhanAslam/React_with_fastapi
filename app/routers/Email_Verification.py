@@ -87,7 +87,7 @@ def send_verification_email(recipient_email, verification_token, verification_co
     smtp_password = SMTP_PASSWORD
 
     # Website link
-    website_link = "https://bittaudio.ai"
+    # website_link = "https://bittaudio.ai"
     # website_link = "http://127.0.0.1:8000"
 
     # Verification link with token
