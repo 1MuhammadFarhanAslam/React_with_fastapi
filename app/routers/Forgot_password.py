@@ -266,12 +266,14 @@ def send_reset_email(recipient_email, reset_access_token):
     # SMTP server configuration
     smtp_server = SMTP_SERVER
     smtp_port = 587  # Adjust as per your SMTP server settings
+    # smtp_username = SMTP_USERNAME
+    # smtp_password = SMTP_PASSWORD
     smtp_username = SMTP_USERNAME
     smtp_password = SMTP_PASSWORD
 
     # Password reset link with token (assuming this is a frontend endpoint for reset)
-    reset_link = f"http://bittaudio.ai/auth/rest-password?token={reset_access_token}"
-    # reset_link = f"http://localhost:3000/auth/rest-password?token={reset_access_token}"
+    # reset_link = f"http://bittaudio.ai/auth/rest-password?token={reset_access_token}"
+    reset_link = f"http://127.0.0.1:8000/auth/rest-password?token={reset_access_token}"
 
     # Email content with HTML formatting including a button
     sender_name = "bittaudio.ai"  # Update sender name
@@ -296,7 +298,7 @@ def send_reset_email(recipient_email, reset_access_token):
             <div style="text-align: center; margin-top: 20px;">
                 <a href="{reset_link}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; display: inline-block;">Reset Password</a>
             </div>
-            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">If you did not request this password reset or have any concerns about your account's security, please contact our support team immediately.</p>
+            <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-top: 20px;">If you did not request this password reset or have any concerns about your account's security, please contact our support team immediately at <a href="mailto:contact@bittaudio.ai" style="color: #007bff; text-decoration: none;">contact@bittaudio.ai</a>.</p>
             <p style="color: #333333; font-size: 16px; line-height: 1.6;">Best regards,<br><strong>Team bittaudio.ai</strong></p>
         </div>
 
