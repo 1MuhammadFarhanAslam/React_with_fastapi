@@ -106,7 +106,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from fastapi.middleware.cors import CORSMiddleware
 from routers import admin, user, login, react, react_ttm, Forgot_password
-from react_database import is_server_available
+# from react_database import is_server_available
 
 app = FastAPI()
 
@@ -158,7 +158,7 @@ origins = [
     "http://v1.api.bittaudio.ai",
     "https://v1.api.bittaudio.ai",
     "http://149.36.1.168:41981",
-    "http://38.242.218.205"
+    "http://38.242.218.205:8000"
 ]
 
 # Allow CORS for all origins
