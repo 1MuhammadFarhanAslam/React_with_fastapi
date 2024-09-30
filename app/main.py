@@ -4,7 +4,7 @@
 # from sqlalchemy import create_engine
 # from fastapi.middleware.cors import CORSMiddleware
 # from routers import admin, user, login, react, react_ttm, Forgot_password
-# from react_database import is_server_available
+from react_database import is_server_available
 
 # app = FastAPI()
 
