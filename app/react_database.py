@@ -73,18 +73,18 @@ def verify_email_user(email: str, password: str):
 #         return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
 
 # Define the function to check if the server is available (Please do not modify this function otherwise it can cause CORS issues and may be it will not perform correctly)
-def is_server_available(url: str):
-    try:
-        response = requests.get(url, verify=False)  # Disable SSL verification
-        if response.status_code == 200:
-            # print("Server is available")
-            return {"status": "Available", "detail": "Server is available."} 
-        else:
-            # print("Server is temporarily Unavailable")
-            return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
-    except requests.exceptions.RequestException as e:
-        print(e)
-        return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
+# def is_server_available(url: str):
+#     try:
+#         response = requests.get(url, verify=False)  # Disable SSL verification
+#         if response.status_code == 200:
+#             # print("Server is available")
+#             return {"status": "Available", "detail": "Server is available."} 
+#         else:
+#             # print("Server is temporarily Unavailable")
+#             return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
+#     except requests.exceptions.RequestException as e:
+#         print(e)
+#         return {"status": "Unavailable", "detail": "Server is temporarily Unavailable."}
 
 
 
