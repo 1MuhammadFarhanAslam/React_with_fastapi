@@ -121,32 +121,32 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Initialize the database
-# def initialize_database_and_check_server_availability():
-#     print("---------------------------------------------------------------")
-#     print("---------------------Database initializing-------------------")
-#     print("---------------------------------------------------------------")
-#     from models import Base
-#     Base.metadata.create_all(bind=engine)
-#     print("---------------------Database initialized successfully--------")
-#     print("---------------------------------------------------------------")
-#     print("---------------------Checking if the server is available--------")
+def initialize_database_and_check_server_availability():
+    print("---------------------------------------------------------------")
+    print("---------------------Database initializing-------------------")
+    print("---------------------------------------------------------------")
+    from models import Base
+    Base.metadata.create_all(bind=engine)
+    print("---------------------Database initialized successfully--------")
+    print("---------------------------------------------------------------")
+    print("---------------------Checking if the server is available--------")
 
-#     # Define the URL of the Nginx server to check if it is available
-#     nginx_url =  "http://38.242.218.205:8000"  #"https://api.bittaudio.ai/" 
+    # Define the URL of the Nginx server to check if it is available
+    nginx_url =  "http://38.242.218.205:8000"  #"https://api.bittaudio.ai/" 
 
-#     # Call the function outside of the endpoint
-#     server_available = is_server_available(nginx_url)
-#     if server_available:
-#         print("---------------------------------------------------------------")
-#         print("---------------------Server is available-------------------")
-#         print("---------------------------------------------------------------")
-#     else:
-#         print("---------------------------------------------------------------")
-#         print("---------------------Server is not available-------------------")
-#         print("---------------------------------------------------------------")  
+    # Call the function outside of the endpoint
+    server_available = is_server_available(nginx_url)
+    if server_available:
+        print("---------------------------------------------------------------")
+        print("---------------------Server is available-------------------")
+        print("---------------------------------------------------------------")
+    else:
+        print("---------------------------------------------------------------")
+        print("---------------------Server is not available-------------------")
+        print("---------------------------------------------------------------")  
 
-# # Call the database initialization function
-# initialize_database_and_check_server_availability()
+# Call the database initialization function
+initialize_database_and_check_server_availability()
 
 # Define the list of allowed origins
 origins = [
