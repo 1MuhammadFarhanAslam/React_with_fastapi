@@ -158,6 +158,7 @@ origins = [
     "http://v1.api.bittaudio.ai",
     "https://v1.api.bittaudio.ai",
     "http://149.36.1.168:41981",
+    "http://38.242.218.205:8000"
 ]
 
 # Allow CORS for all origins
