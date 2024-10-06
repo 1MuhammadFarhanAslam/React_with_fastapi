@@ -1,38 +1,43 @@
-alembic
-bcrypt==3.2.0
-cryptography
-databases
-email-validator
-fastapi==0.115.0
-httpcore
-httptools
-httpx
-passlib==1.7.4
-psycopg2-binary
-pydantic
-pydantic-core
-PyJWT
-pyngrok
-python-multipart
-requests
-requests-toolbelt
-sqlalchemy
-starlette
-typing-extensions
-urllib3
-uvicorn
-watchfiles
-websockets
-typing
-google-auth
-fastapi_mail
-python-jose[cryptography]
-
-
-# fastapi
-# sqlalchemy
-# passlib
+# alembic
+# bcrypt==3.2.0
+# cryptography
+# databases
+# email-validator
+# fastapi==0.115.0
+# httpcore
+# httptools
+# httpx
+# passlib==1.7.4
 # psycopg2-binary
-# python-jose[cryptography]
-# pycryptodom
+# pydantic
+# pydantic-core
+# PyJWT
+# pyngrok
+# python-multipart
+# requests
+# requests-toolbelt
+# sqlalchemy
+# starlette
+# typing-extensions
+# urllib3
+# uvicorn
+# watchfiles
+# websockets
+# typing
 # google-auth
+# fastapi_mail
+# python-jose[cryptography]
+
+
+PyYAML==6.0.2
+requests==2.32.3
+cryptography==43.0.1
+pydantic==2.9.2
+starlette==0.38.6
+uvicorn==0.31.0
+fastapi==0.115.0
+pyngrok==7.2.0
+passlib==1.7.4
+SQLAlchemy==2.0.35
+psycopg2-binary==2.9.9
+python-jose==3.3.0

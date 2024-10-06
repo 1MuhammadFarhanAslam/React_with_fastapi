@@ -132,8 +132,8 @@ def initialize_database_and_check_server_availability():
     print("---------------------Checking if the server is available--------")
 
     # Define the URL of the Nginx server to check if it is available
-    # nginx_url =  "https://api.bittaudio.ai/" 
-    nginx_url =  "http://213.136.80.78:8000/"
+    nginx_url =  "https://api.bittaudio.ai/" 
+    # nginx_url =  "http://213.136.80.78:8000/"
 
     # Call the function outside of the endpoint
     server_available = is_server_available(nginx_url)
