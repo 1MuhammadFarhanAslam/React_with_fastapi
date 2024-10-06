@@ -331,8 +331,8 @@ def send_reset_email(recipient_email, reset_access_token):
     finally:
         server.quit()  # Close the connection
 
-# nginx_url = "api.bittaudio.ai"
-nginx_url = "http://213.136.80.78:8000"
+nginx_url = "api.bittaudio.ai"
+# nginx_url = "http://213.136.80.78:8000"
 
 
 # Custom exception classes
